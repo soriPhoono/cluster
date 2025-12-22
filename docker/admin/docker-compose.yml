@@ -34,17 +34,6 @@ services:
       driver: loki
       options:
         loki-url: http://localhost:3100/loki/api/v1/push
-  watchtower:
-    image: containrrr/watchtower:latest
-    container_name: watchtower
-    restart: unless-stopped
-    command: --cleanup --interval 300 # TODO: check this
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    logging:
-      driver: loki
-      options:
-        loki-url: http://localhost:3100/loki/api/v1/push
 networks:
   portainer-agent:
   core_traefik-public:
