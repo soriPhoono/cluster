@@ -110,8 +110,8 @@ services:
       api:
         condition: service_started
     volumes:
-      - /mnt/data/cache/funkwhale:/srv/funkwhale/data/media:ro
-      - funkwhale-static:/usr/share/nginx/html/staticfiles:ro
+      - /mnt/data/cache/funkwhale:/srv/funkwhale/data/media
+      - funkwhale-static:/usr/share/nginx/html/staticfiles
     environment:
       !!merge <<: *funkwhale-config
       NGINX_MAX_BODY_SIZE: 100M
