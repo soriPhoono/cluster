@@ -39,6 +39,8 @@ services:
       TZ: "America/Chicago"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
       N8N_RUNNERS_ENABLED: true
+      N8N_HOST: n8n.${DOMAIN_NAME}
+      WEBHOOK_TUNNEL_URL: https://n8n.${DOMAIN_NAME}
     networks:
       - backend_default
       - core_traefik-public
