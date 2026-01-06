@@ -38,6 +38,8 @@
 
           PTERODACTYL_DB_PASSWORD.file = ./secrets/pterodactyl_db_password.age;
 
+          N8N_DB_PASSWORD.file = ./secrets/n8n_db_password.age;
+
           AUTHENTIK_DB_PASSWORD.file = ./secrets/authentik_db_password.age;
           AUTHENTIK_SECRET_KEY.file = ./secrets/authentik_secret_key.age;
         };
@@ -75,6 +77,7 @@
                 docker compose -f ./docker/admin/docker-compose.yml up -d --wait --remove-orphans
                 docker compose -f ./docker/admin/backend/docker-compose.yml up -d --wait --remove-orphans
                 docker compose -f ./docker/admin/monitoring/docker-compose.yml up -d --wait --remove-orphans
+                docker compose -f ./docker/admin/automation/docker-compose.yml up -d --wait --remove-orphans
                 docker compose -f ./docker/admin/downloads/docker-compose.yml up -d --wait --remove-orphans
 
                 docker compose -f ./docker/tail/docker-compose.yml up -d --wait --remove-orphans
@@ -106,6 +109,7 @@
                 docker compose -f ./docker/tail/docker-compose.yml down
 
                 docker compose -f ./docker/admin/downloads/docker-compose.yml down
+                docker compose -f ./docker/admin/automation/docker-compose.yml down
                 docker compose -f ./docker/admin/monitoring/docker-compose.yml down
                 docker compose -f ./docker/admin/backend/docker-compose.yml down
                 docker compose -f ./docker/admin/docker-compose.yml down

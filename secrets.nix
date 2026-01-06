@@ -16,6 +16,8 @@ in {
 
   "secrets/pterodactyl_db_password.age".publicKeys = keys;
 
+  "secrets/n8n_db_password.age".publicKeys = keys;
+
   "secrets/authentik_db_password.age".publicKeys = keys;
   "secrets/authentik_secret_key.age".publicKeys = keys;
 }
