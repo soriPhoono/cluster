@@ -55,6 +55,7 @@ services:
       - traefik.http.routers.n8n-admin.tls=true
       - traefik.http.routers.n8n-admin.tls.certresolver=cf-ts
       - traefik.http.middlewares.n8n-tailscale-whitelist.ipallowlist.sourcerange=100.64.0.0/10
+      - traefik.http.middlewares.n8n-tailscale-whitelist.ipallowlist.ipstrategy.depth=1
       - traefik.http.routers.n8n-admin.middlewares=n8n-tailscale-whitelist@docker
       - traefik.http.routers.n8n-admin.service=n8n-service
       - traefik.http.routers.n8n-public.rule=Host(`automation.${DOMAIN_NAME}`)
