@@ -24,13 +24,54 @@ services:
       driver: loki
       options:
         loki-url: http://localhost:3100/loki/api/v1/push
+  n8n-admin-tailscale:
+    image: tailscale/tailscale:stable
+    container_name: n8n-tailscale
+    restart: unless-stopped
+    hostname: automation
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:9002/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - net_admin
+      - sys_module
+    environment:
+      - TS_AUTH_ONCE=true
+      - TS_ACCEPT_DNS=true
+      - TS_USERSPACE=false
+      - TS_ENABLE_HEALTH_CHECK=true
+      - TS_ENABLE_METRICS=true
+      - TS_AUTHKEY=${TAILSCALE_AUTH_KEY}
+    volumes:
+      - tailscale-config:/var/lib/tailscale
+    networks:
+      - backend_default
+      - core_traefik-public
+    logging:
+      driver: loki
+      options:
+        loki-url: http://localhost:3100/loki/api/v1/push
   n8n:
     image: docker.n8n.io/n8nio/n8n
-    restart: unless-stopped
     container_name: n8n
+    restart: unless-stopped
+    network_mode: "service:n8n-admin-tailscale"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5678/healthz/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on:
       migrations:
         condition: service_completed_successfully
+      n8n-admin-tailscale:
+        condition: service_healthy
     volumes:
       - n8n-data:/home/node/.n8n
     environment:
@@ -39,23 +80,18 @@ services:
       TZ: "America/Chicago"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
       N8N_RUNNERS_ENABLED: true
+      N8N_METRICS: true
       N8N_PROXY_HOPS: 1
-      N8N_HOST: automation.admin.ts.${DOMAIN_NAME}
+      N8N_HOST: automation.${DOMAIN_NAME}
+      NODE_ENV: production
       WEBHOOK_URL: https://automation.${DOMAIN_NAME}
-    networks:
-      - backend_default
-      - core_traefik-public
+      QUEUE_HEALTH_CHECK_ACTIVE: true
     logging:
       driver: loki
       options:
         loki-url: http://localhost:3100/loki/api/v1/push
     labels:
       - traefik.enable=true
-      - traefik.http.routers.n8n-admin.rule=Host(`automation.admin.ts.${DOMAIN_NAME}`)
-      - traefik.http.routers.n8n-admin.entrypoints=websecure
-      - traefik.http.routers.n8n-admin.tls=true
-      - traefik.http.routers.n8n-admin.tls.certresolver=cf-ts
-      - traefik.http.routers.n8n-admin.service=n8n-service
       - traefik.http.routers.n8n-public.rule=Host(`automation.${DOMAIN_NAME}`) && (PathPrefix(`/webhook`) || PathPrefix(`/rest`))
       - traefik.http.routers.n8n-public.entrypoints=websecure
       - traefik.http.routers.n8n-public.tls=true
