@@ -99,6 +99,7 @@ services:
       - traefik.http.routers.n8n-public.service=n8n-service
       - traefik.http.services.n8n-service.loadbalancer.server.port=5678
 volumes:
+  tailscale-config:
   n8n-data:
 networks:
   backend_default:
