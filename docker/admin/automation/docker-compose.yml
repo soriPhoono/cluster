@@ -62,7 +62,7 @@ services:
     restart: unless-stopped
     network_mode: "service:n8n-admin-tailscale"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5678/healthz/readiness"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5678/healthz"]
       interval: 10s
       timeout: 5s
       retries: 5
