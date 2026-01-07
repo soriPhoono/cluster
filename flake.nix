@@ -29,6 +29,8 @@
 
           POSTGRES_PASSWORD.file = ./secrets/postgres_password.age;
           MARIADB_PASSWORD.file = ./secrets/mariadb_password.age;
+          MONGODB_PASSWORD.file = ./secrets/mongodb_password.age;
+          MONGO_EXPRESS_PASSWORD.file = ./secrets/mongo_express_password.age;
 
           TAILSCALE_AUTH_KEY.file = ./secrets/tailscale_auth_key.age;
 

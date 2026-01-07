@@ -7,6 +7,8 @@ in {
 
   "secrets/postgres_password.age".publicKeys = keys;
   "secrets/mariadb_password.age".publicKeys = keys;
+  "secrets/mongodb_password.age".publicKeys = keys;
+  "secrets/mongo_express_password.age".publicKeys = keys;
 
   "secrets/tailscale_auth_key.age".publicKeys = keys;
 
