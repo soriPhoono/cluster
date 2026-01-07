@@ -37,6 +37,7 @@ services:
       !!merge <<: *n8n-database-config
       GENERIC_TIMEZONE: "America/Chicago"
       TZ: "America/Chicago"
+      N8N_EDITOR_BASE_URL: https://automation.admin.ts.${DOMAIN_NAME}
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
       N8N_RUNNERS_ENABLED: true
       N8N_METRICS: true
