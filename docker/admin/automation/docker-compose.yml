@@ -39,6 +39,7 @@ services:
       TZ: "America/Chicago"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
       N8N_RUNNERS_ENABLED: true
+      N8N_PROXY_HOPS: 1
       N8N_HOST: automation.admin.ts.${DOMAIN_NAME}
       WEBHOOK_URL: https://automation.${DOMAIN_NAME}
     networks:
