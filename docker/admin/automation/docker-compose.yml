@@ -28,12 +28,9 @@ services:
     image: docker.n8n.io/n8nio/n8n
     container_name: n8n
     restart: unless-stopped
-    network_mode: "service:n8n-admin-tailscale"
     depends_on:
       migrations:
         condition: service_completed_successfully
-      n8n-admin-tailscale:
-        condition: service_healthy
     volumes:
       - n8n-data:/home/node/.n8n
     environment:
