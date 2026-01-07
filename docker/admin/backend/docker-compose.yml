@@ -19,6 +19,21 @@ services:
       driver: loki
       options:
         loki-url: http://localhost:3100/loki/api/v1/push
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb:2.7.0
+    container_name: ferretdb
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FERRETDB_POSTGRESQL_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+    networks:
+      - default
+    logging:
+      driver: loki
+      options:
+        loki-url: http://localhost:3100/loki/api/v1/push
   mariadb:
     image: mariadb:12
     container_name: mariadb
