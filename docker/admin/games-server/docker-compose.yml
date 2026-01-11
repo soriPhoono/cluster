@@ -31,7 +31,7 @@ services:
     volumes:
       - /mnt/data/pterodactyl:/app/var
     environment:
-      APP_URL: https://pterodactyl.ts.${DOMAIN_NAME}
+      APP_URL: https://games-server.admin.ts.${DOMAIN_NAME}
       APP_ENV: production
       APP_ENVIRONMENT_ONLY: false
       # A list of valid timezones can be found here: http://php.net/manual/en/timezones.php
@@ -46,6 +46,7 @@ services:
       TRUSTED_PROXIES: "*"
     networks:
       - backend_default
+      - pterodactyl-wings
       - core_traefik-public
     logging:
       driver: loki
@@ -53,11 +54,11 @@ services:
         loki-url: http://localhost:3100/loki/api/v1/push
     labels:
       - traefik.enable=true
-      - traefik.http.routers.pterodactyl-panel.rule=Host(`games-server.ts.${DOMAIN_NAME}`)
+      - traefik.http.routers.pterodactyl-panel.rule=Host(`games-server.admin.ts.${DOMAIN_NAME}`)
       - traefik.http.routers.pterodactyl-panel.entrypoints=web
       - traefik.http.middlewares.panel_https.redirectscheme.scheme=https
       - traefik.http.routers.pterodactyl_panel.middlewares=panel_https
-      - traefik.http.routers.pterodactyl-panel-secure.rule=Host(`games-server.ts.${DOMAIN_NAME}`)
+      - traefik.http.routers.pterodactyl-panel-secure.rule=Host(`games-server.admin.ts.${DOMAIN_NAME}`)
       - traefik.http.routers.pterodactyl-panel-secure.entrypoints=websecure
       - traefik.http.routers.pterodactyl-panel-secure.tls=true
       - traefik.http.routers.pterodactyl-panel-secure.tls.certresolver=cf-ts
@@ -65,6 +66,6 @@ services:
 networks:
   backend_default:
     external: true
-  pterodactyl_wings:
+  pterodactyl-wings:
   core_traefik-public:
     external: true

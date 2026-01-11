@@ -1,0 +1,76 @@
+x-common:
+  n8n-database-config: &n8n-database-config
+    DB_TYPE: "postgresdb"
+    DB_POSTGRESDB_DATABASE: "n8n"
+    DB_POSTGRESDB_HOST: "postgres"
+    DB_POSTGRESDB_PORT: "5432"
+    DB_POSTGRESDB_USER: "n8n"
+    DB_POSTGRESDB_SCHEMA: "public"
+    DB_POSTGRESDB_PASSWORD: "${N8N_DB_PASSWORD}"
+services:
+  migrations:
+    image: postgres:18-alpine
+    restart: no
+    container_name: n8n-migrations
+    command: ["sh", "-c", "/init/init-db.sh"]
+    volumes:
+      - ./init:/init:ro
+    environment:
+      !!merge <<: *n8n-database-config
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    networks:
+      - backend_default
+    logging:
+      driver: loki
+      options:
+        loki-url: http://localhost:3100/loki/api/v1/push
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    volumes:
+      - n8n-data:/home/node/.n8n
+    environment:
+      !!merge <<: *n8n-database-config
+      GENERIC_TIMEZONE: "America/Chicago"
+      TZ: "America/Chicago"
+      N8N_EDITOR_BASE_URL: https://automation.admin.ts.${DOMAIN_NAME}
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
+      N8N_RUNNERS_ENABLED: true
+      N8N_METRICS: true
+      N8N_PROXY_HOPS: 1
+      N8N_HOST: automation.${DOMAIN_NAME}
+      NODE_ENV: production
+      WEBHOOK_URL: https://automation.${DOMAIN_NAME}
+      QUEUE_HEALTH_CHECK_ACTIVE: true
+    logging:
+      driver: loki
+      options:
+        loki-url: http://localhost:3100/loki/api/v1/push
+    networks:
+      - backend_default
+      - core_traefik-public
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.n8n-admin.rule=Host(`automation.admin.ts.${DOMAIN_NAME}`)
+      - traefik.http.routers.n8n-admin.entrypoints=websecure
+      - traefik.http.routers.n8n-admin.tls=true
+      - traefik.http.routers.n8n-admin.tls.certresolver=cf-ts
+      - traefik.http.routers.n8n-admin.service=n8n-service
+      - traefik.http.routers.n8n-public.rule=Host(`automation.${DOMAIN_NAME}`) && (PathPrefix(`/webhook`) || PathPrefix(`/rest`))
+      - traefik.http.routers.n8n-public.entrypoints=websecure
+      - traefik.http.routers.n8n-public.tls=true
+      - traefik.http.routers.n8n-public.tls.certresolver=cf-ts
+      - traefik.http.routers.n8n-public.service=n8n-service
+      - traefik.http.services.n8n-service.loadbalancer.server.port=5678
+volumes:
+  tailscale-config:
+  n8n-data:
+networks:
+  backend_default:
+    external: true
+  core_traefik-public:
+    external: true

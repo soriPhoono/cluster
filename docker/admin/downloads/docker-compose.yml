@@ -1,12 +1,14 @@
 x-common:
   server-config: &server-config
     TZ: America/Chicago
+    PUID: 1000
+    PGID: 1000
 services:
-  tailscale:
+  qbittorrent-tailscale:
     image: tailscale/tailscale:stable
-    container_name: tailscale
+    container_name: qbittorrent-tailscale
     restart: unless-stopped
-    hostname: qbittorrent-tailscale
+    hostname: qbittorrent
     healthcheck:
       test: ["CMD-SHELL", "wget --spider -q http://localhost:9002/healthz || exit 1"]
       interval: 10s
@@ -19,6 +21,7 @@ services:
       - net_admin
       - sys_module
     environment:
+      - TS_AUTH_ONCE=true
       - TS_ACCEPT_DNS=true
       - TS_USERSPACE=false
       - TS_ENABLE_HEALTH_CHECK=true
@@ -32,11 +35,11 @@ services:
       driver: loki
       options:
         loki-url: http://localhost:3100/loki/api/v1/push
-  qbittorrent-tailscale:
+  qbittorrent:
     image: linuxserver/qbittorrent
-    container_name: qbittorrent-tailscale
+    container_name: qbittorrent
     restart: unless-stopped
-    network_mode: "service:tailscale"
+    network_mode: "service:qbittorrent-tailscale"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
       interval: 10s
@@ -44,7 +47,7 @@ services:
       retries: 5
       start_period: 30s
     depends_on:
-      tailscale:
+      qbittorrent-tailscale:
         condition: service_healthy
     environment:
       !!merge <<: *server-config

@@ -45,7 +45,7 @@ services:
       - traefik.http.routers.cloud.rule=Host(`cloud.${DOMAIN_NAME}`)
       - traefik.http.routers.cloud.entrypoints=websecure
       - traefik.http.routers.cloud.tls=true
-      - traefik.http.routers.cloud.tls.certresolver=le
+      - traefik.http.routers.cloud.tls.certresolver=cf-ts
       - traefik.http.middlewares.nc-redirect.redirectscheme.scheme=https
       - traefik.http.middlewares.nc-secure-headers.headers.hostsProxyHeaders=X-Forwarded-Host
       - traefik.http.middlewares.nc-secure-headers.headers.referrerPolicy=same-origin

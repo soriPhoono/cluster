@@ -25,8 +25,12 @@
       systems = with inputs; import systems;
       agenix-shell = {
         secrets = {
+          CF_API_TOKEN.file = ./secrets/cloudflare_api_token.age;
+
           POSTGRES_PASSWORD.file = ./secrets/postgres_password.age;
           MARIADB_PASSWORD.file = ./secrets/mariadb_password.age;
+          MONGODB_PASSWORD.file = ./secrets/mongodb_password.age;
+          MONGO_EXPRESS_PASSWORD.file = ./secrets/mongo_express_password.age;
 
           TAILSCALE_AUTH_KEY.file = ./secrets/tailscale_auth_key.age;
 
@@ -35,6 +39,8 @@
           FUNKWHALE_DB_PASSWORD.file = ./secrets/funkwhale_db_password.age;
 
           PTERODACTYL_DB_PASSWORD.file = ./secrets/pterodactyl_db_password.age;
+
+          N8N_DB_PASSWORD.file = ./secrets/n8n_db_password.age;
 
           AUTHENTIK_DB_PASSWORD.file = ./secrets/authentik_db_password.age;
           AUTHENTIK_SECRET_KEY.file = ./secrets/authentik_secret_key.age;
@@ -68,19 +74,19 @@
                   docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
                 fi
 
+                docker compose -f ./docker/admin/proxy/docker-compose.yml up -d --wait --remove-orphans
+
+                docker compose -f ./docker/admin/docker-compose.yml up -d --wait --remove-orphans
                 docker compose -f ./docker/admin/backend/docker-compose.yml up -d --wait --remove-orphans
                 docker compose -f ./docker/admin/monitoring/docker-compose.yml up -d --wait --remove-orphans
+                docker compose -f ./docker/admin/automation/docker-compose.yml up -d --wait --remove-orphans
+                docker compose -f ./docker/admin/downloads/docker-compose.yml up -d --wait --remove-orphans
 
                 docker compose -f ./docker/tail/docker-compose.yml up -d --wait --remove-orphans
-                docker compose -f ./docker/tail/downloads/docker-compose.yml up -d --wait --remove-orphans
                 docker compose -f ./docker/tail/pvr/docker-compose.yml up -d --wait --remove-orphans
                 docker compose -f ./docker/tail/jukebox/docker-compose.yml up -d --wait --remove-orphans
 
-                docker compose -f ./docker/tail/games-server/docker-compose.yml up -d --wait --remove-orphans
-
-                # docker compose -f ./docker/public/game/docker-compose.yml up -d --wait --remove-orphans
-
-                docker compose -f ./docker/public/auth/docker-compose.yml up -d --wait --remove-orphans
+                # docker compose -f ./docker/public/auth/docker-compose.yml up -d --wait --remove-orphans
 
                 # docker compose -f ./docker/public/cloud/docker-compose.yml up -d --wait --remove-orphans
               '';
@@ -98,19 +104,19 @@
 
                 # docker compose -f ./docker/public/cloud/docker-compose.yml down
 
-                docker compose -f ./docker/public/auth/docker-compose.yml down
-
-                # docker compose -f ./docker/public/game/docker-compose.yml down
-
-                docker compose -f ./docker/tail/games-server/docker-compose.yml down
+                # docker compose -f ./docker/public/auth/docker-compose.yml down
 
                 docker compose -f ./docker/tail/jukebox/docker-compose.yml down
                 docker compose -f ./docker/tail/pvr/docker-compose.yml down
-                docker compose -f ./docker/tail/downloads/docker-compose.yml down
                 docker compose -f ./docker/tail/docker-compose.yml down
 
+                docker compose -f ./docker/admin/downloads/docker-compose.yml down
+                docker compose -f ./docker/admin/automation/docker-compose.yml down
                 docker compose -f ./docker/admin/monitoring/docker-compose.yml down
                 docker compose -f ./docker/admin/backend/docker-compose.yml down
+                docker compose -f ./docker/admin/docker-compose.yml down
+
+                docker compose -f ./docker/admin/proxy/docker-compose.yml down
               '';
             };
           };

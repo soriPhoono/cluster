@@ -3,8 +3,12 @@ let
 
   keys = [soriphoono];
 in {
+  "secrets/cloudflare_api_token.age".publicKeys = keys;
+
   "secrets/postgres_password.age".publicKeys = keys;
   "secrets/mariadb_password.age".publicKeys = keys;
+  "secrets/mongodb_password.age".publicKeys = keys;
+  "secrets/mongo_express_password.age".publicKeys = keys;
 
   "secrets/tailscale_auth_key.age".publicKeys = keys;
 
@@ -13,6 +17,8 @@ in {
   "secrets/typesense-api_key.age".publicKeys = keys;
 
   "secrets/pterodactyl_db_password.age".publicKeys = keys;
+
+  "secrets/n8n_db_password.age".publicKeys = keys;
 
   "secrets/authentik_db_password.age".publicKeys = keys;
   "secrets/authentik_secret_key.age".publicKeys = keys;

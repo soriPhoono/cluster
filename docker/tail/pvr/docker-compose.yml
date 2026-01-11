@@ -1,6 +1,8 @@
 x-common:
   server-config: &server-config
     TZ: America/Chicago
+    PUID: 1000
+    PGID: 1000
 services:
   sonarr:
     image: linuxserver/sonarr
@@ -19,11 +21,7 @@ services:
     environment:
       !!merge <<: *server-config
     networks:
-      - core_traefik-public
-    logging:
-      driver: loki
-      options:
-        loki-url: http://localhost:3100/loki/api/v1/push
+      - admin_traefik-public
     labels:
       - traefik.enable=true
       - traefik.http.routers.sonarr.rule=Host(`pvr.ts.${DOMAIN_NAME}`) && PathPrefix(`/shows`)
@@ -48,11 +46,7 @@ services:
     environment:
       !!merge <<: *server-config
     networks:
-      - core_traefik-public
-    logging:
-      driver: loki
-      options:
-        loki-url: http://localhost:3100/loki/api/v1/push
+      - admin_traefik-public
     labels:
       - traefik.enable=true
       - traefik.http.routers.radarr.rule=Host(`pvr.ts.${DOMAIN_NAME}`) && PathPrefix(`/movies`)
@@ -79,11 +73,7 @@ services:
     environment:
       !!merge <<: *server-config
     networks:
-      - core_traefik-public
-    logging:
-      driver: loki
-      options:
-        loki-url: http://localhost:3100/loki/api/v1/push
+      - admin_traefik-public
     labels:
       - traefik.enable=true
       - traefik.http.routers.jellyfin.rule=Host(`pvr.ts.${DOMAIN_NAME}`) && PathPrefix(`/watch`)
@@ -113,11 +103,7 @@ services:
     environment:
       - TZ=America/Chicago
     networks:
-      - core_traefik-public
-    logging:
-      driver: loki
-      options:
-        loki-url: http://localhost:3100/loki/api/v1/push
+      - admin_traefik-public
     labels:
       - traefik.enable=true
       - traefik.http.routers.jellyseerr.rule=Host(`pvr.ts.${DOMAIN_NAME}`)

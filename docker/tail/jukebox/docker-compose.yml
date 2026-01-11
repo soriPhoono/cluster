@@ -59,7 +59,7 @@ services:
     user: "995"
     volumes:
       - /mnt/data/media/Music:/srv/funkwhale/data/music
-      - funkwhale-media:/srv/funkwhale/data/media
+      - /mnt/data/cache/funkwhale:/srv/funkwhale/data/media
     environment:
       !!merge <<: [*funkwhale-config, *typesense-config]
       C_FORCE_ROOT: true
@@ -92,7 +92,7 @@ services:
       celerybeat:
         condition: service_started
     volumes:
-      - funkwhale-media:/srv/funkwhale/data/media
+      - /mnt/data/cache/funkwhale:/srv/funkwhale/data/media
       - funkwhale-static:/srv/funkwhale/data/static
     environment:
       !!merge <<: [*funkwhale-config, *typesense-config]
@@ -110,8 +110,8 @@ services:
       api:
         condition: service_started
     volumes:
-      - funkwhale-media:/srv/funkwhale/data/media:ro
-      - funkwhale-static:/usr/share/nginx/html/staticfiles:ro
+      - /mnt/data/cache/funkwhale:/srv/funkwhale/data/media
+      - funkwhale-static:/usr/share/nginx/html/staticfiles
     environment:
       !!merge <<: *funkwhale-config
       NGINX_MAX_BODY_SIZE: 100M
