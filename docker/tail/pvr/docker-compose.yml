@@ -117,5 +117,5 @@ volumes:
   jellyfin-config:
   jellyseerr-config:
 networks:
-  admin_traefik-public:
+  core_traefik-public:
     external: true
