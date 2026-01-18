@@ -31,6 +31,8 @@ services:
       - tailscale-config:/var/lib/tailscale
     networks:
       - admin_traefik-public
+    secrets:
+      - tailscale-authkey
   qbittorrent:
     image: linuxserver/qbittorrent
     container_name: qbittorrent
@@ -90,3 +92,6 @@ volumes:
 networks:
   admin_traefik-public:
     external: true
+secrets:
+  tailscale-authkey:
+    file: ../../../secrets/tailscale-authkey.txt
