@@ -64,8 +64,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    devices:
-      - /dev/dri:/dev/dri
     volumes:
       - jellyfin-config:/config
       - /mnt/data/media/Movies:/movies
