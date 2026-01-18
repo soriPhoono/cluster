@@ -50,10 +50,6 @@ services:
     volumes:
       - qbittorrent-config:/config
       - /mnt/data/media/Torrent:/downloads
-    logging:
-      driver: loki
-      options:
-        loki-url: http://localhost:3100/loki/api/v1/push
     labels:
       - traefik.enable=true
       - traefik.http.routers.qbittorrent.rule=Host(`downloads.admin.ts.${DOMAIN_NAME}`)
@@ -79,11 +75,7 @@ services:
     volumes:
       - prowlarr-config:/config
     networks:
-      - core_traefik-public
-    logging:
-      driver: loki
-      options:
-        loki-url: http://localhost:3100/loki/api/v1/push
+      - admin_traefik-public
     labels:
       - traefik.enable=true
       - traefik.http.routers.prowlarr.rule=Host(`downloads.admin.ts.${DOMAIN_NAME}`) && PathPrefix(`/indexers`)
@@ -96,5 +88,5 @@ volumes:
   qbittorrent-config:
   prowlarr-config:
 networks:
-  core_traefik-public:
+  admin_traefik-public:
     external: true
