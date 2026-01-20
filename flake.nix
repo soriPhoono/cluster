@@ -23,6 +23,8 @@
   in {
     devShells = rec {
       dev = pkgs.mkShell {
+        TALOSCONFIG = "clusterconfig/talosconfig";
+
         packages = with pkgs; [
           sops
           
@@ -31,9 +33,47 @@
           kubectl
         ];
 
-        shellHook = ''
-          if [[ ! -f ./clusterconfig ]]; then
-            talhelper genconfig
+        shellHook = let 
+          CLUSTER_NAME = "adams";
+
+          CONTROL_NODES = [
+            {
+              hostname = "cluster-manager-1";
+              ipAddress = "192.168.1.252";
+            }
+          ];
+
+          WORKER_NODES = [
+            {
+              hostname = "cluster-worker-1";
+              ipAddress = "192.168.1.253";
+            }
+          ];
+        in ''
+          if [[ ! -d ./clusterconfig ]]; then
+            talhelper genconfig --config-file ${pkgs.writeText "talconfig.yaml" ''
+              ---
+              clusterName: ${CLUSTER_NAME}
+              endpoint: https://${(builtins.elemAt CONTROL_NODES 0).ipAddress}:6443
+              nodes:
+              ${builtins.concatStringsSep "\n"
+                (map 
+                  (node: ''
+                    - hostname: ${node.hostname}
+                      controlPlane: true
+                      ipAddress: ${node.ipAddress}
+                      installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}
+                  '')
+                  CONTROL_NODES)}
+              ${builtins.concatStringsSep "\n"
+                (map
+                  (node: ''
+                    - hostname: ${node.hostname}
+                      ipAddress: ${node.ipAddress}
+                      installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}
+                  '')
+                  WORKER_NODES)}
+            ''}
           fi
         '';
       };
