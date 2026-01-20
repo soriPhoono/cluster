@@ -1,1 +1,7 @@
+# Repository directories and files
+
+# Nix flake directories and files
 .direnv/
+
+# Talos directories and files
+_out/

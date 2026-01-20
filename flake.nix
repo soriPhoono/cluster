@@ -23,6 +23,8 @@
       dev = pkgs.mkShell {
         packages = with pkgs; [
           talosctl
+
+          kubectl
         ];
       };
       default = dev;
