@@ -39,30 +39,58 @@
           CONTROL_NODES = [
             {
               hostname = "cluster-manager-1";
+              machine = {
+                mode = "nocloud";
+              };
               ipAddress = "192.168.1.252";
+              extensions = {
+                official = [
+                  "siderolabs/qemu-guest-agent"
+                ];
+              };
             }
           ];
 
           WORKER_NODES = [
             {
               hostname = "cluster-worker-1";
+              machine = {
+                mode = "nocloud";
+              };
               ipAddress = "192.168.1.253";
+              extensions = {
+                official = [
+                  "siderolabs/qemu-guest-agent"
+                ];
+              };
             }
           ];
+
+          CONTROL_PLANE_IP = (builtins.elemAt CONTROL_NODES 0).ipAddress;
         in ''
           if [[ ! -d ./clusterconfig ]]; then
             talhelper genconfig --config-file ${pkgs.writeText "talconfig.yaml" ''
               ---
               clusterName: ${CLUSTER_NAME}
-              endpoint: https://${(builtins.elemAt CONTROL_NODES 0).ipAddress}:6443
+              endpoint: https://${CONTROL_PLANE_IP}:6443
               nodes:
               ${builtins.concatStringsSep "\n"
                 (map 
                   (node: ''
                     - hostname: ${node.hostname}
                       controlPlane: true
+                      machineSpec:
+                        mode: ${node.machine.mode}
                       ipAddress: ${node.ipAddress}
                       installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}
+                      schematic:
+                        customization:
+                          systemExtensions:
+                            officialExtensions:
+                              ${builtins.concatStringsSep "\n"
+                                (if (node.extensions ? "official") then
+                                  (map (extension: "- ${extension}") node.extensions.official)
+                                else [])}
                   '')
                   CONTROL_NODES)}
               ${builtins.concatStringsSep "\n"
@@ -70,11 +98,24 @@
                   (node: ''
                     - hostname: ${node.hostname}
                       ipAddress: ${node.ipAddress}
+                      machineSpec:
+                        mode: ${node.machine.mode}
                       installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}
+                      schematic:
+                        customization:
+                          systemExtensions:
+                            officialExtensions:
+                              ${builtins.concatStringsSep "\n"
+                                (if (node.extensions ? "official") then
+                                  (map (extension: "- ${extension}") node.extensions.official)
+                                else [])}
                   '')
                   WORKER_NODES)}
             ''}
           fi
+
+          talosctl config endpoint ${CONTROL_PLANE_IP}
+          talosctl config node ${CONTROL_PLANE_IP}
         '';
       };
       default = dev;
