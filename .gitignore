@@ -4,4 +4,4 @@
 .direnv/
 
 # Talos directories and files
-_out/
+clusterconfig/

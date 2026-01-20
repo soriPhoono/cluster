@@ -1,0 +1,11 @@
+---
+clusterName: adams
+endpoint: https://192.168.1.252:6443
+nodes:
+  - hostname: cluster-manager-1
+    controlPlane: true
+    ipAddress: 192.168.1.252
+    installDisk: /dev/sda
+  - hostname: cluster-worker-1
+    ipAddress: 192.168.1.253
+    installDisk: /dev/sda

@@ -10,6 +10,8 @@
       url = "github:numtide/flake-utils";
       inputs.systems.follows = "systems";
     };
+
+    talhelper.url = "github:budimanjojo/talhelper";
   };
 
   outputs = inputs @ {
@@ -22,10 +24,18 @@
     devShells = rec {
       dev = pkgs.mkShell {
         packages = with pkgs; [
+          sops
+          
+          (inputs.talhelper.packages.${system}.default)
           talosctl
-
           kubectl
         ];
+
+        shellHook = ''
+          if [[ ! -f ./clusterconfig ]]; then
+            talhelper genconfig
+          fi
+        '';
       };
       default = dev;
     };
