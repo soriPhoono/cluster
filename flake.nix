@@ -46,6 +46,7 @@
               extensions = {
                 official = [
                   "siderolabs/qemu-guest-agent"
+                  "siderolabs/tailscale"
                 ];
               };
             }
@@ -61,6 +62,7 @@
               extensions = {
                 official = [
                   "siderolabs/qemu-guest-agent"
+                  "siderolabs/tailscale"
                 ];
               };
             }
