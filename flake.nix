@@ -40,7 +40,7 @@
             {
               hostname = "cluster-manager-1";
               machine = {
-                mode = "nocloud";
+                mode = "metal";
               };
               ipAddress = "192.168.1.252";
               extensions = {
@@ -55,7 +55,7 @@
             {
               hostname = "cluster-worker-1";
               machine = {
-                mode = "nocloud";
+                mode = "metal";
               };
               ipAddress = "192.168.1.253";
               extensions = {
