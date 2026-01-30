@@ -3,124 +3,72 @@
 
   inputs = {
     systems.url = "github:nix-systems/default";
+    nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/*";
+    flake-parts.url = "github:hercules-ci/flake-parts";
 
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-      inputs.systems.follows = "systems";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    talhelper.url = "github:budimanjojo/talhelper";
+    agenix-shell = {
+      url = "github:aciceri/agenix-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    git-hooks-nix = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    github-actions-nix = {
+      url = "github:synapdeck/github-actions-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
+    self,
     nixpkgs,
-    flake-utils,
+    flake-parts,
+    agenix,
     ...
-  }: flake-utils.lib.eachDefaultSystem (system: let 
-    pkgs = nixpkgs.legacyPackages.${system};
-  in {
-    devShells = rec {
-      dev = pkgs.mkShell {
-        TALOSCONFIG = "clusterconfig/talosconfig";
+  }: let
+    inherit (nixpkgs) lib;
 
-        packages = with pkgs; [
-          sops
-          
-          (inputs.talhelper.packages.${system}.default)
-          talosctl
-          kubectl
+    components = [
+      (flake-parts.lib.mkFlake {inherit inputs;} {
+        imports = with inputs; [
+          agenix-shell.flakeModules.default
+          treefmt-nix.flakeModule
+          git-hooks-nix.flakeModule
+          github-actions-nix.flakeModule
         ];
-
-        shellHook = let 
-          CLUSTER_NAME = "adams";
-
-          CONTROL_NODES = [
-            {
-              hostname = "cluster-manager-1";
-              machine = {
-                mode = "metal";
-              };
-              ipAddress = "192.168.1.252";
-              extensions = {
-                official = [
-                  "siderolabs/qemu-guest-agent"
-                  "siderolabs/tailscale"
-                ];
-              };
-            }
-          ];
-
-          WORKER_NODES = [
-            {
-              hostname = "cluster-worker-1";
-              machine = {
-                mode = "metal";
-              };
-              ipAddress = "192.168.1.253";
-              extensions = {
-                official = [
-                  "siderolabs/qemu-guest-agent"
-                  "siderolabs/tailscale"
-                ];
-              };
-            }
-          ];
-
-          CONTROL_PLANE_IP = (builtins.elemAt CONTROL_NODES 0).ipAddress;
-        in ''
-          if [[ ! -d ./clusterconfig ]]; then
-            talhelper genconfig --config-file ${pkgs.writeText "talconfig.yaml" ''
-              ---
-              clusterName: ${CLUSTER_NAME}
-              endpoint: https://${CONTROL_PLANE_IP}:6443
-              nodes:
-              ${builtins.concatStringsSep "\n"
-                (map 
-                  (node: ''
-                    - hostname: ${node.hostname}
-                      controlPlane: true
-                      machineSpec:
-                        mode: ${node.machine.mode}
-                      ipAddress: ${node.ipAddress}
-                      installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}
-                      schematic:
-                        customization:
-                          systemExtensions:
-                            officialExtensions:
-                              ${builtins.concatStringsSep "\n"
-                                (if (node.extensions ? "official") then
-                                  (map (extension: "- ${extension}") node.extensions.official)
-                                else [])}
-                  '')
-                  CONTROL_NODES)}
-              ${builtins.concatStringsSep "\n"
-                (map
-                  (node: ''
-                    - hostname: ${node.hostname}
-                      ipAddress: ${node.ipAddress}
-                      machineSpec:
-                        mode: ${node.machine.mode}
-                      installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}
-                      schematic:
-                        customization:
-                          systemExtensions:
-                            officialExtensions:
-                              ${builtins.concatStringsSep "\n"
-                                (if (node.extensions ? "official") then
-                                  (map (extension: "- ${extension}") node.extensions.official)
-                                else [])}
-                  '')
-                  WORKER_NODES)}
-            ''}
-          fi
-
-          talosctl config endpoint ${CONTROL_PLANE_IP}
-          talosctl config node ${CONTROL_PLANE_IP}
-        '';
-      };
-      default = dev;
-    };
-  });
+        systems = import inputs.systems;
+        agenix-shell.secrets = (import ./secrets.nix).agenix-shell-secrets;
+        perSystem = args @ {system, ...}: let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [
+              (_: _: {
+                agenix = agenix.packages.${system}.default;
+              })
+            ];
+            config.allowUnfree = true;
+          };
+        in {
+          devShells.default = import ./shell.nix (args
+            // {
+              inherit pkgs;
+            });
+          treefmt = import ./treefmt.nix;
+          pre-commit = import ./pre-commit.nix;
+          githubActions = import ./github-actions.nix {inherit self lib;};
+        };
+      })
+    ];
+  in
+    with lib;
+      foldl' recursiveUpdate {} components;
 }

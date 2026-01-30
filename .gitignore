@@ -1,7 +1,4 @@
-# Repository directories and files
-
-# Nix flake directories and files
+.vscode/
 .direnv/
 
-# Talos directories and files
-clusterconfig/
+.pre-commit-config.yaml
