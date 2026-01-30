@@ -64,7 +64,7 @@
             });
           treefmt = import ./treefmt.nix;
           pre-commit = import ./pre-commit.nix;
-          githubActions = import ./github-actions.nix {inherit self lib;};
+          githubActions = import ./actions.nix {inherit self lib;};
         };
       })
     ];
