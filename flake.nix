@@ -34,39 +34,10 @@
         ];
 
         shellHook = let 
-          CLUSTER_NAME = "adams";
-
-          CONTROL_NODES = [
-            {
-              hostname = "cluster-manager-1";
-              machine = {
-                mode = "metal";
-              };
-              ipAddress = "192.168.1.252";
-              extensions = {
-                official = [
-                  "siderolabs/qemu-guest-agent"
-                  "siderolabs/tailscale"
-                ];
-              };
-            }
-          ];
-
-          WORKER_NODES = [
-            {
-              hostname = "cluster-worker-1";
-              machine = {
-                mode = "metal";
-              };
-              ipAddress = "192.168.1.253";
-              extensions = {
-                official = [
-                  "siderolabs/qemu-guest-agent"
-                  "siderolabs/tailscale"
-                ];
-              };
-            }
-          ];
+          clusterConfig = import ./cluster-config.nix;
+          CLUSTER_NAME = clusterConfig.clusterName;
+          CONTROL_NODES = clusterConfig.controlNodes;
+          WORKER_NODES = clusterConfig.workerNodes;
 
           CONTROL_PLANE_IP = (builtins.elemAt CONTROL_NODES 0).ipAddress;
         in ''
