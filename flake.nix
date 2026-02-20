@@ -69,6 +69,25 @@
           ];
 
           CONTROL_PLANE_IP = (builtins.elemAt CONTROL_NODES 0).ipAddress;
+
+          mkNode = node: controlPlane:
+            let
+              base = [
+                "- hostname: ${node.hostname}"
+              ] ++ (if controlPlane then [ "  controlPlane: true" ] else []) ++ [
+                "  ipAddress: ${node.ipAddress}"
+                "  machineSpec:"
+                "    mode: ${node.machine.mode}"
+                "  installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}"
+                "  schematic:"
+                "    customization:"
+                "      systemExtensions:"
+                "        officialExtensions:"
+              ] ++ (if node.extensions ? "official" then
+                     map (extension: "          - ${extension}") node.extensions.official
+                    else []);
+            in
+              builtins.concatStringsSep "\n" base;
         in ''
           if [[ ! -d ./clusterconfig ]]; then
             talhelper genconfig --config-file ${pkgs.writeText "talconfig.yaml" ''
@@ -76,43 +95,10 @@
               clusterName: ${CLUSTER_NAME}
               endpoint: https://${CONTROL_PLANE_IP}:6443
               nodes:
-              ${builtins.concatStringsSep "\n"
-                (map 
-                  (node: ''
-                    - hostname: ${node.hostname}
-                      controlPlane: true
-                      machineSpec:
-                        mode: ${node.machine.mode}
-                      ipAddress: ${node.ipAddress}
-                      installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}
-                      schematic:
-                        customization:
-                          systemExtensions:
-                            officialExtensions:
-                              ${builtins.concatStringsSep "\n"
-                                (if (node.extensions ? "official") then
-                                  (map (extension: "- ${extension}") node.extensions.official)
-                                else [])}
-                  '')
-                  CONTROL_NODES)}
-              ${builtins.concatStringsSep "\n"
-                (map
-                  (node: ''
-                    - hostname: ${node.hostname}
-                      ipAddress: ${node.ipAddress}
-                      machineSpec:
-                        mode: ${node.machine.mode}
-                      installDisk: ${if (node ? "installDisk") then node.installDisk else "/dev/sda"}
-                      schematic:
-                        customization:
-                          systemExtensions:
-                            officialExtensions:
-                              ${builtins.concatStringsSep "\n"
-                                (if (node.extensions ? "official") then
-                                  (map (extension: "- ${extension}") node.extensions.official)
-                                else [])}
-                  '')
-                  WORKER_NODES)}
+              ${builtins.concatStringsSep "\n" (
+                (map (node: mkNode node true) CONTROL_NODES) ++
+                (map (node: mkNode node false) WORKER_NODES)
+              )}
             ''}
           fi
 
