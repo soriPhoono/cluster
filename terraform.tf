@@ -31,7 +31,7 @@ resource "proxmox_virtual_environment_file" "talos_iso" {
   datastore_id = "local"
   node_name    = "pve"
   source_file {
-    path = "https://github.com/siderolabs/talos/releases/download/v1.12.4/metal-amd64.iso"
+    path = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/v1.12.4/metal-amd64.iso"
   }
 }
 
