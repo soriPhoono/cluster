@@ -35,15 +35,32 @@ resource "proxmox_virtual_environment_file" "talos_iso" {
   }
 }
 
-resource "proxmox_virtual_environment_vm" "cluster_manager_1" {
-  name      = "cluster-manager-1"
+locals {
+  nodes = {
+    manager_1 = {
+      name   = "cluster-manager-1"
+      memory = 4096
+      disk   = 40
+    }
+    worker_1 = {
+      name   = "cluster-worker-1"
+      memory = 8192
+      disk   = 100
+    }
+  }
+}
+
+resource "proxmox_virtual_environment_vm" "cluster" {
+  for_each = local.nodes
+
+  name      = each.value.name
   node_name = "pve"
 
   cpu {
     cores = 4
   }
   memory {
-    dedicated = 4096
+    dedicated = each.value.memory
   }
 
   machine = "q35"
@@ -66,7 +83,7 @@ resource "proxmox_virtual_environment_vm" "cluster_manager_1" {
   disk {
     datastore_id = "local-lvm"
     interface    = "virtio0"
-    size         = 40
+    size         = each.value.disk
   }
 
   cdrom {
@@ -80,47 +97,12 @@ resource "proxmox_virtual_environment_vm" "cluster_manager_1" {
   boot_order = ["virtio0", "ide2"]
 }
 
-resource "proxmox_virtual_environment_vm" "cluster_worker_1" {
-  name      = "cluster-worker-1"
-  node_name = "pve"
+moved {
+  from = proxmox_virtual_environment_vm.cluster_manager_1
+  to   = proxmox_virtual_environment_vm.cluster["manager_1"]
+}
 
-  cpu {
-    cores = 4
-  }
-  memory {
-    dedicated = 8192
-  }
-
-  machine = "q35"
-  bios    = "ovmf"
-
-  efi_disk {
-    datastore_id = "local-lvm"
-    file_format  = "raw"
-    type         = "4m"
-  }
-
-  agent {
-    enabled = true
-  }
-
-  network_device {
-    bridge = "vmbr0"
-  }
-
-  disk {
-    datastore_id = "local-lvm"
-    interface    = "virtio0"
-    size         = 100
-  }
-
-  cdrom {
-    file_id = proxmox_virtual_environment_file.talos_iso.id
-  }
-
-  operating_system {
-    type = "l26"
-  }
-
-  boot_order = ["virtio0", "ide2"]
+moved {
+  from = proxmox_virtual_environment_vm.cluster_worker_1
+  to   = proxmox_virtual_environment_vm.cluster["worker_1"]
 }
