@@ -23,7 +23,7 @@ with pkgs;
       ${config.pre-commit.shellHook}
       source ${config.agenix-shell.installationScript}/bin/install-agenix-shell
 
-      alias s="EDITOR=nvim sops"
+      alias s="sops"
 
       export TF_VAR_proxmox_api_secret="$PROXMOX_API_SECRET"
     '';
