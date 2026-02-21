@@ -31,7 +31,7 @@ resource "proxmox_virtual_environment_file" "talos_iso" {
   datastore_id = "local"
   node_name    = "pve"
   source_file {
-    path = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/v1.12.4/metal-amd64.iso"
+    path = "https://factory.talos.dev/image/780d976716e800d05604b9dd8d41928a97c1ad38f36d4c8276d35984aa947865/v1.12.4/metal-amd64.iso"
   }
 }
 
@@ -95,14 +95,4 @@ resource "proxmox_virtual_environment_vm" "cluster" {
   }
 
   boot_order = ["virtio0", "ide2"]
-}
-
-moved {
-  from = proxmox_virtual_environment_vm.cluster_manager_1
-  to   = proxmox_virtual_environment_vm.cluster["manager_1"]
-}
-
-moved {
-  from = proxmox_virtual_environment_vm.cluster_worker_1
-  to   = proxmox_virtual_environment_vm.cluster["worker_1"]
 }
