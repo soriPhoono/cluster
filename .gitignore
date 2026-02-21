@@ -1,4 +1,12 @@
 .vscode/
 .direnv/
 
+result
 .pre-commit-config.yaml
+
+.gemini/
+gha-creds-*.json
+
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup

@@ -3,8 +3,12 @@
 
   inputs = {
     systems.url = "github:nix-systems/default";
-    nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/*";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+
+    nixtest = {
+      url = "github:jetify-com/nixtest";
+    };
 
     agenix = {
       url = "github:ryantm/agenix";
@@ -22,33 +26,32 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    github-actions-nix = {
-      url = "github:synapdeck/github-actions-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = inputs @ {
-    self,
     nixpkgs,
     flake-parts,
     agenix,
     ...
   }: let
-    inherit (nixpkgs) lib;
-
-    components = [
-      (flake-parts.lib.mkFlake {inherit inputs;} {
+    lib = nixpkgs.lib.extend (final: prev: (import ./lib/default.nix {inherit inputs;}) final prev);
+  in
+    with lib;
+      flake-parts.lib.mkFlake {inherit inputs;} {
         imports = with inputs; [
           agenix-shell.flakeModules.default
           treefmt-nix.flakeModule
           git-hooks-nix.flakeModule
-          github-actions-nix.flakeModule
         ];
         systems = import inputs.systems;
-        agenix-shell.secrets = (import ./secrets.nix).agenix-shell-secrets;
-        perSystem = args @ {system, ...}: let
-          pkgs = import nixpkgs {
+        agenix-shell.secrets = (import ./secrets.nix {inherit lib;}).agenix-shell-secrets;
+        perSystem = {
+          pkgs,
+          config,
+          system,
+          ...
+        }: {
+          _module.args.pkgs = import nixpkgs {
             inherit system;
             overlays = [
               (_: _: {
@@ -57,18 +60,30 @@
             ];
             config.allowUnfree = true;
           };
-        in {
-          devShells.default = import ./shell.nix (args
-            // {
-              inherit pkgs;
-            });
-          treefmt = import ./treefmt.nix;
-          pre-commit = import ./pre-commit.nix;
-          githubActions = import ./actions.nix {inherit self lib;};
+
+          devShells.default = import ./shell.nix {
+            inherit lib pkgs;
+            config = {
+              inherit (config) pre-commit agenix-shell;
+            };
+          };
+
+          checks = let
+            unitTests =
+              lib.discoverTests {
+                inherit pkgs inputs self;
+                inherit (inputs) nixtest;
+              }
+              ./tests;
+          in
+            unitTests;
+
+          treefmt = import ./treefmt.nix {
+            inherit lib pkgs;
+          };
+          pre-commit = import ./pre-commit.nix {
+            inherit lib pkgs;
+          };
         };
-      })
-    ];
-  in
-    with lib;
-      foldl' recursiveUpdate {} components;
+      };
 }

@@ -8,17 +8,23 @@ with pkgs;
     packages = [
       nil
       alejandra
-      agenix
-      fluxcd
-      kubectl
-      kubernetes-helm
-      kustomize
-      sops
+
       age
-      kubeconform
+      sops
+      ssh-to-age
+      agenix
+
+      terraform
+
+      kubectl
     ];
 
     shellHook = ''
       ${config.pre-commit.shellHook}
+      source ${config.agenix-shell.installationScript}/bin/install-agenix-shell
+
+      alias s="EDITOR=nvim sops"
+
+      export TF_VAR_proxmox_api_secret="$PROXMOX_API_SECRET"
     '';
   }
