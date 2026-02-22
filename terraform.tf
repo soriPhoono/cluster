@@ -45,7 +45,7 @@ locals {
     worker_1 = {
       name   = "cluster-worker-1"
       memory = 8192
-      disk   = 100
+      disk   = 40
     }
   }
 }
@@ -58,6 +58,7 @@ resource "proxmox_virtual_environment_vm" "cluster" {
 
   cpu {
     cores = 4
+    type  = "x86-64-v2-AES"
   }
   memory {
     dedicated = each.value.memory
@@ -66,10 +67,16 @@ resource "proxmox_virtual_environment_vm" "cluster" {
   machine = "q35"
   bios    = "ovmf"
 
-  efi_disk {
+  tpm_state {
     datastore_id = "local-lvm"
-    file_format  = "raw"
-    type         = "4m"
+    version      = "v2.0"
+  }
+
+  efi_disk {
+    datastore_id      = "local-lvm"
+    file_format       = "raw"
+    type              = "4m"
+    pre_enrolled_keys = true
   }
 
   agent {
@@ -77,13 +84,16 @@ resource "proxmox_virtual_environment_vm" "cluster" {
   }
 
   network_device {
-    bridge = "vmbr0"
+    bridge   = "vmbr0"
+    firewall = true
   }
 
   disk {
     datastore_id = "local-lvm"
     interface    = "virtio0"
     size         = each.value.disk
+    cache        = "writethrough"
+    discard      = "on"
   }
 
   cdrom {
