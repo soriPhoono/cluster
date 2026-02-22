@@ -7,13 +7,16 @@ let
     # Per-user secrets: simple mapping of secret name -> list of users
     userSecrets = {
       # example = [ "soriphoono" ];
+      proxmox_api_secret = ["soriphoono"];
+      tailscale_oauth_client_id = ["soriphoono"];
+      tailscale_oauth_client_secret = ["soriphoono"];
     };
 
     # Team secrets: for shared access across multiple users
     teams = {
       cloud = {
         users = ["soriphoono"];
-        secrets = ["proxmox_api_secret"];
+        secrets = [];
       };
     };
 
@@ -28,10 +31,8 @@ let
     # Collect secrets from teams
     teamSecretsList = builtins.concatLists (builtins.map (team: builtins.map (secret: mkSecret secret team.users) team.secrets) (builtins.attrValues teams));
 
-    # Collect per-user secrets
-    userSecretsList = builtins.attrValues (
-      lib.mapAttrs' (secret: userList: mkSecret secret userList) userSecrets
-    );
+    # Collect per-user secrets as a list of { name, value } pairs
+    userSecretsList = builtins.map (secret: mkSecret secret userSecrets.${secret}) (builtins.attrNames userSecrets);
 
     # Shell secrets for agenix-shell (filtered by current user)
     # Fallback to soriphoono if USER is not set (e.g. in pure evaluation)
