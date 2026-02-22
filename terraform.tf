@@ -20,6 +20,12 @@ variable "proxmox_api_secret" {
   sensitive = true
 }
 
+variable "proxmox_tls_insecure" {
+  description = "Set to true to ignore certificate errors (e.g. self-signed)"
+  type        = bool
+  default     = true
+}
+
 variable "tailscale_oauth_client_id" {
   type      = string
   sensitive = true
@@ -33,7 +39,7 @@ variable "tailscale_oauth_client_secret" {
 provider "proxmox" {
   endpoint  = "https://pve:8006/api2/json"
   api_token = "terraform@pve!cluster-primary=${var.proxmox_api_secret}"
-  insecure  = true
+  insecure  = var.proxmox_tls_insecure
 }
 
 provider "tailscale" {
