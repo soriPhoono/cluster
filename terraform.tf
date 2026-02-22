@@ -36,13 +36,16 @@ resource "proxmox_virtual_environment_file" "talos_iso" {
 }
 
 locals {
+  project_id = 200
   nodes = {
     manager_1 = {
+      id     = 0
       name   = "cluster-manager-1"
       memory = 4096
       disk   = 40
     }
     worker_1 = {
+      id     = 1
       name   = "cluster-worker-1"
       memory = 8192
       disk   = 40
@@ -55,6 +58,7 @@ resource "proxmox_virtual_environment_vm" "cluster" {
 
   name      = each.value.name
   node_name = "pve"
+  vm_id     = local.project_id + each.value.id
 
   cpu {
     cores = 4
