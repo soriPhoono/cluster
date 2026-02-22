@@ -12,6 +12,9 @@
       entry = "${pkgs.gitleaks}/bin/gitleaks protect --verbose --redact --staged";
     };
 
+    terraform-format.enable = true;
+    terraform-validate.enable = true;
+
     kubeconform = {
       enable = true;
       name = "kubeconform";
