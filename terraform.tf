@@ -55,7 +55,8 @@ resource "proxmox_virtual_environment_file" "talos_iso" {
   datastore_id = "local"
   node_name    = "pve"
   source_file {
-    path = "https://factory.talos.dev/image/780d976716e800d05604b9dd8d41928a97c1ad38f36d4c8276d35984aa947865/v1.12.4/metal-amd64.iso"
+    path     = "https://factory.talos.dev/image/780d976716e800d05604b9dd8d41928a97c1ad38f36d4c8276d35984aa947865/v1.12.4/metal-amd64.iso"
+    checksum = "94519d03096d55bab86f1f6e5a91171c26a8190728c519d3367dd2ad60e6b13d"
   }
 }
 
