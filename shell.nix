@@ -15,6 +15,7 @@ with pkgs;
       agenix
 
       terraform
+      talosctl
 
       kubectl
     ];
@@ -35,5 +36,11 @@ with pkgs;
       fi
 
       export TF_VAR_proxmox_api_secret="$PROXMOX_API_SECRET"
+      export TF_VAR_tailscale_oauth_client_id="$TAILSCALE_OAUTH_CLIENT_ID"
+      export TF_VAR_tailscale_oauth_client_secret="$TAILSCALE_OAUTH_CLIENT_SECRET"
+
+      mkdir -p generated
+      export TALOSCONFIG="$PWD/generated/talosconfig"
+      export KUBECONFIG="$PWD/generated/kubeconfig"
     '';
   }
