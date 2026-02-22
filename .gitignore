@@ -8,5 +8,23 @@ result
 gha-creds-*.json
 
 .terraform/
+deploy.tfplan
 terraform.tfstate
 terraform.tfstate.backup
+
+# Local state locking files
+.terraform.tfstate.lock.info
+
+# Sensitive variables
+*.tfvars
+*.tfvars.json
+
+# Local overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI configuration
+.terraformrc
+terraform.rc
