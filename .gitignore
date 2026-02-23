@@ -6,3 +6,5 @@
 
 .gemini/
 gha-creds-*.json
+
+docker.bak/

@@ -1,0 +1,6 @@
+# This file denotes the repos, branches, and paths to the compose files of the stacks in this cluster
+# e.g.:
+# nginx:
+#   repo: swarm-cd-example
+#   branch: main
+#   compose_file: nginx/compose.yaml

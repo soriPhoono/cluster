@@ -1,0 +1,28 @@
+version: "3.7"
+services:
+  socket_proxy:
+    image: tecnativa/docker-socket-proxy:v0.4.0
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: America/Chicago
+      INFO: 1
+      SERVICES: 1
+      NETWORKS: 1
+      SECRETS: 1
+      CONFIGS: 1
+      POST: 1
+  swarm-cd:
+    image: ghcr.io/m-adawi/swarm-cd:v1.10.0
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./repos.yaml:/app/repos.yaml:ro
+      - ./stacks.yaml:/app/stacks.yaml:ro

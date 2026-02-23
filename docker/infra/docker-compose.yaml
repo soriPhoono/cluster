@@ -1,0 +1,4 @@
+networks:
+  backend:
+    driver: overlay
+    attachable: true
