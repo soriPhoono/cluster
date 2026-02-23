@@ -4,10 +4,8 @@ This directory contains utility functions used throughout the flake configuratio
 
 ## Usage
 
-These functions are typically passed to modules via `lib` or `extraSpecialArgs`.
+These functions are typically passed to modules via `lib`.
 
 ## Structure
 
 - `default.nix`: Entry point, importing and merging other library files.
-- `module-utils.nix`: Utilities for module system manipulation.
-- `file-utils.nix`: Utilities for file handling (like `scanPaths`).
