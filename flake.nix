@@ -4,51 +4,67 @@
   inputs = {
     systems.url = "github:nix-systems/x86_64-linux";
 
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     treefmt-nix.url = "github:numtide/treefmt-nix";
-
     git-hooks-nix.url = "github:cachix/git-hooks.nix";
   };
 
-  outputs = inputs @ {flake-parts, ...}:
+  outputs = inputs @ {
+    self,
+    nixpkgs,
+    flake-parts,
+    ...
+  }: let
+    # Extend lib with our custom functions
+    lib = nixpkgs.lib.extend (final: prev:
+      (import ./lib/default.nix {inherit inputs;}) final prev
+      // {
+        inherit (inputs.home-manager.lib) hm;
+      });
+
+    supportedSystems = import inputs.systems;
+  in
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = with inputs; [
         treefmt-nix.flakeModule
         git-hooks-nix.flakeModule
       ];
-      systems = with inputs; import systems;
+      systems = supportedSystems;
       perSystem = {
         pkgs,
         config,
-        lib,
+        system,
         ...
-      }:
-        with pkgs;
-        with lib; rec {
-          devShells.default = mkShell {
-            shellHook = ''
-              ${config.pre-commit.shellHook}
-            '';
-          };
+      }: {
+        _module.args.pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
 
-          treefmt.programs = {
-            alejandra.enable = true;
-            deadnix.enable = true;
-            statix.enable = true;
-
-            yamlfmt.enable = true;
-          };
-
-          pre-commit = {
-            check.enable = true;
-            settings.hooks = {
-              nil.enable = true;
-
-              treefmt.enable = true;
-            };
+        devShells.default = import ./shell.nix {
+          inherit lib pkgs;
+          config = {
+            inherit (config) pre-commit;
           };
         };
+
+        checks = let
+          # Structure and Unit Tests
+          unitTests =
+            lib.discoverTests {
+              inherit pkgs inputs self;
+              inherit (inputs) nixtest;
+            }
+            ./tests;
+          # Dynamic Build Checks
+        in
+          unitTests;
+
+        treefmt = import ./treefmt.nix {inherit lib pkgs;};
+        pre-commit = import ./pre-commit.nix {inherit lib pkgs;};
+      };
     };
 }
