@@ -1,20 +1,38 @@
 {pkgs, ...}: {
   settings.hooks = {
+    # --- Nix Code Support ---
     nil.enable = true;
     statix.enable = true;
     deadnix.enable = true;
-
     treefmt.enable = true;
 
+    # --- Terraform Support ---
+    terraform-format.enable = true;
+    tflint.enable = true;
+    terrascan = {
+      enable = true;
+      entry = "${pkgs.terrascan}/bin/terrascan";
+      types = ["terraform" "text"];
+      args = ["scan"];
+    };
+
+    # --- Kubernetes Development Support ---
+    kubeconform = {
+      enable = true;
+      entry = "${pkgs.kubeconform}/bin/kubeconform";
+      types = ["yaml"];
+      args = ["."];
+    };
+    yamllint.enable = true;
+
+    # --- GitHub and Git Support ---
     gitleaks = {
       enable = true;
       name = "gitleaks";
       entry = "${pkgs.gitleaks}/bin/gitleaks protect --verbose --redact --staged";
       pass_filenames = false;
     };
-
     actionlint.enable = true;
-
     action-validator = {
       enable = true;
       name = "action-validator";

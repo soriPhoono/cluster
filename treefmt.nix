@@ -7,7 +7,12 @@ _: {
     deadnix.enable = true;
     statix.enable = true;
 
+    shfmt.enable = true;
+    shellcheck.enable = true;
+
     yamlfmt.enable = true;
+    yamllint.enable = true;
+    actionlint.enable = true;
 
     mdformat.enable = true;
   };

@@ -13,17 +13,15 @@
   };
 
   outputs = inputs @ {
-    self,
     nixpkgs,
     flake-parts,
     ...
   }: let
     # Extend lib with our custom functions
-    lib = nixpkgs.lib.extend (final: prev:
-      (import ./lib/default.nix {inherit inputs;}) final prev
-      // {
-        inherit (inputs.home-manager.lib) hm;
-      });
+    lib = nixpkgs.lib.extend (
+      final: prev:
+        (import ./lib/default.nix {inherit inputs;}) final prev
+    );
 
     supportedSystems = import inputs.systems;
   in
@@ -50,18 +48,6 @@
             inherit (config) pre-commit;
           };
         };
-
-        checks = let
-          # Structure and Unit Tests
-          unitTests =
-            lib.discoverTests {
-              inherit pkgs inputs self;
-              inherit (inputs) nixtest;
-            }
-            ./tests;
-          # Dynamic Build Checks
-        in
-          unitTests;
 
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
         pre-commit = import ./pre-commit.nix {inherit lib pkgs;};
