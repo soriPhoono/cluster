@@ -1,6 +1,10 @@
+.vscode/
+
 .direnv/
 
 .pre-commit-config.yaml
 
-# Secrets paths
-secrets/
+.gemini/
+gha-creds-*.json
+
+docker.bak/
