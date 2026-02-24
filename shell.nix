@@ -15,6 +15,7 @@ with pkgs;
 
       talosctl
       kubectl
+      fluxcd
     ];
 
     shellHook = ''

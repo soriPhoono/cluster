@@ -1,7 +1,13 @@
 _: {
   projectRootFile = "flake.nix";
-  settings.formatter.yamlfmt.excludes = [".github/workflows/*"];
-  settings.formatter.yamllint.excludes = [".github/workflows/*"];
+  settings.formatter.yamlfmt.excludes = [
+    ".github/workflows/*"
+    "k8s/core/flux-system/*"
+  ];
+  settings.formatter.yamllint.excludes = [
+    ".github/workflows/*"
+    "k8s/core/flux-system/*"
+  ];
 
   programs = {
     alejandra.enable = true;

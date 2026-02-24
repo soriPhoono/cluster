@@ -21,9 +21,13 @@
       enable = true;
       entry = "${pkgs.kubeconform}/bin/kubeconform";
       types = ["yaml"];
-      args = ["."];
+      args = ["-ignore-missing-schemas" "-skip" "CustomResourceDefinition" "k8s"];
+      exclude = "k8s/core/flux-system/gotk-components.yaml";
     };
-    yamllint.enable = true;
+    yamllint = {
+      enable = true;
+      exclude = "k8s/core/flux-system/gotk-components.yaml";
+    };
 
     # --- GitHub and Git Support ---
     gitleaks = {
