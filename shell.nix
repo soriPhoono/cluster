@@ -12,6 +12,9 @@ with pkgs;
       age
       sops
       ssh-to-age
+
+      talosctl
+      kubectl
     ];
 
     shellHook = ''
