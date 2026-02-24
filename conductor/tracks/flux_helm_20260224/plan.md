@@ -2,11 +2,11 @@
 
 ## Phase 1: FluxCD Core Infrastructure
 
-- [ ] Task: Prepare FluxCD bootstrap manifests
-  - [ ] Generate bootstrap manifests using Flux CLI
-  - [ ] Review and adapt manifests to follow project pinning and resource rules
-- [ ] Task: Deploy FluxCD to the cluster
-  - [ ] Apply bootstrap manifests to the `flux-system` namespace
+- [x] Task: Prepare FluxCD bootstrap manifests
+  - [x] Generate bootstrap manifests using Flux CLI
+  - [x] Review and adapt manifests to follow project pinning and resource rules
+- [~] Task: Deploy FluxCD to the cluster
+  - [~] Apply bootstrap manifests to the `flux-system` namespace
   - [ ] Verify all controllers (source, helm, kustomize) are healthy
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: FluxCD Core Infrastructure' (Protocol in workflow.md)
 
