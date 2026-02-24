@@ -5,27 +5,25 @@ Welcome! This document provides essential context, architectural rules, and work
 ## Core Technologies
 
 - **Nix / NixOS**: The environment and toolchain are managed via Nix. `flake.nix` is the primary entry point.
-- **Docker Swarm**: We use Docker Swarm for orchestrating services.
+- **Kubernetes**: We use Kubernetes for orchestrating workloads.
+- **Talos Linux**: An immutable OS for our Kubernetes nodes.
 
 ## Key Files & Configuration
 
-- **`stacks.yaml`**: Specifies the repositories, branches, and relative paths to the Docker Compose files for the stacks running in our cluster.
+- **`k8s/`**: Directory containing all declarative Kubernetes manifests.
 - **`shell.nix`**: Defines the development environment. It automatically installs `pre-commit` hooks and handles integrating Gemini/Antigravity MCP servers if you are running in the Antigravity editor context.
-- **`README.md`**: Contains the critical Swarm Service Requirements.
+- **`README.md`**: Contains the critical Kubernetes Manifest Requirements.
 
-## Docker Swarm Strict Requirements
+## Strict Kubernetes Requirements
 
-When creating or modifying Docker Compose files (`docker-compose.yaml`) for Swarm, you **MUST** adhere to the following rules:
+When creating or modifying Kubernetes manifests for the cluster, you **MUST** adhere to the following rules:
 
-1. **Image pinning**: Images must be pinned to a specific version tag. Do not use `latest`.
-1. **Deploy configuration**: All Swarm-specific settings must reside under the `deploy` block:
-   - `restart_policy`: Configured for failure resilience (e.g., `condition: on-failure`).
-   - `placement`: Appropriate node constraints (e.g., `node.role == manager`).
-   - `update_config`: Must be defined for rolling updates.
-1. **Healthcheck**: Must be explicitly configured to ensure the task is fully ready before it receives traffic.
-1. **Secrets & Configs**: Prefer Swarm `secrets` and `configs` over plain environment variables for sensitive data or files.
-1. **Networks**: Must use `driver: overlay` for cross-node swarm communication (typically defined in the infra stack).
-1. **Labels**: Traefik and other service discovery labels must be placed under `deploy.labels`, **not** container-level `labels`.
+1. **Image pinning**: Images must be pinned to a specific version tag or digest. Do not use `latest`.
+1. **Declarative**: All edits must be made via YAML manifests located in `k8s/`.
+1. **Validation**: Enforce `kubeconform` checks on all manifests.
+1. **Healthchecks**: Must explicitly configure `livenessProbe` and `readinessProbe` to ensure pods are ready before receiving traffic.
+1. **Secrets**: Utilize `sops` and `age` to encrypt secrets. Do not commit plaintext secrets.
+1. **Limits**: Define CPU and Memory `requests` and `limits` for predictability.
 
 ## Extensible Workflows
 

@@ -5,8 +5,8 @@ Thank you for contributing to the Home Lab cluster! This environment is intended
 ## Table of Contents
 
 1. [Development Environment](#development-environment)
-1. [Adding or Modifying Services](#adding-or-modifying-services)
-   - [Strict Swarm Requirements](#strict-swarm-requirements)
+1. [Adding or Modifying Workloads](#adding-or-modifying-workloads)
+   - [Strict Kubernetes Requirements](#strict-kubernetes-requirements)
 1. [AI Agent Guidelines](#ai-agent-guidelines)
 1. [Pull Requests & Code Style](#pull-requests--code-style)
 
@@ -18,26 +18,21 @@ This project relies heavily on **Nix**. We enforce the use of the provided envir
 - **Manual Entry**: If not using `direnv`, launch the development shell by running `nix develop`.
 - **Pre-commit Hooks**: The nix shell will automatically configure git hooks to run formatters (`treefmt`, `alejandra`).
 
-## Adding or Modifying Services
+## Adding or Modifying Workloads
 
-All deployed applications and their configurations track back to our central registry.
+All deployed applications and their configurations track back to our Kubernetes manifests.
 
-1. **`stacks.yaml`**: Ensure any new stack/service is defined. This sets the repository, branch, and relative path to the Docker Compose files.
-1. **Docker Compose**: Place compose files under the `docker/` directory (or according to what is specific in `stacks.yaml`).
+1. **Kubernetes Manifests**: All workloads must be defined as declarative YAML manifests under `k8s/` in their respective categorical directories (e.g., `core`, `databases`, `media-stack`).
 
-### Strict Swarm Requirements
+### Strict Kubernetes Requirements
 
-We strictly validate `docker-compose.yaml` files. If you do not follow these rules, your service will fail to deploy properly or be rejected in review:
+We strictly validate Kubernetes manifests using `kubeconform`. If you do not follow these rules, your service will fail to deploy properly or be rejected in review:
 
-- **Image pinning**: Never use the `latest` tag. Always pin to a specific, reproducible version.
-- **Deploy block**: All Swarm operational settings live here.
-  - Set a `restart_policy` (e.g., `condition: on-failure`).
-  - Configure `update_config` to avoid downtime during rollouts.
-  - Add appropriate `placement` constraints (e.g., `node.role == manager`).
-- **Healthchecks**: Must be configured. A container cannot receive traffic until it is healthy.
-- **Secrets & Configs**: Prefer Swarm native `secrets` and `configs` instead of raw environment variables for sensitive data.
-- **Overlay Networks**: Ensure the service uses the correct cross-node `overlay` network.
-- **Service Labels**: Things like Traefik routing labels *must* go under `deploy.labels` (the Swarm service level), not container `labels`.
+- **Image pinning**: Never use the `latest` tag. Always pin to a specific, reproducible version or digest.
+- **Declarative Configuration**: Avoid manual `kubectl` commands. Define all resources (Deployments, Services, ConfigMaps, etc.) in YAML.
+- **Healthchecks**: Configure `livenessProbe` and `readinessProbe` to ensure a container is healthy before it receives traffic.
+- **Secrets**: Never commit plain text secrets. Use `sops` with `age` encryption for `Secret` resources.
+- **Resource Limits**: Define both `requests` and `limits` for all containers to ensure stable scheduling.
 
 ## AI Agent Guidelines
 
@@ -54,4 +49,4 @@ If you are an AI autonomous agent (like Antigravity or Gemini), please consult o
   - `refactor`: A code change that neither fixes a bug nor adds a feature.
   - `chore`: Changes to the build process or auxiliary tools.
     **Example**: `feat(infra): update manager node RAM to 4GB`
-- **Testing**: Whenever possible, state how you manually verified your compose file configurations or plans.
+- **Testing**: Whenever possible, state how you manually verified your Kubernetes manifests or configurations.
