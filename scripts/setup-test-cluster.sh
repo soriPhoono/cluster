@@ -26,10 +26,7 @@ fi
 
 sudo -E talosctl cluster create docker
 
-echo "[INFO]: Extracting kubeconfig..."
-talosctl kubeconfig ./kubeconfig --force --merge=false
-KUBECONFIG="$(pwd)/kubeconfig"
-export KUBECONFIG
+read -rp "Press any key to continue..." -n 1 -s
 
 echo "[INFO]: Installing FluxCD components..."
 kubectl apply -f k8s/core/flux-system/gotk-components.yaml

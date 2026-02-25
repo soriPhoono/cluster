@@ -1,6 +1,0 @@
-{
-  "id": "foundational_infra_20260224",
-  "name": "Foundational Cluster Infrastructure",
-  "description": "Deploy Traefik, Rook-Ceph, and Grafana monitoring stack",
-  "status": "backlog"
-}
