@@ -22,10 +22,10 @@
 
 ## Phase 3: Helm Support Integration
 
-- [ ] Task: Configure HelmRepository support
-  - [ ] Write validation tests for HelmRepository CRD usage
-  - [ ] Implement an example HelmRepository (e.g., bitnami) to verify connectivity
-- [ ] Task: Implement HelmRelease workflow
-  - [ ] Create a template for HelmRelease manifests following project standards
-  - [ ] Verify Flux can successfully deploy a sample Helm chart
+- [x] Task: Configure HelmRepository support
+  - [x] Write validation tests for HelmRepository CRD usage
+  - [x] Implement an example HelmRepository (e.g., bitnami) to verify connectivity
+- [x] Task: Implement HelmRelease workflow
+  - [x] Create a template for HelmRelease manifests following project standards
+  - [x] Verify Flux can successfully deploy a sample Helm chart
 - [~] Task: Conductor - User Manual Verification 'Phase 3: Helm Support Integration' (Protocol in workflow.md)
