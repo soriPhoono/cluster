@@ -1,0 +1,80 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rook-ceph-cluster
+  namespace: flux-system
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: rook-ceph-cluster
+      version: "1.19.1"
+      sourceRef:
+        kind: HelmRepository
+        name: rook-release
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  targetNamespace: rook-ceph
+  values:
+    operatorNamespace: rook-ceph
+    clusterName: rook-ceph
+    cephClusterSpec:
+      cephVersion:
+        image: quay.io/ceph/ceph:v19.2.1
+        allowUnsupported: true
+      dataDirHostPath: /var/lib/rook
+      skipUpgradeChecks: true
+      mon:
+        count: 3
+        allowMultiplePerNode: false
+      mgr:
+        count: 1
+        modules:
+          - name: pg_autoscaler
+            enabled: true
+      dashboard:
+        enabled: true
+        ssl: false
+      monitoring:
+        enabled: false
+      network:
+        provider: host
+      storage:
+        useAllNodes: true
+        useAllDevices: true
+        config:
+          databaseSizeMB: "1024"
+          journalSizeMB: "1024"
+          osdsPerDevice: "1"
+      resources:
+        mgr:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        mon:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+        osd:
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+    ingress:
+      dashboard:
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: web
+        host:
+          name: rook.cluster.local
+          path: /

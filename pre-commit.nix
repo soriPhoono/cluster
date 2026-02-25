@@ -22,11 +22,7 @@
       entry = "${pkgs.kubeconform}/bin/kubeconform";
       types = ["yaml"];
       args = ["-ignore-missing-schemas" "-skip" "CustomResourceDefinition" "k8s"];
-      exclude = "k8s/core/flux-system/.*";
-    };
-    yamllint = {
-      enable = true;
-      exclude = "k8s/core/flux-system/.*";
+      excludes = ["k8s/core/flux-system/.*"];
     };
 
     # --- GitHub and Git Support ---

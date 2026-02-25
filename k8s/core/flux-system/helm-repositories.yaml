@@ -15,3 +15,12 @@ metadata:
 spec:
   interval: 1h0s
   url: https://stefanprodan.github.io/podinfo
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: rook-release
+  namespace: flux-system
+spec:
+  interval: 1h0s
+  url: https://charts.rook.io/release
