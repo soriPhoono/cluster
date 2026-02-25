@@ -3,7 +3,7 @@
 ## Phase 1: Storage Layer (Rook-Ceph)
 
 - [x] Task: Deploy Rook-Ceph Operator
-- [~] Task: Configure and Deploy CephCluster
+- [x] Task: Configure and Deploy CephCluster (2cf356d)
 - [ ] Task: Verify Rook-Ceph health and storage classes
 
 ## Phase 2: Ingress & Connectivity (Traefik)

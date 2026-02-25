@@ -24,7 +24,7 @@ if [ -z "$OVMF_DIR" ]; then
   echo "[WARN]: OVMF_DIR is not set. Cluster creation might fail if UEFI is required."
 fi
 
-sudo -E talosctl cluster create --provisioner docker ${OVMF_DIR:+--extra-uefi-search-paths "$OVMF_DIR"}
+sudo -E talosctl cluster create docker
 
 echo "[INFO]: Extracting kubeconfig..."
 talosctl kubeconfig ./kubeconfig --force --merge=false

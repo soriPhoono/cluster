@@ -16,9 +16,12 @@ with pkgs;
       talosctl
       kubectl
       fluxcd
+      OVMF
+      iptables
     ];
 
     shellHook = ''
+      export OVMF_DIR="${pkgs.OVMF.fd}/FV"
       ${config.pre-commit.shellHook}
 
       # Automation: Ensure test cluster exists at session start

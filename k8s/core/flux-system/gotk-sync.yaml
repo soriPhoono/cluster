@@ -9,7 +9,7 @@ spec:
     branch: main
   secretRef:
     name: flux-system
-  url: ssh://git@github.com/soriPhoono/cluster.git
+  url: https://www.github.com/soriPhoono/cluster.git
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -27,7 +27,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
