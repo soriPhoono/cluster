@@ -1,24 +1,48 @@
 {
-  description = "Empty flake with basic devshell";
+  description = "Cluster management flake";
 
   inputs = {
     systems.url = "github:nix-systems/x86_64-linux";
 
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-weekly.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.948651";
 
     flake-parts.url = "github:hercules-ci/flake-parts";
 
-    treefmt-nix.url = "github:numtide/treefmt-nix";
-    git-hooks-nix.url = "github:cachix/git-hooks.nix";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs-weekly";
+    };
+    agenix-shell = {
+      url = "github:aciceri/agenix-shell";
+      inputs.nixpkgs.follows = "nixpkgs-weekly";
+    };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs-weekly";
+    };
+    git-hooks-nix = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs-weekly";
+    };
+    github-actions-nix = {
+      url = "github:synapdeck/github-actions-nix";
+      inputs.nixpkgs.follows = "nixpkgs-weekly";
+    };
   };
 
   outputs = inputs @ {
-    nixpkgs,
+    self,
+    nixpkgs-weekly,
     flake-parts,
+    agenix,
+    agenix-shell,
+    treefmt-nix,
+    git-hooks-nix,
+    github-actions-nix,
     ...
   }: let
     # Extend lib with our custom functions
-    lib = nixpkgs.lib.extend (
+    lib = nixpkgs-weekly.lib.extend (
       final: prev:
         (import ./lib/default.nix {inherit inputs;}) final prev
     );
@@ -26,26 +50,39 @@
     supportedSystems = import inputs.systems;
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
-      imports = with inputs; [
+      imports = [
+        agenix-shell.flakeModules.default
         treefmt-nix.flakeModule
         git-hooks-nix.flakeModule
+        github-actions-nix.flakeModule
       ];
+
       systems = supportedSystems;
+
+      agenix-shell.secrets = (import ./secrets.nix {inherit lib;}).agenix-shell-secrets;
+
       perSystem = {
         pkgs,
         config,
         system,
         ...
       }: {
-        _module.args.pkgs = import nixpkgs {
+        _module.args.pkgs = import nixpkgs-weekly {
           inherit system;
+          overlays = [
+            (_: _: {
+              agenix = agenix.packages.${system}.default;
+            })
+          ];
           config.allowUnfree = true;
         };
+
+        githubActions = import ./actions.nix {inherit self lib;};
 
         devShells.default = import ./shell.nix {
           inherit lib pkgs;
           config = {
-            inherit (config) pre-commit;
+            inherit (config) pre-commit agenix-shell githubActions;
           };
         };
 

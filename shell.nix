@@ -10,6 +10,7 @@ with pkgs;
       alejandra
 
       age
+      agenix
       sops
       ssh-to-age
 
@@ -21,6 +22,9 @@ with pkgs;
 
     shellHook = ''
       ${config.pre-commit.shellHook}
+      source ${config.agenix-shell.installationScript}/bin/install-agenix-shell
+
+      # TODO: Add dynamic generation of devShell GitHub Actions workflow files from ./actions.nix
 
       # If there are no docker containers with talos
       if [ -z "$(docker ps --filter "name=talos-default" --format "{{.Names}}")" ]; then
