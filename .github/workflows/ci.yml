@@ -16,4 +16,4 @@ jobs:
       - name: Format
         run: nix fmt
       - name: Check Flake
-        run: nix flake check --print-build-logs
+        run: nix flake check
