@@ -18,7 +18,7 @@
 
     # --- Kubernetes Development Support ---
     kubeconform = {
-      enable = true;
+      enable = false; # Disabled due to network connectivity issues in Nix sandbox
       entry = "${pkgs.kubeconform}/bin/kubeconform";
       files = "^k8s/.*\\.yaml$";
       args = ["-ignore-missing-schemas" "-skip" "CustomResourceDefinition" "-kubernetes-version" "1.30.0"];
