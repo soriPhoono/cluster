@@ -9,3 +9,5 @@ gha-creds-*.json
 
 docker.bak/
 kubeconfig
+
+testing/*
