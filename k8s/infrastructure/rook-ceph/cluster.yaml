@@ -20,9 +20,10 @@ spec:
     configOverride: |
       [global]
       osd_pool_default_size = 1
+    cephImage:
+      repository: quay.io/ceph/ceph
+      tag: v19.2.0
     cephClusterSpec:
-      cephVersion:
-        image: quay.io/ceph/ceph:v19.2.0
       dataDirHostPath: /var/lib/rook
       mon:
         count: 1 # Single mon for small clusters/dev
