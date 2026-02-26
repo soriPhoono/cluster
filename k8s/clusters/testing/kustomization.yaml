@@ -4,4 +4,3 @@ resources:
   - flux-system
   - ../../infrastructure
   - ../../infrastructure/rook-ceph
-  - ../../apps/testing
