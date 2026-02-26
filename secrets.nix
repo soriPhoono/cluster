@@ -7,7 +7,8 @@ let
     # Per-user secrets: simple mapping of secret name -> list of users
     userSecrets = {
       # example = [ "soriphoono" ];
-      # github_token = ["soriphoono"];
+      github_token = ["soriphoono"];
+      cluster_age_key = ["soriphoono"];
     };
 
     # Team secrets: for shared access across multiple users

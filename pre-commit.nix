@@ -20,9 +20,11 @@
     kubeconform = {
       enable = true;
       entry = "${pkgs.kubeconform}/bin/kubeconform";
-      types = ["yaml"];
-      args = ["-ignore-missing-schemas" "-skip" "CustomResourceDefinition" "k8s"];
-      excludes = ["k8s/core/flux-system/.*"];
+      files = "^k8s/.*\\.yaml$";
+      args = ["-ignore-missing-schemas" "-skip" "CustomResourceDefinition" "-kubernetes-version" "1.30.0"];
+      excludes = [
+        "^k8s/clusters/*/flux-system/.*"
+      ];
     };
 
     # --- GitHub and Git Support ---

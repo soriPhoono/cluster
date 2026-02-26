@@ -1,4 +1,4 @@
-# AI Agent Guidelines for `server` Repository
+# AI Agent Guidelines for `cluster` Repository
 
 Welcome! This document provides essential context, architectural rules, and workflows to help AI agents navigate and contribute to this repository effectively.
 
@@ -7,6 +7,7 @@ Welcome! This document provides essential context, architectural rules, and work
 - **Nix / NixOS**: The environment and toolchain are managed via Nix. `flake.nix` is the primary entry point.
 - **Kubernetes**: We use Kubernetes for orchestrating workloads.
 - **Talos Linux**: An immutable OS for our Kubernetes nodes.
+- **Flux**: We use Flux for GitOps.
 
 ## Key Files & Configuration
 
@@ -24,6 +25,7 @@ When creating or modifying Kubernetes manifests for the cluster, you **MUST** ad
 1. **Healthchecks**: Must explicitly configure `livenessProbe` and `readinessProbe` to ensure pods are ready before receiving traffic.
 1. **Secrets**: Utilize `sops` and `age` to encrypt secrets. Do not commit plaintext secrets.
 1. **Limits**: Define CPU and Memory `requests` and `limits` for predictability.
+1. **Flux**: Utilize `flux` to manage your Kubernetes manifests.
 
 ## Extensible Workflows
 

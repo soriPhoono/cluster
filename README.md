@@ -4,9 +4,16 @@ This repository contains the configuration, definitions, and orchestration files
 
 ## Project Structure
 
-- **`k8s/`**: Contains Kubernetes manifests and definitions for the different workloads running in the cluster.
+- **`k8s/apps`**: Contains Kubernetes manifests and definitions for the different workloads running in the cluster.
+- **`k8s/clusters`**: Contains Kubernetes manifests and definitions for the different clusters this infrastructure manages, with optional segregation of testing code.
+- **`secrets/`**: Contains encrypted secrets for the cluster, managed with agenix.
 - **`lib/`**: Contains custom Nix library functions.
 - **`flake.nix` & `shell.nix`**: Defines the reproducible development environment, packages, and hooks needed to work on this repository.
+- **`actions.nix`**: Defines the GitHub Actions workflow for this repository.
+- **`secrets.nix`**: Defines ownership of files in the `secrets/` directory, used with agenix as a
+  built-in editor for secrets management, and as a source of truth for secrets rotation.
+- **`pre-commit`**: Defines pre-commit hooks for code quality.
+- **`treefmt.nix`**: Defines the treefmt configuration for the repository.
 
 ## Getting Started
 
