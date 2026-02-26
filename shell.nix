@@ -15,25 +15,28 @@ with pkgs;
 
       talosctl
       kubectl
+      kubernetes-helm
       fluxcd
-      OVMF
-      iptables
     ];
 
     shellHook = ''
-      export OVMF_DIR="${pkgs.OVMF.fd}/FV"
       ${config.pre-commit.shellHook}
 
-      # Automation: Ensure test cluster exists at session start
-      if ! docker ps --format "{{.Names}}" | grep -q "talos-default"; then
-        echo "[INFO]: No Talos test cluster detected. Initializing..."
-        ./scripts/setup-test-cluster.sh
+      # If there are no docker containers with talos
+      if [ -z "$(docker ps --filter "name=talos-default" --format "{{.Names}}")" ]; then
+        echo "No talos containers found. Creating a new cluster..."
+        talosctl cluster create docker
+
+        echo "Cluster created successfully, initializing FluxCD inside newly created docker cluster"
+        flux bootstrap github \
+          --token-auth \
+          --owner=soriPhoono \
+          --repository=cluster \
+          --branch=main \
+          --path=k8s/clusters/testing/ \
+          --personal --verbose
       else
-        echo "[INFO]: Talos test cluster already running."
-        # Ensure KUBECONFIG is set if the file exists
-        if [ -f "./kubeconfig" ]; then
-          export KUBECONFIG="$(pwd)/kubeconfig"
-        fi
+        echo "Found existing docker cluster, not overwriting..."
       fi
     '';
   }
