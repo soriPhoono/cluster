@@ -15,3 +15,14 @@ metadata:
 spec:
   interval: 5m
   url: https://charts.bitnami.com/bitnami
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: rook-release
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: https://charts.rook.io/release
+---
+
