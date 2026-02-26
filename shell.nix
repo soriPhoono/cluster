@@ -40,7 +40,7 @@ with pkgs;
           --token-auth \
           --owner=soriPhoono \
           --repository=cluster \
-          --branch=main \
+          --branch=$(git rev-parse --abbrev-ref HEAD) \
           --path=k8s/clusters/testing/ \
           --personal --verbose
 
