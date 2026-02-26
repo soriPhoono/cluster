@@ -4,6 +4,7 @@ metadata:
   name: traefik
   namespace: traefik
 spec:
+  targetNamespace: traefik
   interval: 1h
   chart:
     spec:
