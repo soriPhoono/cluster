@@ -87,17 +87,24 @@
         };
 
         apps = {
-          launch-development-cluster = pkgs.writeShellApplication {
-            name = "launch-development-cluster";
+          launch-development-cluster = "${pkgs.writeShellApplication {
+            name = "launch-development-cluster.sh";
             runtimeInputs = [
               pkgs.docker
               pkgs.talosctl
               pkgs.kubectl
               pkgs.fluxcd
             ];
-            program = ''
-              # If there are no docker containers with talos
-              if [ -z "$(docker ps --filter "name=talos-default" --format "{{.Names}}")" ]; then
+            text = ''
+              # 1. Check if talosconfig exists (optional but recommended)
+              if [[ -z "$TALOSCONFIG" ]]; then
+                export TALOSCONFIG="$HOME/.talos/config"
+              fi
+
+              QEMU_RUNNING=$(pgrep -f "qemu-system-x86_64.*talos")
+
+              # If there are no qemu PIDs with talos
+              if [ -z "$QEMU_RUNNING" ]; then
                 echo "No talos containers found. Creating a new cluster..."
                 sudo -E talosctl cluster create qemu
 
@@ -110,7 +117,7 @@
                   --token-auth \
                   --owner=soriPhoono \
                   --repository=cluster \
-                  --branch=$(git rev-parse --abbrev-ref HEAD) \
+                  --branch="$(git rev-parse --abbrev-ref HEAD)" \
                   --path=k8s/clusters/testing/ \
                   --personal --verbose
 
@@ -126,8 +133,15 @@
               else
                 echo "Found existing docker cluster, not overwriting..."
               fi
+
+              if talosctl health --wait-timeout 5s >/dev/null 2>&1; then
+                echo "Result: Talos QEMU Cluster is UP and AVAILABLE."
+              else
+                echo "Result: QEMU is running, but the Talos API is UNREACHABLE."
+                exit 1
+              fi
             '';
-          };
+          }}/bin/launch-development-cluster.sh";
         };
 
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
