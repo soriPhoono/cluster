@@ -87,7 +87,7 @@
         };
 
         apps = {
-          launch-development-cluster = "${pkgs.writeShellApplication {
+          launch-development-cluster = { type = "app"; program = "${pkgs.writeShellApplication {
             name = "launch-development-cluster.sh";
             runtimeInputs = [
               pkgs.docker
@@ -101,7 +101,7 @@
                 export TALOSCONFIG="$HOME/.talos/config"
               fi
 
-              QEMU_RUNNING=$(pgrep -f "qemu-system-x86_64.*talos")
+              QEMU_RUNNING=$(pgrep -f "qemu-system-x86_64.*talos" || true)
 
               # If there are no qemu PIDs with talos
               if [ -z "$QEMU_RUNNING" ]; then
@@ -141,7 +141,7 @@
                 exit 1
               fi
             '';
-          }}/bin/launch-development-cluster.sh";
+          }}/bin/launch-development-cluster.sh"; };
         };
 
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
