@@ -4,5 +4,6 @@ resources:
   - metallb
   - cert-manager
   - cloudflare-tunnel
+  - monitoring
   - traefik
   - external-dns
