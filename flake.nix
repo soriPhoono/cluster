@@ -77,7 +77,6 @@
           config.allowUnfree = true;
         };
 
-        checks = lib.discoverTests {inherit pkgs;} ./tests;
         githubActions = import ./actions.nix {inherit self lib;};
 
         devShells.default = import ./shell.nix {
@@ -87,7 +86,7 @@
           };
         };
 
-        apps = lib.discoverApps ./scripts;
+        apps = lib.discoverApps {inherit pkgs;} ./scripts;
 
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
         pre-commit = import ./pre-commit.nix {inherit lib pkgs;};

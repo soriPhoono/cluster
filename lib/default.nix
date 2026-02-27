@@ -1,4 +1,4 @@
-{inputs, ...}: self: _super: {
+_: self: _super: {
   # Discovery for Tests: specifically just find .nix files in tests/
   discoverTests = args: dir:
     self.mapAttrs' (name: _: {
@@ -11,13 +11,10 @@
       ) (builtins.readDir dir)
     );
   # Dynamic Discovery: Reads a directory and returns an attrset of { name = path; }
-  discoverApps = dir:
+  discoverApps = args: dir:
     self.mapAttrs' (name: _: {
       name = self.removeSuffix ".nix" name;
-      value = import (dir + "/${name}") {
-        inherit self;
-        pkgs = inputs.nixpkgs-weekly.legacyPackages.x86_64-linux;
-      };
+      value = import (dir + "/${name}") (args // {lib = self;});
     }) (
       self.filterAttrs (
         name: type:
