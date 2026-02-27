@@ -4,6 +4,11 @@ keys:
   - &cluster_adams age10mnx9lzy5ls2zl09qpsr4zryf9lys2qnv3a55832m436fzc0933q3sfn2t
 
 creation_rules:
+  - path_regex: talos/.*
+    key_groups:
+      - age:
+          - *admin_soriphoono
+
   - path_regex: .*.yaml
     key_groups:
       - age:
