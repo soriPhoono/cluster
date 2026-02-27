@@ -3,6 +3,12 @@
   program = "${pkgs.writeShellApplication {
     name = "launch-development-cluster.sh";
     runtimeInputs = with pkgs; [
+      qemu
+      OVMF
+      iptables
+      bridge-utils
+      dnsmasq
+
       talosctl
       kubectl
       fluxcd
@@ -13,9 +19,18 @@
       # If there are no qemu PIDs with talos
       if [ -z "$QEMU_RUNNING" ]; then
         echo "No talos containers found. Creating a new cluster..."
+
+        # Symlink OVMF to a path talosctl expects if it doesn't exist
+        if [ ! -f /usr/share/qemu/OVMF_CODE.fd ]; then
+          echo "Symlinking OVMF for talosctl..."
+          sudo mkdir -p /usr/share/qemu
+          sudo ln -sf "${pkgs.OVMF.fd}/FV/OVMF_CODE.fd" /usr/share/qemu/OVMF_CODE.fd
+          sudo ln -sf "${pkgs.OVMF.fd}/FV/OVMF_VARS.fd" /usr/share/qemu/OVMF_VARS.fd
+        fi
+
         sudo -E talosctl cluster create qemu
 
-        if [ -z "$GITHUB_TOKEN" ]; then
+        if [ -z "''${GITHUB_TOKEN:-}" ]; then
           echo "WARNING: GITHUB_TOKEN not found. flux bootstrap may fail if token-auth is required."
         fi
 
@@ -28,9 +43,9 @@
           --path=k8s/clusters/testing/ \
           --personal --verbose
 
-        if [ -n "$CLUSTER_AGE_KEY" ]; then
+        if [ -n "''${CLUSTER_AGE_KEY:-}" ]; then
           echo "Found CLUSTER_AGE_KEY, injecting sops-age secret..."
-          echo "$CLUSTER_AGE_KEY" | kubectl create secret generic sops-age \
+          echo "''${CLUSTER_AGE_KEY:-}" | kubectl create secret generic sops-age \
             --namespace=flux-system \
             --from-file=age.agekey=/dev/stdin \
             --dry-run=client -o yaml | kubectl apply -f -

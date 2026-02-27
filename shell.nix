@@ -18,6 +18,12 @@ with pkgs;
       kubectl
       kubernetes-helm
       fluxcd
+
+      qemu
+      OVMF
+      iptables
+      bridge-utils
+      dnsmasq
     ];
 
     TALOS_CONFIG = "./talos/talosconfig";

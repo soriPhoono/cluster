@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - email-secret.yaml
+  - cert-manager-issuer.yaml
+  - metallb-config.yaml
+  - external-dns-secret.yaml
+  - cloudflare-tunnel-secret.yaml
+  - cloudflare-tunnel-config.yaml
