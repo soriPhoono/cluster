@@ -6,7 +6,7 @@ ______________________________________________________________________
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
 **Describe the solution you'd like**
-A clear and concise description of what you want to happen (e.g., adding a new stack to `stacks.yaml`).
+A clear and concise description of what you want to happen (e.g., adding a new workload under `k8s/apps/` or a new infrastructure component under `k8s/infrastructure/`).
 
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
