@@ -28,5 +28,9 @@ spec:
     ingressRoute:
       dashboard:
         enabled: true
+        entryPoints: ["websecure"]
+        matchRule: Host(`traefik.soriphoono.com`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+        tls:
+          secretName: traefik-dashboard-tls
     service:
       type: LoadBalancer # Assuming MetalLB or similar provides IP
