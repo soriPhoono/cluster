@@ -20,12 +20,8 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./k8s/clusters/adams
+  path: ./k8s/clusters/testing
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
