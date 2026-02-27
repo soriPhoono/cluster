@@ -11,19 +11,21 @@ Please delete options that are not relevant.
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Infrastructure change (updating Nix, or Swarm clusters)
+- [ ] Infrastructure change (updating Nix, Talos, or Kubernetes manifests)
 - [ ] Documentation update
 
 ## How Has This Been Tested?
 
-Please describe the tests that you ran to verify your changes.
+Please describe the steps taken to verify your changes. Where possible, test against the `testing` cluster before targeting `adams`.
 
-- [ ] Verified deployment locally or on staging
+- [ ] Ran `kubeconform` against changed manifests
+- [ ] Verified Flux reconciliation (`flux reconcile kustomization <name> --with-source`)
+- [ ] Verified deployment on cluster (node / namespace):
 
-## Checklist:
+## Checklist
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have updated the documentation accordingly (e.g. `README.md`, `agents.md`, `stacks.yaml`)
-- [ ] I have verified image tags and deployment configurations against the Swarm strict requirements
+- [ ] My changes follow the style guidelines of this project
+- [ ] I have performed a self-review of my own changes
+- [ ] I have commented any manifests with non-obvious configuration choices
+- [ ] I have updated documentation accordingly (e.g. `README.md`, `AGENTS.md`)
+- [ ] All manifests satisfy the Kubernetes strict requirements (image pinning, resource limits, health checks, encrypted secrets)

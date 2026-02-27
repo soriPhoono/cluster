@@ -6,6 +6,8 @@ metadata:
 spec:
   dependsOn:
     - name: flux-system
+    - name: infra-metallb
+    - name: infra-cert-manager
   interval: 1h
   path: ./k8s/clusters/testing/configs
   prune: true
