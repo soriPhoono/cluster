@@ -1,0 +1,184 @@
+# All infrastructure components as Flux Kustomization CRs with explicit dependsOn chains.
+# Applied ordering:
+#   infra-sources
+#     ├─ infra-metallb
+#     │    └─ infra-traefik (also needs cert-manager)
+#     ├─ infra-cert-manager
+#     │    └─ infra-traefik
+#     │         ├─ infra-external-dns    (also needs adams-configs)
+#     │         └─ infra-cloudflare-tunnel (also needs adams-configs)
+#     └─ infra-rook-ceph-operator
+#          └─ infra-rook-ceph-cluster
+#               └─ infra-monitoring  (also needs traefik + adams-configs)
+
+# ── Sources (no deps, must come first) ────────────────────────────────────────
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-sources
+  namespace: flux-system
+spec:
+  interval: 1h
+  path: ./k8s/infrastructure/sources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# ── MetalLB ───────────────────────────────────────────────────────────────────
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-metallb
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-sources
+  interval: 1h
+  path: ./k8s/infrastructure/metallb
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: metallb
+      namespace: metallb-system
+---
+# ── Cert-Manager ──────────────────────────────────────────────────────────────
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-cert-manager
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-sources
+  interval: 1h
+  path: ./k8s/infrastructure/cert-manager
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: cert-manager
+      namespace: cert-manager
+---
+# ── Traefik (needs MetalLB for LoadBalancer IP + cert-manager for TLS) ────────
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-traefik
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-metallb
+    - name: infra-cert-manager
+  interval: 1h
+  path: ./k8s/infrastructure/traefik
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: traefik
+      namespace: traefik
+---
+# ── External-DNS (needs traefik ingress + cloudflare-api-token secret) ────────
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-external-dns
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-traefik
+    - name: adams-configs
+  interval: 1h
+  path: ./k8s/infrastructure/external-dns
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# ── Cloudflare Tunnel (needs traefik + tunnel-token secret) ───────────────────
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-cloudflare-tunnel
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-traefik
+    - name: adams-configs
+  interval: 1h
+  path: ./k8s/infrastructure/cloudflare-tunnel
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# ── Rook-Ceph Operator ────────────────────────────────────────────────────────
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-rook-ceph-operator
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-sources
+  interval: 1h
+  path: ./k8s/infrastructure/rook-ceph/operator
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: rook-ceph
+      namespace: rook-ceph
+---
+# ── Rook-Ceph Cluster (waits for operator to be Ready) ───────────────────────
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-rook-ceph-cluster
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-rook-ceph-operator
+  interval: 1h
+  path: ./k8s/infrastructure/rook-ceph/cluster
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: rook-ceph-cluster
+      namespace: rook-ceph
+---
+# ── Monitoring (needs ceph-block StorageClass + traefik ingress + ClusterIssuer)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-monitoring
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-rook-ceph-cluster
+    - name: infra-traefik
+    - name: adams-configs
+  interval: 1h
+  path: ./k8s/infrastructure/monitoring
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
