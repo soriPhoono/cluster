@@ -17,9 +17,7 @@ spec:
     grafana:
       enabled: true
       persistence:
-        enabled: true
-        storageClassName: ceph-block
-        size: 10Gi
+        enabled: false
       ingress:
         enabled: true
         ingressClassName: traefik
@@ -34,8 +32,6 @@ spec:
     prometheus:
       prometheusSpec:
         persistence:
-          enabled: true
-          storageClass: ceph-block
-          size: 20Gi
+          enabled: false
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false

@@ -7,9 +7,7 @@
 #     │    └─ infra-traefik
 #     │         ├─ infra-external-dns    (also needs adams-configs)
 #     │         └─ infra-cloudflare-tunnel (also needs adams-configs)
-#     └─ infra-rook-ceph-operator
-#          └─ infra-rook-ceph-cluster
-#               └─ infra-monitoring  (also needs traefik + adams-configs)
+#     └─ infra-monitoring  (needs traefik + adams-configs)
 
 # ── Sources (no deps, must come first) ────────────────────────────────────────
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -123,49 +121,7 @@ spec:
     kind: GitRepository
     name: flux-system
 ---
-# ── Rook-Ceph Operator ────────────────────────────────────────────────────────
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: infra-rook-ceph-operator
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: infra-sources
-  interval: 1h
-  path: ./k8s/infrastructure/rook-ceph/operator
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: rook-ceph
-      namespace: rook-ceph
----
-# ── Rook-Ceph Cluster (waits for operator to be Ready) ───────────────────────
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: infra-rook-ceph-cluster
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: infra-rook-ceph-operator
-  interval: 1h
-  path: ./k8s/infrastructure/rook-ceph/cluster
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: rook-ceph-cluster
-      namespace: rook-ceph
----
-# ── Monitoring (needs ceph-block StorageClass + traefik ingress + ClusterIssuer)
+# ── Monitoring (needs traefik ingress + ClusterIssuer)
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -173,7 +129,6 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infra-rook-ceph-cluster
     - name: infra-traefik
     - name: adams-configs
   interval: 1h
