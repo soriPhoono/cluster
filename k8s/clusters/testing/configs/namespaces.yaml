@@ -1,0 +1,17 @@
+---
+# Pre-create namespaces so cluster config secrets can be applied
+# before infra kustomizations (which depend on this kustomization) run.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-dns
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudflare-tunnel
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
