@@ -39,7 +39,8 @@ spec:
     backend:
       replicas: 0
     persistence:
-      enabled: false
+      enabled: true
+      size: 10Gi
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
