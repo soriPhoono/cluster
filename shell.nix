@@ -26,7 +26,7 @@ with pkgs;
       dnsmasq
     ];
 
-    CONTROL_PLANE_IP = "100.122.30.64";
+    CONTROL_PLANE_IP = "100.122.30.64:6443";
 
     shellHook = ''
       ${config.pre-commit.shellHook}
