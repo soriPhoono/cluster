@@ -21,15 +21,12 @@ spec:
         size: 10Gi
       ingress:
         enabled: true
-        ingressClassName: traefik
+        ingressClassName: tailscale
         hosts:
-          - grafana.soriphoono.com
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-prod
+          - grafana
         tls:
-          - secretName: grafana-tls
-            hosts:
-              - grafana.soriphoono.com
+          - hosts:
+              - grafana
     prometheus:
       prometheusSpec:
         persistence:
