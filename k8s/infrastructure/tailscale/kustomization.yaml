@@ -3,4 +3,5 @@ kind: Kustomization
 namespace: tailscale
 resources:
   - namespace.yaml
+  - secret.yaml
   - helmrelease.yaml
