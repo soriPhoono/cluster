@@ -26,8 +26,7 @@ with pkgs;
       dnsmasq
     ];
 
-    TALOS_CONFIG = "./talos/talosconfig";
-    CONTROL_PLANE_IP = "192.168.1.48";
+    CONTROL_PLANE_IP = "100.122.30.64";
 
     shellHook = ''
       ${config.pre-commit.shellHook}
