@@ -5,3 +5,4 @@ resources:
   - release.yaml
   - certificate.yaml
   - dashboard-ingress.yaml
+  - dashboard-service.yaml
