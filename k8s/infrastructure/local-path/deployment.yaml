@@ -89,6 +89,13 @@ spec:
         - name: local-path-provisioner
           image: rancher/local-path-provisioner:v0.0.30
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
           command:
             - local-path-provisioner
             - --debug
