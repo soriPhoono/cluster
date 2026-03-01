@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - release.yaml
   - certificate.yaml
+  - dashboard-ingress.yaml

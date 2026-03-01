@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik-dashboard
+  namespace: traefik
+  annotations:
+    tailscale.com/hostname: traefik
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: traefik.xerus-augmented.ts.net
+      http:
+        paths:
+          - path: /dashboard
+            pathType: Prefix
+            backend:
+              service:
+                name: api@internal
+                port:
+                  name: traefik
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api@internal
+                port:
+                  name: traefik
