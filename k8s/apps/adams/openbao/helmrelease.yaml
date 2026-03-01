@@ -17,5 +17,4 @@ spec:
   values:
     server:
       service:
-        annotations:
-          tailscale.com/expose: "true"
+        enabled: true
