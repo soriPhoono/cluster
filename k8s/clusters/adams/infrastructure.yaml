@@ -62,6 +62,21 @@ spec:
       name: metallb
       namespace: metallb-system
 ---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-metallb-config
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-metallb
+  interval: 1h
+  path: ./k8s/infrastructure/metallb-config
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
 # ── Cert-Manager ──────────────────────────────────────────────────────────────
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -91,7 +106,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infra-metallb
+    - name: infra-metallb-config
     - name: infra-cert-manager
   interval: 1h
   path: ./k8s/infrastructure/traefik
