@@ -15,8 +15,5 @@ spec:
         namespace: flux-system
       interval: 1m
   values:
-    oauth:
-      clientId: "PLACEHOLDER_CLIENT_ID"
-      clientSecret: "PLACEHOLDER_CLIENT_SECRET"
     operatorConfig:
       logging: info

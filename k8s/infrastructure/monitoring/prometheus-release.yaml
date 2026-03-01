@@ -23,10 +23,10 @@ spec:
         enabled: true
         ingressClassName: tailscale
         hosts:
-          - grafana
+          - monitoring
         tls:
           - hosts:
-              - grafana
+              - monitoring
     prometheus:
       prometheusSpec:
         persistence:
