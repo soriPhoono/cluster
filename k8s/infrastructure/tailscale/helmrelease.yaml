@@ -15,7 +15,10 @@ spec:
         namespace: flux-system
       interval: 1m
   values:
+    defaultTags: "tag:adams"
     operatorConfig:
+      defaultTags:
+        - "tag:adams"
       logging: info
       oauth:
         secretRef:
