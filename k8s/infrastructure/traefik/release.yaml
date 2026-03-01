@@ -28,12 +28,10 @@ spec:
     ingressRoute:
       dashboard:
         enabled: false
+    ports:
+      traefik:
+        expose: true
+        port: 8080
+        exposedPort: 8080
     service:
       type: LoadBalancer # Assuming MetalLB or similar provides IP
-      additionalPorts:
-        traefik:
-          port: 8080
-          targetPort: traefik
-          expose: true
-          exposedPort: 8080
-          protocol: TCP
