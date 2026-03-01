@@ -8,7 +8,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: traefik
   endpoints:
-    - port: metrics
+    - portd: metrics
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
