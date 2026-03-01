@@ -7,7 +7,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: openbao
+      version: "1.0.0"
       version: ">=0.1.0"
       sourceRef:
         kind: HelmRepository
