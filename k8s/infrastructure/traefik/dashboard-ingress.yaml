@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: tailscale
   rules:
-    - host: traefik.xerus-augmented.ts.net
+    - host: traefik.adams-admin.net
       http:
         paths:
           - path: /dashboard
