@@ -13,7 +13,7 @@ spec:
         kind: HelmRepository
         name: openbao
         namespace: flux-system
-    interval: 1m
+      interval: 1m
   values:
     server:
       service:
