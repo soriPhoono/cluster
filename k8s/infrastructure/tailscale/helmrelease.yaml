@@ -16,6 +16,8 @@ spec:
       interval: 1m
   values:
     defaultTags: "tag:adams"
+    proxyConfig:
+      defaultTags: "tag:adams"
     operatorConfig:
       defaultTags:
         - "tag:adams"
