@@ -15,13 +15,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: api@internal
+                name: traefik-traefik
                 port:
                   name: traefik
           - path: /api
             pathType: Prefix
             backend:
               service:
-                name: api@internal
+                name: traefik-traefik
                 port:
                   name: traefik

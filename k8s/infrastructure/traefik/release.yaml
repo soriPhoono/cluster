@@ -30,3 +30,10 @@ spec:
         enabled: false
     service:
       type: LoadBalancer # Assuming MetalLB or similar provides IP
+      additionalPorts:
+        traefik:
+          port: 8080
+          targetPort: traefik
+          expose: true
+          exposedPort: 8080
+          protocol: TCP
