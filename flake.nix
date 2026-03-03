@@ -86,7 +86,7 @@
           };
         };
 
-        apps = lib.discoverApps {inherit pkgs;} ./scripts;
+        # apps = lib.discoverApps {inherit pkgs;} ./scripts;
 
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
         pre-commit = import ./pre-commit.nix {inherit lib pkgs;};
