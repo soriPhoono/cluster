@@ -52,6 +52,7 @@ All services are defined in the \[**`stacks/`**\](file:///home/soriphoono/Docume
 ______________________________________________________________________
 
 ## 🎮 Gaming Tier (Pterodactyl)
+
 All services are defined in the \[**`stacks/`**\](stacks) directory.
 We use the **Pterodactyl Panel** on the Proxmox tier to manage game servers across the Gaming Tier (Mini PCs).
 
