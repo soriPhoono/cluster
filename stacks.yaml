@@ -1,7 +1,3 @@
-socket-proxy:
-  repo: cluster
-  branch: main
-  compose_file: ./stacks/socket-proxy/docker-compose.yaml
 reverse-proxy:
   repo: cluster
   branch: main
