@@ -4,13 +4,13 @@ services:
     image: traefik:v3.1
     command:
       # Entrypoints
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http.tls=true"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.websecure.http.tls=true"
       # Entrypoints Redirection (HTTP to HTTPS)
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
+      - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entryPoints.web.http.redirections.entrypoint.permanent=true"
       # Docker Swarm Provider
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.watch=true"
@@ -19,12 +19,12 @@ services:
       # Certificate Resolvers
       # 1. HTTP Challenge (Public)
       - "--certificatesresolvers.http.acme.httpchallenge=true"
-      - "--certificatesresolvers.http.acme.httpchallenge.entryPoint=web"
+      - "--certificatesresolvers.http.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.http.acme.email=soriphoono@gmail.com"
       - "--certificatesresolvers.http.acme.storage=/letsecrypt/acme.json"
       # 2. DNS Challenge (Cloudflare - for local/private domains)
       - "--certificatesresolvers.dnsresolver.acme.dnschallenge=true"
-      - "--certificatesresolvers.dnsresolver.acme.dnschallenge.entryPoint=web"
+      - "--certificatesresolvers.dnsresolver.acme.dnschallenge.entrypoint=web"
       - "--certificatesresolvers.dnsresolver.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.dnsresolver.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
       - "--certificatesresolvers.dnsresolver.acme.email=soriphoono@gmail.com"
@@ -48,6 +48,7 @@ services:
     networks:
       - traefik-public
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - traefik-certs:/letsecrypt
     environment:
       # DNS Challenge Credentials (for dnsresolver)
