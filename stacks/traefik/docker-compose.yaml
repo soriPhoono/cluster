@@ -61,7 +61,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.traefik.rule=Host(`proxy.admin.ts.localhost`)"
-        - "traefik.http.routers.traefik.entrypoints=web"
+        - "traefik.http.routers.traefik.entrypoints=websecure"
         - "traefik.http.routers.traefik.service=api@internal"
         - "traefik.http.routers.traefik.tls.certresolver=dnsresolver"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
