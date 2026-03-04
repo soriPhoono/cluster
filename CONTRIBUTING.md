@@ -58,7 +58,7 @@ We use the **Pterodactyl Panel** on the Proxmox tier to manage game servers acro
 - **Adding Game Eggs**: To add a new game type or modify an existing one, update the configuration in the corresponding Pterodactyl service stack or management script.
 - **Runner Management**: To add or update a Pterodactyl "Wing" (runner), configure the node labels on the Swarm manager to ensure the runner is scheduled correctly on the Gaming Tier mini PCs.
 
-______________________________________________________________________
+1. Register the Stack: Add the new stack definition to \[**`stacks.yaml`**\](stacks.yaml) to enable tracking by `swarm-cd`.
 
 ## 🔄 Deployment via `swarm-cd`
 
