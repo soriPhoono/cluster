@@ -14,7 +14,7 @@ services:
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.watch=true"
       - "--providers.swarm.exposedByDefault=false"
-      - "--providers.swarm.networks=reverse-proxy_traefik-public"
+      - "--providers.swarm.network=reverse-proxy_traefik-public"
       # Certificate Resolvers
       # 1. HTTP Challenge (Public)
       - "--certificatesresolvers.http.acme.httpchallenge=true"
