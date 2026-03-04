@@ -89,5 +89,5 @@ The shell provides:
 
 ______________________________________________________________________
 
-For detailed contribution guidelines, see \[**`CONTRIBUTING.md`**\](file:///home/soriphoono/Documents/Projects/cluster/CONTRIBUTING.md).
+For detailed contribution guidelines, see \[**`CONTRIBUTING.md`**\](CONTRIBUTING.md).
 For AI Agent specific context, see \[**`AGENTS.md`**\](AGENTS.md).
