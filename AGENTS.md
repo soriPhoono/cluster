@@ -45,5 +45,5 @@ The following tools are pre-configured and should be utilized by the agent:
 - **`sops`**: Used for editing and rotating service secrets.
 
 ## 📈 Extensible Workflows
-
+Before performing routine tasks (like onboarding a new Pi 5 node or deploying a game server), check the \[**`.agents/workflows/`**\](.agents/workflows/) directory for step-by-step procedures.
 Before performing routine tasks (like onboarding a new Pi 5 node or deploying a game server), check the \[**`.agents/workflows/`**\](file:///home/soriphoono/Documents/Projects/cluster/.agents/workflows/) directory for step-by-step procedures.
