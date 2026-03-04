@@ -1,93 +1,82 @@
-# Contributing to the Server Home Lab Cluster
+# Contributing to the Data Fortress
 
-Thank you for contributing to the Home Lab cluster! This environment is strongly declarative and version-controlled. By following these guidelines, you help keep the infrastructure reliable and reproducible.
+Thank you for contributing to the **Data Fortress**! This project is a highly declarative, multi-tier environment optimized for efficiency and performance. By following these guidelines, you help maintain the stability and reproducibility of the cluster.
 
-## Table of Contents
+______________________________________________________________________
 
-1. [Development Environment](#development-environment)
-1. [Repository Layout](#repository-layout)
-1. [Adding or Modifying Workloads](#adding-or-modifying-workloads)
-   - [Strict Kubernetes Requirements](#strict-kubernetes-requirements)
-1. [Applying Changes via Flux](#applying-changes-via-flux)
-1. [AI Agent Guidelines](#ai-agent-guidelines)
-1. [Pull Requests & Code Style](#pull-requests--code-style)
+## 🏗️ Development Environment
 
-## Development Environment
+This project relies on **Nix** to ensure a consistent, reproducible toolchain across all contributor machines.
 
-This project relies heavily on **Nix**. We enforce the use of the provided environment to ensure all configurations and `pre-commit` hooks execute identically across machines.
+1. **Enter the Environment**: Use `nix develop` or `direnv allow` to load the shell.
+1. **Required Tools**: The shell provides `docker` (Swarm client), `nh` (Nix helper), `sops`, and `agenix`.
+1. **Pre-commit Hooks**: We use `treefmt` and `git-hooks-nix` to enforce formatting and basic checks before code is committed.
 
-- **Setup**: Ensure `nix` with flakes enabled is installed. If you use `direnv`, allow the environment with `direnv allow`.
-- **Manual Entry**: If not using `direnv`, launch the development shell:
-  ```bash
-  nix develop
-  ```
-- **Pre-commit Hooks**: The Nix shell automatically configures git hooks to run formatters (`treefmt`, `alejandra`).
-- **Cluster Tools**: The shell provides `kubectl`, `flux`, `talosctl`, `kubeconform`, `sops`, and `agenix`.
+______________________________________________________________________
 
-## Repository Layout
+## 🔐 Secrets Workflow
 
-| Path | Purpose |
-|------|---------|
-| `k8s/clusters/adams/` | Production cluster Flux entrypoint |
-| `k8s/clusters/testing/` | Testing cluster for validating changes |
-| `k8s/infrastructure/` | Platform-level components (cert-manager, metallb, traefik, rook-ceph, monitoring, etc.) |
-| `k8s/apps/` | Application workloads |
-| `talos/` | Talos Linux machine configs managed via `talosctl` |
-| `secrets/` | `sops`-encrypted secret files |
+We maintain a strict separation between development and production runtime secrets.
 
-## Adding or Modifying Workloads
+### 1. Developer Secrets (`agenix-shell`)
 
-All deployed applications and their configurations track back to declarative Kubernetes manifests in `k8s/`.
+Used for tool authentication and environment variables within the Nix shell.
 
-1. **New infrastructure components** (ingress controllers, storage, monitoring): add under `k8s/infrastructure/<component>/` and reference from the appropriate cluster's `infrastructure.yaml`.
-1. **New application workloads**: add under `k8s/apps/<app-name>/` and reference from the cluster's Flux kustomization.
-1. **All manifests** must be declared as `Kustomization` resources (or `HelmRelease`) and reconciled through Flux — do not apply resources manually with `kubectl`.
+- **To add/update**:
+  - Edit the appropriate `.age` secret file in `secrets/`.
+  - Update `secrets.nix` with any new ownership or rotation rules.
+  - Run `agenix -e <secret-file>.age` to edit the secret.
 
-### Strict Kubernetes Requirements
+### 2. Service Secrets (Docker Swarm / SOPS)
 
-We strictly validate Kubernetes manifests using `kubeconform`. If you do not follow these rules, your service will either fail to deploy or be rejected in review:
+Used by containerized services at runtime.
 
-- **Image pinning**: Never use the `latest` tag. Always pin to a specific, reproducible version or digest.
-- **Declarative Configuration**: Avoid manual `kubectl apply` commands. All resources (Deployments, Services, ConfigMaps, etc.) must be declared in YAML.
-- **Healthchecks**: Configure `livenessProbe` and `readinessProbe` to ensure containers are healthy before receiving traffic.
-- **Secrets**: Never commit plain-text secrets. Use `sops` with `age` encryption for `Secret` resources.
-- **Resource Limits**: Define both `requests` and `limits` for all containers to ensure stable scheduling.
+- **To add/update**:
+  - Use `sops` to encrypt and manage secrets in the `stacks/` directory.
+  - Reference these in your `docker-compose.yaml` under the `secrets:` key.
+  - **Best Practice**: Secret names should be versioned (e.g., `db_password_v1`) to allow for smooth rotation without service downtime.
 
-## Applying Changes via Flux
+______________________________________________________________________
 
-This cluster uses **Flux** for GitOps. Changes merged to the tracked branch are automatically reconciled. To manually trigger reconciliation during development:
+## 🚀 Adding or Modifying Stacks
 
-```bash
-# Reconcile a specific kustomization and its source
-flux reconcile kustomization <name> --with-source
+All services are defined in the \[**`stacks/`**\](file:///home/soriphoono/Documents/Projects/cluster/stacks) directory.
 
-# Watch all Flux resources
-flux get all -A
+1. **Define the Stack**: Create or modify a `docker-compose.yaml` within a subdirectory of `stacks/`.
+1. **Compose Best Practices**:
+   - **Image Pinning**: Avoid `latest` tags. Pin to a specific version or hash.
+   - **Resource Management**: Always define `reservations` and `limits` for CPU/Memory.
+   - **Networks**: Assign services to relevant overlay networks (e.g., `traefik-public` for ingress).
+1. **Register the Stack**: Add the new stack definition to \[**`stacks.yaml`**\](file:///home/soriphoono/Documents/Projects/cluster/stacks.yaml) to enable tracking by `swarm-cd`.
 
-# Force reconcile the infrastructure kustomization
-flux reconcile kustomization infrastructure --with-source
-```
+______________________________________________________________________
 
-Wherever possible, validate changes against the **`testing`** cluster before targeting **`adams`** (production).
+## 🎮 Gaming Tier (Pterodactyl)
 
-## AI Agent Guidelines
+We use the **Pterodactyl Panel** on the Proxmox tier to manage game servers across the Gaming Tier (Mini PCs).
 
-If you are an AI autonomous agent (like Antigravity or Gemini), please consult `AGENTS.md` for architectural context and check `.agents/workflows/` for step-by-step procedures. The development shell automatically mounts necessary MCP servers to your runtime context if you are running inside this workspace (Antigravity only).
+- **Adding Game Eggs**: To add a new game type or modify an existing one, update the configuration in the corresponding Pterodactyl service stack or management script.
+- **Runner Management**: To add or update a Pterodactyl "Wing" (runner), configure the node labels on the Swarm manager to ensure the runner is scheduled correctly on the Gaming Tier mini PCs.
 
-## Pull Requests & Code Style
+______________________________________________________________________
 
-- **Formatting**: Pre-commit hooks format Nix and YAML files. Ensure these pass locally before opening a PR.
+## 🔄 Deployment via `swarm-cd`
 
-- **Commit Messages**: This project follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. Use the following types:
+The cluster uses a custom `swarm-cd` controller for GitOps reconciliation.
 
-  - `feat`: A new feature or workload addition.
-  - `fix`: A bug fix or configuration correction.
-  - `docs`: Documentation-only changes.
-  - `style`: Formatting changes that do not affect behavior.
-  - `refactor`: A change that neither fixes a bug nor adds a feature.
-  - `chore`: Changes to the build process or auxiliary tools.
-  - `infra`: Changes to cluster infrastructure components.
+- Improvements to the CD logic should be made in `docker-compose.yaml` at the root.
+- To trigger a manual reconciliation, you can use the `swarm-cd` service directly or trigger a build in the CI pipeline (`actions.nix`).
 
-  **Example**: `feat(infra): add traefik ingress controller`
+______________________________________________________________________
 
-- **Testing**: State how you verified your changes — e.g., `kubeconform` output, Flux reconciliation on the `testing` cluster, or `talosctl` node status.
+## 📝 Commit Messages & PRs
+
+We follow the [**Conventional Commits**](https://www.conventionalcommits.org/) specification:
+
+- `feat`: A new stack or hardware tier integration.
+- `fix`: A configuration correction.
+- `infra`: Changes to the core Swarm manager or Proxmox nodes.
+- `docs`: Documentation updates.
+- `game`: Specific updates to Pterodactyl or game server configurations.
+
+**Example**: `feat(game): add minecraft runner to gaming tier`
