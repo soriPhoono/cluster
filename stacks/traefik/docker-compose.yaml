@@ -51,7 +51,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       # DNS Challenge Credentials (for dnsresolver)
-      - CLOUDFLARE_EMAIL=soriphoono@gmail.com
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_token
     deploy:
       mode: replicated
