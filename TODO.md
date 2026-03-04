@@ -37,14 +37,14 @@ This TODO outlines the steps necessary to establish a production-quality Swarm c
 
 ## 5. Ingress & Core Services Deployment
 
-- [ ] **Traefik Deployment**: Deploy the `stacks/traefik/docker-compose.yaml` stack.
+- [ ] **Traefik Deployment**: Deploy the `stacks/traefik/docker-compose.yml` stack.
   - Verify Cloudflare DNS challenge credentials are working.
   - Ensure Traefik can fetch certificates for the configured `DOMAIN_NAME`.
 - [ ] **Verify Ingress**: Test the Traefik dashboard using the securely routed `proxy.admin.ts...` hostname.
 
 ## 6. Application Migration (K8s to Swarm)
 
-- [ ] **Translate Workloads**: Convert existing Kubernetes manifests (`k8s/apps/`) into Docker Compose stack files (`stacks/<app-name>/docker-compose.yaml`).
+- [ ] **Translate Workloads**: Convert existing Kubernetes manifests (`k8s/apps/`) into Docker Compose stack files (`stacks/<app-name>/docker-compose.yml`).
 - [ ] **Translate Ingress Rules**: Convert K8s Ingress objects to Traefik Swarm labels (e.g., `traefik.http.routers.myapp.rule=Host('myapp.example.com')`).
 - [ ] **Database & Stateful Workloads**: Migrate core databases (Postgres, Redis/Dragonfly). Ensure they are pinned to specific nodes if relying on local storage, or use the shared storage layer carefully to avoid corruption.
 - [ ] **GitLab / Gitea**: Deploy the version control system as a Swarm stack to complete the "Black Box" bootstrap goal.

@@ -48,18 +48,18 @@ graph TD
 This cluster utilizes a **GitOps** workflow for seamless deployments:
 
 - **`swarm-cd`**: Automatically reconciles stack definitions from this repository to the Swarm cluster.
-- **`stacks.yaml`**: The source of truth for all deployed services.
+- **`stacks.yml`**: The source of truth for all deployed services.
 - **Nix Flake**: The entire development environment, CI/CD pipelines (`actions.nix`), and secret management are defined via a unified Nix flake.
 
 ## 📂 Repository Structure
 
 | Path | Purpose |
-|------|---------|
+| ------------ | --------------------------------------------- |
 | `stacks/` | Declarative Docker Compose stack definitions. |
 | `scripts/` | Maintenance, backup, and automation scripts. |
 | `secrets/` | Encrypted secrets managed via SOPS and Age. |
 | `lib/` | Custom Nix library functions for the flake. |
-| `stacks.yaml` | Service registration for `swarm-cd`. |
+| `stacks.yml` | Service registration for `swarm-cd`. |
 | `flake.nix` | Reproducible environment and toolchain. |
 
 ## 🔐 Secret Management

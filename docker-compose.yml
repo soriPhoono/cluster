@@ -6,19 +6,19 @@ services:
         target: /secrets/age.key
     configs:
       - source: stacks
-        target: /app/stacks.yaml
+        target: /app/stacks.yml
         mode: 0400
       - source: repos
-        target: /app/repos.yaml
+        target: /app/repos.yml
         mode: 0400
       - source: config
-        target: /app/config.yaml
+        target: /app/config.yml
         mode: 0400
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./stacks.yaml:/app/stacks.yaml
-      - ./repos.yaml:/app/repos.yaml
-      - ./config.yaml:/app/config.yaml
+      - ./stacks.yml:/app/stacks.yml
+      - ./repos.yml:/app/repos.yml
+      - ./config.yml:/app/config.yml
     environment:
       - SOPS_AGE_KEY_FILE=/secrets/age.key
     deploy:
@@ -36,8 +36,8 @@ secrets:
     file: /home/soriphoono/.config/sops/age/keys.txt
 configs:
   stacks:
-    file: ./stacks.yaml
+    file: ./stacks.yml
   repos:
-    file: ./repos.yaml
+    file: ./repos.yml
   config:
-    file: ./config.yaml
+    file: ./config.yml

@@ -33,21 +33,21 @@ Used by containerized services at runtime.
 
 - **To add/update**:
   - Use `sops` to encrypt and manage secrets in the `stacks/` directory.
-  - Reference these in your `docker-compose.yaml` under the `secrets:` key.
+  - Reference these in your `docker-compose.yml` under the `secrets:` key.
   - **Best Practice**: Secret names should be versioned (e.g., `db_password_v1`) to allow for smooth rotation without service downtime.
 
 ______________________________________________________________________
 
 ## 🚀 Adding or Modifying Stacks
 
-All services are defined in the \[**`stacks/`**\](file:///home/soriphoono/Documents/Projects/cluster/stacks) directory.
+All services are defined in the \[**`stacks/`**\](stacks) directory.
 
-1. **Define the Stack**: Create or modify a `docker-compose.yaml` within a subdirectory of `stacks/`.
+1. **Define the Stack**: Create or modify a `docker-compose.yml` within a subdirectory of `stacks/`.
 1. **Compose Best Practices**:
    - **Image Pinning**: Avoid `latest` tags. Pin to a specific version or hash.
    - **Resource Management**: Always define `reservations` and `limits` for CPU/Memory.
    - **Networks**: Assign services to relevant overlay networks (e.g., `traefik-public` for ingress).
-1. **Register the Stack**: Add the new stack definition to \[**`stacks.yaml`**\](file:///home/soriphoono/Documents/Projects/cluster/stacks.yaml) to enable tracking by `swarm-cd`.
+1. **Register the Stack**: Add the new stack definition to \[**`stacks.yml`**\](stacks.yml) to enable tracking by `swarm-cd`.
 
 ______________________________________________________________________
 
@@ -59,13 +59,13 @@ We use the **Pterodactyl Panel** on the Proxmox tier to manage game servers acro
 - **Adding Game Eggs**: To add a new game type or modify an existing one, update the configuration in the corresponding Pterodactyl service stack or management script.
 - **Runner Management**: To add or update a Pterodactyl "Wing" (runner), configure the node labels on the Swarm manager to ensure the runner is scheduled correctly on the Gaming Tier mini PCs.
 
-1. Register the Stack: Add the new stack definition to \[**`stacks.yaml`**\](stacks.yaml) to enable tracking by `swarm-cd`.
+1. Register the Stack: Add the new stack definition to \[**`stacks.yml`**\](stacks.yml) to enable tracking by `swarm-cd`.
 
 ## 🔄 Deployment via `swarm-cd`
 
 The cluster uses a custom `swarm-cd` controller for GitOps reconciliation.
 
-- Improvements to the CD logic should be made in `docker-compose.yaml` at the root.
+- Improvements to the CD logic should be made in `docker-compose.yml` at the root.
 - To trigger a manual reconciliation, you can use the `swarm-cd` service directly or trigger a build in the CI pipeline (`actions.nix`).
 
 ______________________________________________________________________

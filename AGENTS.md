@@ -24,7 +24,7 @@ These secrets are intended for **containerized workloads** (e.g., database passw
 
 - **Storage**: Encrypted using `sops` with the cluster's `age` key.
 - **Consumption**: Injected into Docker Swarm services at runtime. They are typically mounted at `/run/secrets/<secret_name>`.
-- **Agent Action**: Defined in the `secrets` section of a `docker-compose.yaml` file in the `stacks/` directory.
+- **Agent Action**: Defined in the `secrets` section of a `docker-compose.yml` file in the `stacks/` directory.
 
 ## 🏗️ Architectural Constraints
 
@@ -40,7 +40,7 @@ When modifying or adding stacks in `stacks/`, agents **MUST** adhere to these ru
 The following tools are pre-configured and should be utilized by the agent:
 
 - **`docker`**: Primary interface for Swarm management (`docker stack deploy`, `docker node ls`).
-- **`swarm-cd`**: The internal GitOps controller. To trigger a deployment, update the `stacks.yaml` file or the corresponding stack definition in `stacks/`.
+- **`swarm-cd`**: The internal GitOps controller. To trigger a deployment, update the `stacks.yml` file or the corresponding stack definition in `stacks/`.
 - **`nh`**: Nix helper for managing the development shell and building dependencies.
 - **`sops`**: Used for editing and rotating service secrets.
 
