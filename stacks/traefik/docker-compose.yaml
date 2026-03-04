@@ -44,9 +44,11 @@ services:
         mode: ingress
     networks:
       - traefik-public
+    secrets:
+      - cf_api_token
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - traefik-certs:/letsecrypt
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       # DNS Challenge Credentials (for dnsresolver)
       - CLOUDFLARE_EMAIL=soriphoono@gmail.com
