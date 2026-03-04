@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   swarm-cd:
-    image: ghcr.io/m-adawi/swarm-cd:v1.10.0
+    image: ghcr.io/m-adawi/swarm-cd:1.10.0
     secrets:
       - source: age
         target: /secrets/age.key
@@ -12,12 +12,13 @@ services:
       - source: repos
         target: /app/repos.yaml
         mode: 0400
+      - source: config
+        target: /app/config.yaml
+        mode: 0400
     environment:
-      - DOCKER_HOST=tcp://socket_proxy:2375
+      - DOCKER_HOST=unix:///var/run/docker.sock
 
       - SOPS_AGE_KEY_FILE=/secrets/age.key
-    networks:
-      - socket_proxy
     deploy:
       replicas: 1
       placement:
@@ -36,8 +37,5 @@ configs:
     file: ./stacks.yaml
   repos:
     file: ./repos.yaml
-networks:
-  socket_proxy:
-    driver: overlay
-    attachable: true
-    internal: true
+  config:
+    file: ./config.yaml

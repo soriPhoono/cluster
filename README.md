@@ -1,59 +1,93 @@
-# Server Home Lab Cluster
+# Data Fortress: Multi-Tier Swarm & Game Cluster
 
-This repository contains the configuration, definitions, and orchestration files for a self-hosted Kubernetes cluster. The infrastructure is built on **Talos Linux** (immutable OS), managed declaratively through **Nix**, and deployed continuously via **Flux** GitOps.
+Welcome to the **Data Fortress**, a high-performance, resource-efficient, and fully declarative home lab environment. This project has evolved from a Kubernetes foundation to a sophisticated **Docker Swarm** orchestration layer running across heterogeneous hardware tiers, ranging from Raspberry Pis to a Mac Studio.
 
-## Project Structure
+## 🏗️ Architecture Overview
 
-- **`k8s/clusters/`**: Per-cluster Flux entrypoints. Currently contains two clusters:
-  - **`adams/`** — The primary production cluster.
-  - **`testing/`** — An isolated environment for validating changes before promoting to production.
-- **`k8s/infrastructure/`**: Core platform components reconciled by Flux, including:
-  - `cert-manager` — Automatic TLS certificate management.
-  - `cloudflare-tunnel` — Secure ingress tunneling via Cloudflare.
-  - `external-dns` — Automatic DNS record management.
-  - `metallb` — Bare-metal load balancer.
-  - `monitoring` — Prometheus-based observability stack.
-  - `rook-ceph` — Distributed block and object storage.
-  - `traefik` — Ingress controller and reverse proxy.
-- **`k8s/apps/`**: Application workloads deployed on top of the platform.
-- **`talos/`**: Talos Linux node machine configs (Talosctl-managed).
-- **`controlplane.yaml` & `worker.yaml`**: Base Talos machine configuration patches.
-- **`secrets/`**: Encrypted secrets managed with `agenix` + `sops`/`age`.
-- **`lib/`**: Custom Nix library functions.
-- **`flake.nix` & `shell.nix`**: Reproducible development environment, packages, and hooks.
-- **`actions.nix`**: GitHub Actions workflow definitions (via `github-actions-nix`).
-- **`secrets.nix`**: Ownership declarations for secrets, used by `agenix` for rotation and editing.
-- **`pre-commit.nix`**: Pre-commit hook definitions.
-- **`treefmt.nix`**: Repository-wide formatter configuration.
+The Data Fortress is distributed across four specialized hardware tiers to optimize for CPU, RAM, and specialized AI/Gaming workloads.
 
-## Getting Started
+```mermaid
+graph TD
+    subgraph "Proxmox Tier (LXC Nodes)"
+        M[Swarm Managers]
+        P[Pterodactyl Panel]
+        CS[Core Services]
+    end
 
-To get started developing or administering the cluster:
+    subgraph "Edge Tier (8x Raspberry Pi 5 8GB)"
+        W[Swarm Workers]
+        LW[Lightweight Workloads]
+    end
 
-1. **Enter the Nix Shell**:
-   If you have `direnv` set up, simply `cd` into the directory and the shell will load automatically (`direnv allow` on first run). Alternatively:
+    subgraph "AI Tier (Mac Studio)"
+        LLM[Self-Hosted LLMs]
+        AI[AI/ML Agents]
+    end
 
-   ```bash
-   nix develop
-   ```
+    subgraph "Gaming Tier (3x Mini PCs)"
+        G[Pterodactyl Wings]
+        GS[Private Game Servers]
+    end
 
-1. **Pre-commit Hooks**:
-   The shell provisions `pre-commit` hooks automatically (formatting with `treefmt`, `alejandra`, etc.).
+    M -- Orchestrates --> W
+    M -- Orchestrates --> LW
+    M -- Orchestrates --> LLM
+    P -- Manages --> G
+    G -- Hosts --> GS
+```
 
-1. **Cluster Tools**:
-   The shell also provides `kubectl`, `flux`, `talosctl`, `kubeconform`, `sops`, and `agenix` for interacting with the cluster.
+### Hardware Tiers
 
-## Kubernetes Manifest Requirements
+1. **Proxmox Tier**: Virtualized LXC nodes on Proxmox VE. Hosts the Swarm managers, core infrastructure (Traefik, Socket Proxy), and the **Pterodactyl Panel**.
+1. **Edge Tier**: A cluster of **8x Raspberry Pi 5 (8GB)** nodes. Optimized for distributed, low-power horizontal scaling of web services and data processing.
+1. **AI Tier**: A **Mac Studio** dedicated to hosting local large language models (LLMs) and supporting the Antigravity/Gemini agentic workflows.
+1. **Gaming Tier**: **3x Mini PCs** acting as Pterodactyl runners (Wings), hosting private game servers for low-latency performance.
 
-When adding a new workload or modifying an existing manifest in `k8s/`, you **MUST** adhere to the following strict requirements:
+## 🚀 GitOps & Automation
 
-1. **Image pinning**: Pin images to a specific version or digest — never `latest`.
-1. **Declarative**: All resources must be defined as YAML manifests within `k8s/`.
-1. **Validation**: All manifests must pass `kubeconform` validation.
-1. **Healthchecks**: Configure `livenessProbe` and `readinessProbe` for all services.
-1. **Secrets**: NEVER commit plain-text secrets. Use `sops` with `age` encryption for `Secret` resources.
-1. **Resources**: Define `requests` and `limits` for all containers.
+This cluster utilizes a **GitOps** workflow for seamless deployments:
 
-## Contributing
+- **`swarm-cd`**: Automatically reconciles stack definitions from this repository to the Swarm cluster.
+- **`stacks.yaml`**: The source of truth for all deployed services.
+- **Nix Flake**: The entire development environment, CI/CD pipelines (`actions.nix`), and secret management are defined via a unified Nix flake.
 
-Please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file for guidelines on making changes, updating infrastructure, and deploying stacks.
+## 📂 Repository Structure
+
+| Path | Purpose |
+|------|---------|
+| `stacks/` | Declarative Docker Compose stack definitions. |
+| `scripts/` | Maintenance, backup, and automation scripts. |
+| `secrets/` | Encrypted secrets managed via SOPS and Age. |
+| `lib/` | Custom Nix library functions for the flake. |
+| `stacks.yaml` | Service registration for `swarm-cd`. |
+| `flake.nix` | Reproducible environment and toolchain. |
+
+## 🔐 Secret Management
+
+We maintain a strict distinction between developer and service secrets:
+
+- **Developer Secrets**: Decrypted into the `nix develop` shell via `agenix-shell` for local tool usage.
+- **Service Secrets**: Encrypted via `sops` and injected into Swarm services as native Docker secrets at `/run/secrets/`.
+
+## 🛠️ Getting Started
+
+### 1. Enter the Environment
+
+Ensure you have Nix installed with flakes enabled.
+
+```bash
+nix develop # or 'direnv allow'
+```
+
+### 2. Management Tools
+
+The shell provides:
+
+- `docker`: Directly interact with the Swarm manager.
+- `nh`: Nix helper for flake management.
+- `sops` / `agenix`: For secret encryption/decryption.
+
+______________________________________________________________________
+
+For detailed contribution guidelines, see \[**`CONTRIBUTING.md`**\](CONTRIBUTING.md).
+For AI Agent specific context, see \[**`AGENTS.md`**\](AGENTS.md).
