@@ -1,4 +1,3 @@
 # repos.yaml
 cluster:
   url: "https://github.com/soriphoono/cluster.git"
-  sops_secrets_discovery: true # NOTE: possibly needs to be moved to config.yaml

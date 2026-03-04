@@ -12,7 +12,7 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
       # Docker Swarm Provider
-      - "--providers.swarm.endpoint=tcp://socket_proxy:2375"
+      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.watch=true"
       - "--providers.swarm.exposedByDefault=false"
       - "--providers.swarm.networks=reverse-proxy_traefik-public"
@@ -46,7 +46,6 @@ services:
         protocol: tcp
         mode: ingress
     networks:
-      - socket-proxy
       - traefik-public
     volumes:
       - traefik-certs:/letsecrypt
@@ -76,5 +75,3 @@ networks:
   traefik-public:
     driver: overlay
     attachable: true
-  socket-proxy:
-    external: true
