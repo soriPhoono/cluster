@@ -12,9 +12,9 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
       # Docker Swarm Provider
-      - "--providers.swarm.exposedByDefault=false"
       - "--providers.swarm.endpoint=tcp://socket_proxy:2375"
       - "--providers.swarm.watch=true"
+      - "--providers.swarm.exposedByDefault=false"
       - "--providers.swarm.networks=reverse-proxy_traefik-public"
       # Certificate Resolvers
       # 1. HTTP Challenge (Public)
@@ -53,9 +53,9 @@ services:
     environment:
       # DNS Challenge Credentials (for dnsresolver)
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
-      - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_token
     deploy:
+      mode: replicated
       replicas: 1
       placement:
         constraints:
@@ -63,8 +63,8 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.traefik.rule=HostRegexp(`proxy.admin.ts.${DOMAIN_NAME}`)"
-        - "traefik.http.routers.traefik.service=api@internal"
         - "traefik.http.routers.traefik.entrypoints=websecure"
+        - "traefik.http.routers.traefik.service=api@internal"
         - "traefik.http.routers.traefik.tls.certresolver=dnsresolver"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 volumes:

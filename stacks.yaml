@@ -1,8 +1,8 @@
 socket-proxy:
-  repo: adams-cluster
+  repo: cluster
   branch: main
   compose_file: ./stacks/socket-proxy/docker-compose.yaml
 reverse-proxy:
-  repo: adams-cluster
+  repo: cluster
   branch: main
   compose_file: ./stacks/traefik/docker-compose.yaml
