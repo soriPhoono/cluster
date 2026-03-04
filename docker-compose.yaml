@@ -14,6 +14,7 @@ services:
         mode: 0400
     environment:
       - DOCKER_HOST=tcp://socket_proxy:2375
+
       - SOPS_AGE_KEY_FILE=/secrets/age.key
     networks:
       - socket_proxy

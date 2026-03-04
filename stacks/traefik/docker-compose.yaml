@@ -54,6 +54,7 @@ services:
       # DNS Challenge Credentials (for dnsresolver)
       - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_token
     deploy:
       replicas: 1
       placement:
@@ -66,11 +67,14 @@ services:
         - "traefik.http.routers.traefik.entrypoints=websecure"
         - "traefik.http.routers.traefik.tls.certresolver=dnsresolver"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+volumes:
+  traefik-certs:
+secrets:
+  cf_api_token:
+    file: ../secrets/cf_api_token.age
 networks:
   traefik-public:
     driver: overlay
     attachable: true
   socket-proxy:
     external: true
-volumes:
-  traefik-certs:
