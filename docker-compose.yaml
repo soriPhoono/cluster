@@ -1,0 +1,43 @@
+version: "3.7"
+services:
+  swarm-cd:
+    image: ghcr.io/m-adawi/swarm-cd:v1.10.0
+    secrets:
+      - source: age
+        target: /secrets/age.key
+    configs:
+      - source: stacks
+        target: /app/stacks.yaml
+        mode: 0400
+      - source: repos
+        target: /app/repos.yaml
+        mode: 0400
+    environment:
+      - DOCKER_HOST=tcp://socket_proxy:2375
+
+      - SOPS_AGE_KEY_FILE=/secrets/age.key
+    networks:
+      - socket_proxy
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+secrets:
+  age:
+    file: /home/soriphoono/.config/sops/age/keys.txt
+configs:
+  stacks:
+    file: ./stacks.yaml
+  repos:
+    file: ./repos.yaml
+networks:
+  socket_proxy:
+    driver: overlay
+    attachable: true
+    internal: true

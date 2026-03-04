@@ -16,17 +16,6 @@
       args = ["scan"];
     };
 
-    # --- Kubernetes Development Support ---
-    kubeconform = {
-      enable = false; # Disabled due to network connectivity issues in Nix sandbox
-      entry = "${pkgs.kubeconform}/bin/kubeconform";
-      files = "^k8s/.*\\.yaml$";
-      args = ["-ignore-missing-schemas" "-skip" "CustomResourceDefinition" "-kubernetes-version" "1.30.0"];
-      excludes = [
-        "^k8s/clusters/*/flux-system/.*"
-      ];
-    };
-
     # --- GitHub and Git Support ---
     gitleaks = {
       enable = true;

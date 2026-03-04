@@ -1,13 +1,6 @@
-.vscode/
-
 .direnv/
 
 .pre-commit-config.yaml
 
 .gemini/
 gha-creds-*.json
-
-docker.bak/
-kubeconfig
-
-talos/_out

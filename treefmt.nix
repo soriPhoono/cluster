@@ -6,8 +6,10 @@ _: {
     deadnix.enable = true;
     statix.enable = true;
 
-    shfmt.enable = true;
-    shellcheck.enable = true;
+    yamlfmt = {
+      enable = true;
+      includes = ["stacks/**/*.yaml" "stacks/**/*.yml"];
+    };
 
     actionlint.enable = true;
 

@@ -13,20 +13,7 @@ with pkgs;
       agenix
       sops
       ssh-to-age
-
-      talosctl
-      kubectl
-      kubernetes-helm
-      fluxcd
-
-      qemu
-      OVMF
-      iptables
-      bridge-utils
-      dnsmasq
     ];
-
-    CONTROL_PLANE_IP = "100.122.30.64:6443";
 
     shellHook = ''
       ${config.pre-commit.shellHook}

@@ -1,0 +1,30 @@
+version: "3.7"
+services:
+  socket_proxy:
+    image: tecnativa/docker-socket-proxy:0.2.0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: America/Chicago
+      INFO: 1
+      SERVICES: 1
+      NETWORKS: 1
+      SECRETS: 1
+      CONFIGS: 1
+      POST: 1
+    networks:
+      - socket-proxy
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager
+networks:
+  socket-proxy:
+    driver: overlay
+    attachable: true
