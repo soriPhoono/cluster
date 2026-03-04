@@ -90,4 +90,4 @@ The shell provides:
 ______________________________________________________________________
 
 For detailed contribution guidelines, see \[**`CONTRIBUTING.md`**\](file:///home/soriphoono/Documents/Projects/cluster/CONTRIBUTING.md).
-For AI Agent specific context, see \[**`AGENTS.md`**\](file:///home/soriphoono/Documents/Projects/cluster/AGENTS.md).
+For AI Agent specific context, see \[**`AGENTS.md`**\](AGENTS.md).
