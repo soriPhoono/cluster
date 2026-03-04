@@ -70,7 +70,7 @@ volumes:
   traefik-certs:
 secrets:
   cf_api_token:
-    file: ../secrets/cf_api_token.age
+    file: ../secrets/cf_api_token
 networks:
   traefik-public:
     driver: overlay
