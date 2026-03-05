@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.6.1
+    image: traefik:v3.6.9 # Base version of v3 that supports docker API 1.44
     command:
       # Entrypoints
       - "--entryPoints.web.address=:80"
@@ -37,13 +37,13 @@ services:
       - target: 80
         published: 80
         protocol: tcp
-        mode: ingress
+        mode: host
       - target: 443
         published: 443
         protocol: tcp
-        mode: ingress
+        mode: host
     networks:
-      - traefik-public
+      - public
     secrets:
       - cf_api_token
     volumes:
@@ -52,6 +52,11 @@ services:
     environment:
       # DNS Challenge Credentials (for dnsresolver)
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_token
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       mode: replicated
       replicas: 1
@@ -59,18 +64,18 @@ services:
         constraints:
           - node.role == manager
       labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.traefik.rule=Host(`proxy.admin.ts.cryptic-coders.net`)"
-        - "traefik.http.routers.traefik.entrypoints=websecure"
-        - "traefik.http.routers.traefik.service=api@internal"
-        - "traefik.http.routers.traefik.tls.certresolver=dnsresolver"
-        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+        traefik.enable: true
+        traefik.http.routers.traefik.rule: Host(`proxy.admin.ts.cryptic-coders.net`)
+        traefik.http.routers.traefik.entrypoints: websecure
+        traefik.http.routers.traefik.service: api@internal
+        traefik.http.routers.traefik.tls.certresolver: dnsresolver
+        traefik.http.services.traefik.loadbalancer.server.port: 8080
 volumes:
   traefik-certs:
 secrets:
   cf_api_token:
-    file: ../secrets/cf_api_token
+    file: ./secrets/cf_api_token
 networks:
-  traefik-public:
+  public:
     driver: overlay
     attachable: true
