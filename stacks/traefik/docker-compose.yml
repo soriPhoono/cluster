@@ -64,12 +64,12 @@ services:
         constraints:
           - node.role == manager
       labels:
-        traefik.enable: true
-        traefik.http.routers.traefik.rule: Host(`proxy.admin.cryptic-coders.net`)
-        traefik.http.routers.traefik.entrypoints: websecure
-        traefik.http.routers.traefik.service: api@internal
-        traefik.http.routers.traefik.tls.certresolver: dnsresolver
-        traefik.http.services.traefik.loadbalancer.server.port: 8080
+        - traefik.enable=true
+        - traefik.http.routers.traefik.rule=Host(`proxy.admin.cryptic-coders.net`)
+        - traefik.http.routers.traefik.entrypoints=websecure
+        - traefik.http.routers.traefik.service=api@internal
+        - traefik.http.routers.traefik.tls.certresolver=dnsresolver
+        - traefik.http.services.traefik.loadbalancer.server.port=8080
 volumes:
   traefik-certs:
 secrets:
