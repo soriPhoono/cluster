@@ -29,8 +29,9 @@ services:
         - traefik.enable=true
         - traefik.docker.network=reverse-proxy_public
         - traefik.http.routers.portainer.rule=Host(`portainer.admin.${DOMAIN_NAME}`)
-        - traefik.http.routers.portainer.entrypoints=web
-        - traefik.http.routers.portainer.service=portainer
+        - traefik.http.routers.portainer.entrypoints=websecure
+        - traefik.http.routers.portainer.tls.certresolver=dnsresolver
+        - traefik.http.routers.portainer.service=portainer@swarm
         - traefik.http.services.portainer.loadbalancer.server.port=9000
 networks:
   agent_network:
