@@ -36,7 +36,7 @@ networks:
   agent_network:
     driver: overlay
     attachable: true
-  reverse_proxy-public:
+  reverse-proxy_public:
     external: true
 volumes:
   portainer_data:
