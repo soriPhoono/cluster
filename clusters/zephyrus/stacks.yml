@@ -6,3 +6,7 @@ portainer:
   repo: cluster
   branch: main
   compose_file: stacks/portainer/docker-compose.yml
+jellyfin:
+  repo: cluster
+  branch: main
+  compose_file: stacks/jellyfin/docker-compose.yml

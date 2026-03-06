@@ -1,0 +1,54 @@
+version: "3.8"
+services:
+  jellyfin:
+    image: linuxserver/jellyfin:10.11.6
+    group_add:
+      - 107
+      - 44
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/card0:/dev/dri/card0
+    volumes:
+      - config:/config
+      - /mnt/data/media:/media
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - JELLYFIN_PublishedServerUrl=http://media.${DOMAIN_NAME}
+    networks:
+      - seerr
+      - reverse-proxy_public
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.labels.type == media
+      resources:
+        reservations:
+          generic_resources:
+            - discrete_resource_spec:
+                kind: "igpu"
+                value: 1
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=reverse-proxy_public
+        - traefik.http.routers.jellyfin.rule=Host(`jellyfin.admin.${DOMAIN_NAME}`)
+        - traefik.http.routers.jellyfin.entrypoints=websecure
+        - traefik.http.routers.jellyfin.tls.certresolver=dnsresolver
+        - traefik.http.routers.jellyfin.service=jellyfin@swarm
+        - traefik.http.services.jellyfin.loadbalancer.server.port=8096
+volumes:
+  config:
+  cache:
+networks:
+  seerr:
+    external: true
+  reverse-proxy_public:
+    external: true
