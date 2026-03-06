@@ -1,0 +1,34 @@
+services:
+  agent:
+    image: portainer/agent:sts
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+  portainer:
+    image: portainer/portainer-ee:sts
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+    volumes:
+      - portainer_data:/data
+    networks:
+      - agent_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        traefik.enable: true
+        traefik.http.routers.portainer.rule: Host(`portainer.admin.cryptic-coders.net`)
+        traefik.http.routers.portainer.entrypoints: websecure
+        traefik.http.routers.portainer.tls.certresolver: dnsresolver
+        traefik.http.routers.portainer.service: portainer@swarm
+        traefik.http.services.portainer.loadbalancer.server.port: 9443

@@ -1,6 +1,6 @@
 # Data Fortress: Multi-Tier Swarm & Game Cluster
 
-Welcome to the **Data Fortress**, a high-performance, resource-efficient, and fully declarative home lab environment. This project has evolved from a Kubernetes foundation to a sophisticated **Docker Swarm** orchestration layer running across heterogeneous hardware tiers, ranging from Raspberry Pis to a Mac Studio.
+Welcome to the **Data Fortress**, a high-performance, resource-efficient, and fully declarative home lab environment.
 
 ## 🏗️ Architecture Overview
 

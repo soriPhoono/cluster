@@ -1,0 +1,3 @@
+services:
+  openbao:
+    image: openbao/openbao:latest
