@@ -1,0 +1,3 @@
+# repos.yml
+cluster:
+  url: "https://github.com/soriphoono/cluster.git"

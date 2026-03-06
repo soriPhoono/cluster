@@ -9,7 +9,8 @@ services:
     deploy:
       mode: global
       placement:
-        constraints: [node.platform.os == linux]
+        constraints:
+          - node.platform.os == linux
   portainer:
     image: portainer/portainer-ee:sts
     command: -H tcp://tasks.agent:9001 --tlsskipverify
@@ -24,10 +25,11 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.role == manager]
+        constraints:
+          - node.role == manager
       labels:
         traefik.enable: true
-        traefik.http.routers.portainer.rule: Host(`portainer.admin.cryptic-coders.net`)
+        traefik.http.routers.portainer.rule: Host(`portainer.admin.${DOMAIN_NAME}`)
         traefik.http.routers.portainer.entrypoints: websecure
         traefik.http.routers.portainer.tls.certresolver: dnsresolver
         traefik.http.routers.portainer.service: portainer@swarm

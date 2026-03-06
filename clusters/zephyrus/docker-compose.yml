@@ -1,0 +1,45 @@
+services:
+  swarm-cd:
+    image: ghcr.io/m-adawi/swarm-cd:1.10.0
+    secrets:
+      - source: age
+        target: /secrets/age.key
+    configs:
+      - source: stacks
+        target: /app/stacks.yml
+        mode: 0400
+      - source: repos
+        target: /app/repos.yml
+        mode: 0400
+      - source: config
+        target: /app/config.yml
+        mode: 0400
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./stacks.yml:/app/stacks.yml
+      - ./repos.yml:/app/repos.yml
+      - ./config.yml:/app/config.yml
+    environment:
+      - SOPS_AGE_KEY_FILE=/secrets/age.key
+
+      - DOMAIN_NAME=localhost
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+secrets:
+  age:
+    file: /home/soriphoono/.config/sops/age/keys.txt
+configs:
+  stacks:
+    file: ./stacks.yml
+  repos:
+    file: ./repos.yml
+  config:
+    file: ./config.yml

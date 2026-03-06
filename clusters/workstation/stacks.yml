@@ -1,0 +1,4 @@
+reverse-proxy:
+  repo: cluster
+  branch: main
+  compose_file: ../../stacks/traefik/docker-compose.yml

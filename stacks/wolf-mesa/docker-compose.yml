@@ -1,0 +1,28 @@
+services:
+  wolf:
+    image: ghcr.io/games-on-whales/wolf:stable
+    network_mode: host
+    device_cgroup_rules:
+      - "c 13:* rmw"
+    devices:
+      - /dev/dri
+      - /dev/uinput
+      - /dev/uhid
+    secrets:
+      - configuration-file
+    volumes:
+      - /etc/wolf/:/etc/wolf
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /dev/:/dev/:rw
+      - /run/udev:/run/udev:rw
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      mode: replicated
+      replicas: 1
+secrets:
+  configuration-file:
+    file: ./secrets/config.toml
