@@ -27,6 +27,7 @@ services:
           - node.role == manager
       labels:
         - traefik.enable=true
+        - traefik.docker.network=reverse-proxy_public
         - traefik.http.routers.portainer.rule=Host(`portainer.admin.${DOMAIN_NAME}`)
         - traefik.http.routers.portainer.entrypoints=web
         - traefik.http.routers.portainer.service=portainer
