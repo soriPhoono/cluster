@@ -14,9 +14,6 @@ services:
   portainer:
     image: portainer/portainer-ee:sts
     command: -H tcp://tasks.agent:9001 --tlsskipverify
-    ports:
-      - "9000:9000"
-      - "8000:8000"
     volumes:
       - portainer_data:/data
     networks:
@@ -34,3 +31,9 @@ services:
         - traefik.http.routers.portainer.tls.certresolver=dnsresolver
         - traefik.http.routers.portainer.service=portainer@swarm
         - traefik.http.services.portainer.loadbalancer.server.port=9443
+networks:
+  agent_network:
+    driver: overlay
+    attachable: true
+volumes:
+  portainer_data:
