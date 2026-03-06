@@ -52,11 +52,6 @@ services:
     environment:
       # DNS Challenge Credentials (for dnsresolver)
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_token
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
     deploy:
       mode: replicated
       replicas: 1
