@@ -13,6 +13,8 @@ with pkgs;
       agenix
       sops
       ssh-to-age
+
+      ansible
     ];
 
     shellHook = ''

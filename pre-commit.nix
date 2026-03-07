@@ -6,6 +6,12 @@
     deadnix.enable = true;
     treefmt.enable = true;
 
+    # -- Ansible Support --
+    ansible-lint = {
+      enable = true;
+      files = "ansible/*.yml";
+    };
+
     # --- Terraform Support ---
     terraform-format.enable = true;
     tflint.enable = true;
