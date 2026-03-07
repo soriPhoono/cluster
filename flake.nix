@@ -36,10 +36,7 @@
     ...
   }: let
     # Extend lib with our custom functions
-    lib = nixpkgs-weekly.lib.extend (
-      final: prev:
-        (import ./lib/default.nix {inherit inputs;}) final prev
-    );
+    inherit (nixpkgs-weekly) lib;
 
     supportedSystems = import inputs.systems;
   in
