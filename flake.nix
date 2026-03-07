@@ -24,21 +24,15 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs-weekly";
     };
-    github-actions-nix = {
-      url = "github:synapdeck/github-actions-nix";
-      inputs.nixpkgs.follows = "nixpkgs-weekly";
-    };
   };
 
   outputs = inputs @ {
-    self,
     nixpkgs-weekly,
     flake-parts,
     agenix,
     agenix-shell,
     treefmt-nix,
     git-hooks-nix,
-    github-actions-nix,
     ...
   }: let
     # Extend lib with our custom functions
@@ -54,7 +48,6 @@
         agenix-shell.flakeModules.default
         treefmt-nix.flakeModule
         git-hooks-nix.flakeModule
-        github-actions-nix.flakeModule
       ];
 
       systems = supportedSystems;
@@ -76,8 +69,6 @@
           ];
           config.allowUnfree = true;
         };
-
-        githubActions = import ./actions.nix {inherit self lib;};
 
         devShells.default = import ./shell.nix {
           inherit lib pkgs;
