@@ -29,5 +29,7 @@
         "result": true,
         "result-*": true,
         ".direnv/": true
-    }
+    },
+    "ansible.mcpServer.enabled": true,
+    "ansible.python.interpreterPath": "/nix/store/slhpx9glq7vl99bwi93bgrhn3syv98s1-python3-3.13.11/bin/python"
 }
