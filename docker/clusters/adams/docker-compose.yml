@@ -7,13 +7,13 @@ services:
     configs:
       - source: stacks
         target: /app/stacks.yml
-        mode: 0400
+        mode: "0400"
       - source: repos
         target: /app/repos.yml
-        mode: 0400
+        mode: "0400"
       - source: config
         target: /app/config.yml
-        mode: 0400
+        mode: "0400"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./stacks.yml:/app/stacks.yml
@@ -21,8 +21,6 @@ services:
       - ./config.yml:/app/config.yml
     environment:
       - SOPS_AGE_KEY_FILE=/secrets/age.key
-
-      - DOMAIN_NAME=localhost
     deploy:
       replicas: 1
       placement:
