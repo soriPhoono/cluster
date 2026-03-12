@@ -2,6 +2,8 @@ version: "3"
 services:
   wolf:
     image: ghcr.io/games-on-whales/wolf:stable
+    environment:
+      - WOLF_RENDER_NODE=/dev/dri/renderD129
     volumes:
       - /etc/wolf/:/etc/wolf
       - /var/run/docker.sock:/var/run/docker.sock:rw
@@ -10,7 +12,8 @@ services:
     device_cgroup_rules:
       - c 13:* rmw
     devices:
-      - /dev/dri
+      - /dev/dri/renderD129
+      - /dev/dri/card1
       - /dev/uinput
       - /dev/uhid
     network_mode: host
