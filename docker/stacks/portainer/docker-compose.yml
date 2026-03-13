@@ -61,7 +61,19 @@ services:
           memory: 512M
         reservations:
           cpus: "0.10"
+      # Security enhancement: resource limits
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.10"
           memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
       labels:
         - traefik.enable=true
         - traefik.docker.network=reverse-proxy_public
