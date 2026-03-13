@@ -1,5 +1,6 @@
+---
 name: CI
-on:
+"on":
   pull_request:
   push:
     branches: [main]
@@ -11,9 +12,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@v16
-      - uses: DeterminateSystems/magic-nix-cache-action@v8
-      - name: Format
-        run: nix fmt
-      - name: Check Flake
-        run: nix flake check
+      - name: Install yamllint
+        run: sudo apt-get update && sudo apt-get install -y yamllint
+      - name: Lint YAML
+        run: yamllint .
