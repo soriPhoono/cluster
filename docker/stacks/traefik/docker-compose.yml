@@ -3,36 +3,36 @@ services:
     image: traefik:v3.6.9 # Base version of v3 that supports docker API 1.44
     command:
       # Entrypoints
-      - "--entryPoints.web.address=:80"
-      - "--entryPoints.websecure.address=:443"
-      - "--entryPoints.websecure.http.tls=true"
+      - --entryPoints.web.address=:80
+      - --entryPoints.websecure.address=:443
+      - --entryPoints.websecure.http.tls=true
       # Entrypoints Redirection (HTTP to HTTPS)
-      - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entryPoints.web.http.redirections.entrypoint.permanent=true"
+      - --entryPoints.web.http.redirections.entrypoint.to=websecure
+      - --entryPoints.web.http.redirections.entrypoint.permanent=true
       # Docker Swarm Provider
-      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-      - "--providers.swarm.watch=true"
-      - "--providers.swarm.exposedByDefault=false"
-      - "--providers.swarm.network=reverse-proxy_public"
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.watch=true
+      - --providers.swarm.exposedByDefault=false
+      - --providers.swarm.network=reverse-proxy_public
       # Certificate Resolvers
       # 1. HTTP Challenge (Public)
-      - "--certificatesresolvers.http.acme.httpchallenge=true"
-      - "--certificatesresolvers.http.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.http.acme.email=soriphoono@gmail.com"
-      - "--certificatesresolvers.http.acme.storage=/letsecrypt/acme.json"
+      - --certificatesresolvers.http.acme.httpchallenge=true
+      - --certificatesresolvers.http.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.http.acme.email=soriphoono@gmail.com
+      - --certificatesresolvers.http.acme.storage=/letsecrypt/acme.json
       # 2. DNS Challenge (Cloudflare - for local/private domains)
-      - "--certificatesresolvers.dnsresolver.acme.dnschallenge=true"
-      - "--certificatesresolvers.dnsresolver.acme.dnschallenge.provider=cloudflare"
-      - "--certificatesresolvers.dnsresolver.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
-      - "--certificatesresolvers.dnsresolver.acme.email=soriphoono@gmail.com"
-      - "--certificatesresolvers.dnsresolver.acme.storage=/letsecrypt/acme.json"
+      - --certificatesresolvers.dnsresolver.acme.dnschallenge=true
+      - --certificatesresolvers.dnsresolver.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.dnsresolver.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      - --certificatesresolvers.dnsresolver.acme.email=soriphoono@gmail.com
+      - --certificatesresolvers.dnsresolver.acme.storage=/letsecrypt/acme.json
       # API/Dashboard
-      - "--api.dashboard=true"
-      - "--api.insecure=false"
+      - --api.dashboard=true
+      - --api.insecure=false
       # Logging
-      - "--log.level=INFO"
-      - "--accesslog=true"
-      - "--metrics.prometheus=true"
+      - --log.level=INFO
+      - --accesslog=true
+      - --metrics.prometheus=true
     ports:
       - target: 80
         published: 80
@@ -48,9 +48,11 @@ services:
       - cf_api_token
     volumes:
       - traefik-certs:/letsecrypt
+
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       # DNS Challenge Credentials (for dnsresolver)
+
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_token
     deploy:
       mode: replicated
@@ -58,6 +60,11 @@ services:
       placement:
         constraints:
           - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
       labels:
         - traefik.enable=true
         - traefik.http.routers.traefik.rule=Host(`proxy.admin.${DOMAIN_NAME}`)
