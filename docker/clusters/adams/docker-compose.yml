@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 
 services:
   swarm-cd:
@@ -9,32 +9,64 @@ services:
     configs:
       - source: stacks
         target: /app/stacks.yml
-        mode: "0400"
+        mode: 256
       - source: repos
         target: /app/repos.yml
-        mode: "0400"
+        mode: 256
       - source: config
         target: /app/config.yml
-        mode: "0400"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./stacks.yml:/app/stacks.yml
-      - ./repos.yml:/app/repos.yml
-      - ./config.yml:/app/config.yml
+        mode: 256
     environment:
       - SOPS_AGE_KEY_FILE=/secrets/age.key
-
       - DOMAIN_NAME=cryptic-coders.net
+      - DOCKER_HOST=tcp://socket-proxy:2375
+    networks:
+      - socket-internal
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.role == manager
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
+
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    environment:
+      - SWARM=1
+      - STACKS=1
+      - SERVICES=1
+      - CONFIGS=1
+      - SECRETS=1
+      - NETWORKS=1
+      - NODES=1
+      - POST=1 # Required for swarm-cd to deploy stacks
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - socket-internal
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.10"
+          memory: 64M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
 
 secrets:
   age:
@@ -47,3 +79,8 @@ configs:
     file: ./repos.yml
   config:
     file: ./config.yml
+
+networks:
+  socket-internal:
+    driver: overlay
+    internal: true
