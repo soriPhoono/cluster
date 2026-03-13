@@ -9,8 +9,8 @@ services:
       # Entrypoints Redirection (HTTP to HTTPS)
       - --entryPoints.web.http.redirections.entrypoint.to=websecure
       - --entryPoints.web.http.redirections.entrypoint.permanent=true
-      # Docker Swarm Provider
-      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      # Docker Swarm Provider (using socket-proxy)
+      - --providers.swarm.endpoint=tcp://socket-proxy:2375
       - --providers.swarm.watch=true
       - --providers.swarm.exposedByDefault=false
       - --providers.swarm.network=reverse-proxy_public
@@ -44,15 +44,12 @@ services:
         mode: host
     networks:
       - public
+      - socket-internal
     secrets:
       - cf_api_token
     volumes:
       - traefik-certs:/letsecrypt
-
-      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      # DNS Challenge Credentials (for dnsresolver)
-
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_token
     deploy:
       mode: replicated
@@ -60,6 +57,13 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          cpus: "0.10"
+          memory: 128M
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -72,12 +76,48 @@ services:
         - traefik.http.routers.traefik.service=api@internal
         - traefik.http.routers.traefik.tls.certresolver=dnsresolver
         - traefik.http.services.traefik.loadbalancer.server.port=8080
+
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    environment:
+      - SWARM=1 # Allow access to swarm info
+      - SERVICES=1 # Allow access to services
+      - TASKS=1 # Allow access to tasks
+      - NETWORKS=1 # Allow access to networks
+      - NODES=1 # Allow access to nodes
+      - CONFIGS=1 # Allow access to configs
+      - SECRETS=1 # Allow access to secrets
+      - VOLUMES=0 # Deny access to volumes
+      - POST=0 # Deny POST requests (Read-only)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - socket-internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.10"
+          memory: 64M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+
 volumes:
   traefik-certs:
+
 secrets:
   cf_api_token:
     file: ./secrets/cf_api_token
+
 networks:
   public:
     driver: overlay
     attachable: true
+  socket-internal:
+    driver: overlay
+    internal: true
