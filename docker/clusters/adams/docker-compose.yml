@@ -35,9 +35,11 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+
 secrets:
   age:
     file: /home/soriphoono/.config/sops/age/keys.txt
+
 configs:
   stacks:
     file: ./stacks.yml
