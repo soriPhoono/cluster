@@ -27,7 +27,19 @@ services:
           memory: 256M
         reservations:
           cpus: "0.10"
+      # Security enhancement: resource limits to prevent runaway resource consumption
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          cpus: "0.10"
           memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
   portainer:
     image: portainer/portainer-ee:sts
     command: -H tcp://tasks.agent:9001 --tlsskipverify
