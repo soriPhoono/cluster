@@ -1,20 +1,20 @@
 # Data Fortress: Multi-Tier Swarm & Game Cluster
 
-Welcome to the **Data Fortress**, a high-performance, resource-efficient, and fully declarative home lab environment.
+Welcome to the **Data Fortress**, a high-performance, resource-efficient, and fully declarative home lab environment currently transitioning from Kubernetes to Docker Swarm.
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture Overview (Target State)
 
-The Data Fortress is distributed across four specialized hardware tiers to optimize for CPU, RAM, and specialized AI/Gaming workloads.
+The Data Fortress is designed to be distributed across specialized hardware tiers to optimize for CPU, RAM, and specialized AI/Gaming workloads. See `TODO.md` for the current migration status.
 
 ```mermaid
 graph TD
     subgraph "Proxmox Tier (LXC Nodes)"
         M[Swarm Managers]
-        P[Pterodactyl Panel]
+        P[Management UI]
         CS[Core Services]
     end
 
-    subgraph "Edge Tier (8x Raspberry Pi 5 8GB)"
+    subgraph "Edge Tier (Raspberry Pi 5 Cluster)"
         W[Swarm Workers]
         LW[Lightweight Workloads]
     end
@@ -24,8 +24,8 @@ graph TD
         AI[AI/ML Agents]
     end
 
-    subgraph "Gaming Tier (3x Mini PCs)"
-        G[Pterodactyl Wings]
+    subgraph "Gaming Tier (Mini PCs)"
+        G[Game Runners]
         GS[Private Game Servers]
     end
 
@@ -36,58 +36,55 @@ graph TD
     G -- Hosts --> GS
 ```
 
-### Hardware Tiers
+### Hardware Tiers (In Progress)
 
-1. **Proxmox Tier**: Virtualized LXC nodes on Proxmox VE. Hosts the Swarm managers, core infrastructure (Traefik, Socket Proxy), and the **Pterodactyl Panel**.
-1. **Edge Tier**: A cluster of **8x Raspberry Pi 5 (8GB)** nodes. Optimized for distributed, low-power horizontal scaling of web services and data processing.
-1. **AI Tier**: A **Mac Studio** dedicated to hosting local large language models (LLMs) and supporting the Antigravity/Gemini agentic workflows.
-1. **Gaming Tier**: **3x Mini PCs** acting as Pterodactyl runners (Wings), hosting private game servers for low-latency performance.
+1. **Proxmox Tier**: Virtualized LXC nodes on Proxmox VE. Hosts the Swarm managers and core infrastructure (Traefik, Socket Proxy).
+1. **Edge Tier**: A cluster of **Raspberry Pi 5** nodes. Optimized for distributed, low-power horizontal scaling of web services.
+1. **AI Tier**: Dedicated hardware (e.g., Mac Studio) for hosting local large language models (LLMs) and supporting agentic workflows.
+1. **Gaming Tier**: High-performance nodes acting as game server runners.
 
 ## 🚀 GitOps & Automation
 
 This cluster utilizes a **GitOps** workflow for seamless deployments:
 
 - **`swarm-cd`**: Automatically reconciles stack definitions from this repository to the Swarm cluster.
-- **`stacks.yml`**: The source of truth for all deployed services.
-- **Nix Flake**: The entire development environment, CI/CD pipelines (`actions.nix`), and secret management are defined via a unified Nix flake.
+- **Cluster Configuration**: Located in `docker/clusters/adams/`, defining the source of truth for deployed services via `stacks.yml`.
+- **Infrastructure as Code**: All services are defined as Docker Compose stacks in `docker/stacks/`.
 
 ## 📂 Repository Structure
 
 | Path | Purpose |
 | ------------ | --------------------------------------------- |
-| `stacks/` | Declarative Docker Compose stack definitions. |
-| `scripts/` | Maintenance, backup, and automation scripts. |
-| `secrets/` | Encrypted secrets managed via SOPS and Age. |
-| `lib/` | Custom Nix library functions for the flake. |
-| `stacks.yml` | Service registration for `swarm-cd`. |
-| `flake.nix` | Reproducible environment and toolchain. |
+| `docker/stacks/` | Declarative Docker Compose stack definitions. |
+| `docker/clusters/` | Cluster-specific configurations and GitOps definitions. |
+| `lancedb/` | Vector database storage for agent memory. |
+| `TODO.md` | Migration roadmap from Kubernetes (Talos) to Swarm. |
 
 ## 🔐 Secret Management
 
 We maintain a strict distinction between developer and service secrets:
 
-- **Developer Secrets**: Decrypted into the `nix develop` shell via `agenix-shell` for local tool usage.
-- **Service Secrets**: Encrypted via `sops` and injected into Swarm services as native Docker secrets at `/run/secrets/`.
+- **Developer Secrets**: Managed via environment variables and `.envrc` (using `direnv`).
+- **Service Secrets**: Encrypted via `sops` or managed as native Docker secrets. See stack definitions for specific implementations.
 
 ## 🛠️ Getting Started
 
 ### 1. Enter the Environment
 
-Ensure you have Nix installed with flakes enabled.
+Ensure you have `direnv` and `docker` installed.
 
 ```bash
-nix develop # or 'direnv allow'
+direnv allow
 ```
 
 ### 2. Management Tools
 
-The shell provides:
-
 - `docker`: Directly interact with the Swarm manager.
-- `nh`: Nix helper for flake management.
-- `sops` / `agenix`: For secret encryption/decryption.
+- `sops`: For secret encryption/decryption (requires age key).
+- `trunk`: For linting and formatting.
 
 ______________________________________________________________________
 
-For detailed contribution guidelines, see \[**`CONTRIBUTING.md`**\](CONTRIBUTING.md).
-For AI Agent specific context, see \[**`AGENTS.md`**\](AGENTS.md).
+For detailed contribution guidelines, see [**`CONTRIBUTING.md`**](CONTRIBUTING.md).
+For AI Agent specific context, see [**`AGENTS.md`**](AGENTS.md).
+

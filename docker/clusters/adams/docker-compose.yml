@@ -21,6 +21,7 @@ services:
       - DOMAIN_NAME=cryptic-coders.net
       - DOCKER_HOST=tcp://socket-proxy:2375
     networks:
+      - public
       - socket-internal
     deploy:
       replicas: 1
@@ -41,7 +42,7 @@ services:
         window: 120s
 
   socket-proxy:
-    image: tecnativa/docker-socket-proxy:latest
+    image: tecnativa/docker-socket-proxy:0.4.2
     environment:
       - SWARM=1
       - STACKS=1
@@ -52,7 +53,7 @@ services:
       - NODES=1
       - POST=1 # Required for swarm-cd to deploy stacks
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - socket-internal
     deploy:
@@ -80,6 +81,9 @@ configs:
     file: ./config.yml
 
 networks:
+  public:
+    driver: overlay
+    attachable: false
   socket-internal:
     driver: overlay
     internal: true
