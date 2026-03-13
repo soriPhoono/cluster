@@ -27,13 +27,6 @@ services:
           memory: 256M
         reservations:
           cpus: "0.10"
-      # Security enhancement: resource limits to prevent runaway resource consumption
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 256M
-        reservations:
-          cpus: "0.10"
           memory: 128M
       restart_policy:
         condition: on-failure
@@ -54,13 +47,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-      # Security enhancement: resource limits
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: 512M
-        reservations:
-          cpus: "0.10"
       # Security enhancement: resource limits
       resources:
         limits:
