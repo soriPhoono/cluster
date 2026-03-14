@@ -71,7 +71,7 @@ services:
 
 secrets:
   age:
-    file: /root/.config/sops/age/keys.txt
+    file: /home/sphoono/.config/sops/age/keys.txt
 configs:
   stacks:
     file: ./stacks.yml
