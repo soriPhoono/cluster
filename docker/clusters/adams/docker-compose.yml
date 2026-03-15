@@ -17,9 +17,9 @@ services:
         target: /app/config.yml
         mode: 256
     environment:
-      - SOPS_AGE_KEY_FILE=/secrets/age.key
-      - DOCKER_HOST=tcp://socket-proxy:2375
-      - DOMAIN_NAME=cryptic-coders.net
+      SOPS_AGE_KEY_FILE: /secrets/age.key
+      DOCKER_HOST: tcp://socket-proxy:2375
+      DOMAIN_NAME: cryptic-coders.net
     deploy:
       replicas: 1
       placement:
