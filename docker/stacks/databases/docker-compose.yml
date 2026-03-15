@@ -20,21 +20,22 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 1G
-        reservations:
-          cpus: "0.25"
-          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
       labels:
         komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+
 secrets:
   mongo-root-password:
     file: ./secrets/mongo-root-password
+
 volumes:
   mongo-data:
   mongo-config:
+
 networks:
   mongo:
     driver: overlay

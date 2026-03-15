@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   swarm-cd:
-    image: ghcr.io/m-adawi/swarm-cd:1.10.0
+    image: ghcr.io/m-adawi/swarm-cd:latest
     secrets:
       - source: age
         target: /secrets/age.key
@@ -18,8 +18,8 @@ services:
         mode: 256
     environment:
       - SOPS_AGE_KEY_FILE=/secrets/age.key
-      - DOMAIN_NAME=cryptic-coders.net
       - DOCKER_HOST=tcp://socket-proxy:2375
+      - DOMAIN_NAME=cryptic-coders.net
     networks:
       - public
       - socket-internal
@@ -58,6 +58,7 @@ services:
 secrets:
   age:
     file: /home/sphoono/.config/sops/age/keys.txt
+
 configs:
   stacks:
     file: ./stacks.yml
