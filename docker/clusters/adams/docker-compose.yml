@@ -20,9 +20,6 @@ services:
       - SOPS_AGE_KEY_FILE=/secrets/age.key
       - DOCKER_HOST=tcp://socket-proxy:2375
       - DOMAIN_NAME=cryptic-coders.net
-    networks:
-      - public
-      - socket-internal
     deploy:
       replicas: 1
       placement:
@@ -47,8 +44,6 @@ services:
       - POST=1 # Required for swarm-cd to deploy stacks
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - socket-internal
     deploy:
       replicas: 1
       placement:
@@ -66,11 +61,3 @@ configs:
     file: ./repos.yml
   config:
     file: ./config.yml
-
-networks:
-  public:
-    driver: overlay
-    attachable: false
-  socket-internal:
-    driver: overlay
-    internal: true
