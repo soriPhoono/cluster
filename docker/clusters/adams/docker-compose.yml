@@ -54,13 +54,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-      resources:
-        limits:
-          cpus: "0.10"
-          memory: 64M
-        reservations:
-          cpus: "0.05"
-          memory: 32M
 
 secrets:
   age:
