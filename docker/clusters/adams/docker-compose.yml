@@ -35,7 +35,7 @@ services:
         window: 120s
 
   socket-proxy:
-    image: tecnativa/docker-socket-proxy:0.4.2
+    image: tecnativa/docker-socket-proxy:latest
     environment:
       - SWARM=1
       - STACKS=1
