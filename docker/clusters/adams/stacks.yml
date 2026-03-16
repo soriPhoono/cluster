@@ -2,3 +2,9 @@ reverse-proxy:
   repo: cluster
   branch: main
   compose_file: docker/stacks/traefik/docker-compose.yml
+
+pihole:
+  repo: cluster
+  branch: main
+  compose_file: stacks/pihole/docker-compose.yml
+
