@@ -28,9 +28,7 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
-        delay: 5s
         max_attempts: 3
-        window: 120s
 
   socket-proxy:
     image: tecnativa/docker-socket-proxy:latest
@@ -50,6 +48,9 @@ services:
       placement:
         constraints:
           - node.role == manager
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
 
 secrets:
   age:
