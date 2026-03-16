@@ -16,32 +16,13 @@ services:
       - source: config
         target: /app/config.yml
         mode: 256
-    environment:
-      SOPS_AGE_KEY_FILE: /secrets/age.key
-      DOCKER_HOST: tcp://socket-proxy:2375
-
-      DOMAIN_NAME: cryptic-coders.net
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
-
-  socket-proxy:
-    image: tecnativa/docker-socket-proxy:latest
-    environment:
-      - TZ=America/Chicago
-      - INFO=1
-      - SERVICES=1
-      - NETWORKS=1
-      - SECRETS=1
-      - CONFIGS=1
-      - POST=1 # Required for swarm-cd to deploy stacks
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      SOPS_AGE_KEY_FILE: /secrets/age.key
+      DOCKER_HOST: unix:///var/run/docker.sock
+
+      DOMAIN_NAME: cryptic-coders.net
     deploy:
       replicas: 1
       placement:

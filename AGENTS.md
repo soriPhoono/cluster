@@ -32,7 +32,9 @@ When modifying or adding stacks in `docker/stacks/`, agents **MUST** adhere to t
 1. **Image Pinning**: Always use a specific version tag or digest. Never use `latest`.
 1. **Resource Limits**: Explicitly define `reservations` and `limits` for CPU/Memory in the `deploy` section of the compose file.
 1. **Network Isolation**: Use internal overlay networks for service-to-service communication. Only expose services through the **Traefik** reverse proxy using labels.
-1. **Security**: Avoid exposing the Docker socket directly. Use the defined `socket-proxy` (TCP endpoint) for any service that needs to communicate with the Docker API.
+1. **Security**: Mount the Docker socket (`/var/run/docker.sock`) directly to services that require cluster orchestration (e.g., Traefik, swarm-cd).
+   - **Persistence**: Ensure proper read/write permissions. Most infrastructure services (like Traefik) MUST mount the socket as read-only (`ro`).
+   - **Management**: Only core management/deployment services (like `swarm-cd`) should be granted read-write access to the socket.
 
 ## 🛠️ Essential Agent Tools
 

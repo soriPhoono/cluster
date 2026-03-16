@@ -9,8 +9,8 @@ services:
       # Entrypoints Redirection (HTTP to HTTPS)
       - --entryPoints.web.http.redirections.entrypoint.to=websecure
       - --entryPoints.web.http.redirections.entrypoint.permanent=true
-      # Docker Swarm Provider (using socket-proxy)
-      - --providers.swarm.endpoint=tcp://socket-proxy:2375
+      # Docker Swarm Provider (direct socket access)
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
       - --providers.swarm.watch=true
       - --providers.swarm.exposedByDefault=false
       - --providers.swarm.network=reverse-proxy_public
@@ -44,10 +44,10 @@ services:
         mode: ingress
     networks:
       - public
-      - socket-internal
     secrets:
       - cf_api_token
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-certs:/letsecrypt
     environment:
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_api_token
@@ -59,9 +59,7 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
-        delay: 5s
         max_attempts: 3
-        window: 120s
       labels:
         - traefik.enable=true
         - traefik.http.routers.traefik.rule=Host(`proxy.admin.${DOMAIN_NAME}`)
@@ -69,29 +67,6 @@ services:
         - traefik.http.routers.traefik.service=api@internal
         - traefik.http.routers.traefik.tls.certresolver=dnsresolver
         - traefik.http.services.traefik.loadbalancer.server.port=8080
-
-  socket-proxy:
-    image: tecnativa/docker-socket-proxy:latest
-    environment:
-      - SWARM=1 # Allow access to swarm info
-      - SERVICES=1 # Allow access to services
-      - TASKS=1 # Allow access to tasks
-      - NETWORKS=1 # Allow access to networks
-      - NODES=1 # Allow access to nodes
-      - CONFIGS=1 # Allow access to configs
-      - SECRETS=1 # Allow access to secrets
-      - VOLUMES=0 # Deny access to volumes
-      - POST=0 # Deny POST requests (Read-only)
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - socket-internal
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
 
 volumes:
   traefik-certs:
@@ -104,6 +79,3 @@ networks:
   public:
     driver: overlay
     attachable: true
-  socket-internal:
-    driver: overlay
-    internal: true

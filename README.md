@@ -38,7 +38,7 @@ graph TD
 
 ### Hardware Tiers (In Progress)
 
-1. **Proxmox Tier**: Virtualized LXC nodes on Proxmox VE. Hosts the Swarm managers and core infrastructure (Traefik, Socket Proxy).
+1. **Proxmox Tier**: Virtualized LXC nodes on Proxmox VE. Hosts the Swarm managers and core infrastructure (Traefik).
 1. **Edge Tier**: A cluster of **Raspberry Pi 5** nodes. Optimized for distributed, low-power horizontal scaling of web services.
 1. **AI Tier**: Dedicated hardware (e.g., Mac Studio) for hosting local large language models (LLMs) and supporting agentic workflows.
 1. **Gaming Tier**: High-performance nodes acting as game server runners.
