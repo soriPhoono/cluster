@@ -37,10 +37,10 @@ This TODO outlines the steps necessary to establish a production-quality Swarm c
 
 ## 5. Ingress & Core Services Deployment
 
-- [ ] **Traefik Deployment**: Deploy the `stacks/traefik/docker-compose.yml` stack.
-  - Verify Cloudflare DNS challenge credentials are working.
-  - Ensure Traefik can fetch certificates for the configured `DOMAIN_NAME`.
-- [ ] **Verify Ingress**: Test the Traefik dashboard using the securely routed `proxy.admin.ts...` hostname.
+- [x] **Traefik Deployment**: Deploy the `stacks/traefik/docker-compose.yml` stack.
+  - [x] Verify Cloudflare DNS challenge credentials are working.
+  - [x] Ensure Traefik can fetch certificates for the configured `DOMAIN_NAME`.
+- [x] **Verify Ingress**: Test the Traefik dashboard using the securely routed `proxy.admin.ts...` hostname.
 
 ## 6. Application Migration (K8s to Swarm)
 

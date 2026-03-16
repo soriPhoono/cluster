@@ -16,6 +16,8 @@ services:
     networks:
       - seerr
       - reverse-proxy_public
+    dns:
+      - 100.100.100.100
     deploy:
       mode: replicated
       replicas: 1
