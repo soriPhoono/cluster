@@ -8,6 +8,9 @@ on:
         description: "Any additional context from the request"
         required: false
 
+permissions:
+  contents: read
+
 concurrency:
   group: "${{ github.workflow }}-review-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}"
   cancel-in-progress: true
