@@ -68,6 +68,8 @@ services:
         - traefik.http.routers.traefik.entrypoints=websecure
         - traefik.http.routers.traefik.service=api@internal
         - traefik.http.routers.traefik.tls.certresolver=dnsresolver
+        - traefik.http.routers.traefik.tls.domains[0].main=admin.${DOMAIN_NAME}
+        - traefik.http.routers.traefik.tls.domains[0].sans=*.admin.${DOMAIN_NAME}
         - traefik.http.services.traefik.loadbalancer.server.port=8080
 
 volumes:
