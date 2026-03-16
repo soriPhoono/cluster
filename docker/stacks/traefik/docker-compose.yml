@@ -23,7 +23,7 @@ services:
       # 2. DNS Challenge (Cloudflare - for local/private domains)
       - --certificatesresolvers.dnsresolver.acme.dnschallenge=true
       - --certificatesresolvers.dnsresolver.acme.dnschallenge.provider=cloudflare
-      - --certificatesresolvers.dnsresolver.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      - --certificatesresolvers.dnsresolver.acme.dnschallenge.resolvers=100.100.100.100:53
       - --certificatesresolvers.dnsresolver.acme.email=soriphoono@gmail.com
       - --certificatesresolvers.dnsresolver.acme.storage=/letsecrypt/acme.json
       # API/Dashboard
