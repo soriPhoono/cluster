@@ -20,19 +20,9 @@ services:
       placement:
         constraints:
           - node.platform.os == linux
-      # Security enhancement: resource limits to prevent runaway resource consumption
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 256M
-        reservations:
-          cpus: "0.10"
-          memory: 128M
       restart_policy:
         condition: on-failure
-        delay: 5s
         max_attempts: 3
-        window: 120s
   portainer:
     image: portainer/portainer-ee:sts
     command: -H tcp://tasks.agent:9001 --tlsskipverify
@@ -49,27 +39,15 @@ services:
       placement:
         constraints:
           - node.role == manager
-      # Security enhancement: resource limits
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: 512M
-        reservations:
-          cpus: "0.10"
-          memory: 256M
       restart_policy:
         condition: on-failure
-        delay: 5s
         max_attempts: 3
-        window: 120s
       labels:
         - traefik.enable=true
-        - traefik.docker.network=reverse-proxy_public
         - traefik.http.routers.portainer.rule=Host(`portainer.admin.${DOMAIN_NAME}`)
         - traefik.http.routers.portainer.entrypoints=websecure
         - traefik.http.routers.portainer.tls.certresolver=dnsresolver
-        - traefik.http.routers.portainer.service=portainer@swarm
-        - traefik.http.services.portainer.loadbalancer.server.port=9000
+        - traefik.http.services.portainer.loadbalancer.server.port=9443
 networks:
   agent_network:
     driver: overlay

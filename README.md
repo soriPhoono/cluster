@@ -1,10 +1,10 @@
 # Data Fortress: Multi-Tier Swarm & Game Cluster
 
-Welcome to the **Data Fortress**, a high-performance, resource-efficient, and fully declarative home lab environment currently transitioning from Kubernetes to Docker Swarm.
+Welcome to the **Data Fortress**, a high-performance, resource-efficient, and fully declarative home lab environment powered by Docker Swarm. This repository serves as the single source of truth for the entire cluster's configuration and deployment.
 
-## 🏗️ Architecture Overview (Target State)
+## 🏗️ Architecture Overview
 
-The Data Fortress is designed to be distributed across specialized hardware tiers to optimize for CPU, RAM, and specialized AI/Gaming workloads. See `TODO.md` for the current migration status.
+The Data Fortress is distributed across specialized hardware tiers to optimize for CPU, RAM, and specialized AI/Gaming workloads.
 
 ```mermaid
 graph TD
@@ -36,55 +36,41 @@ graph TD
     G -- Hosts --> GS
 ```
 
-### Hardware Tiers (In Progress)
+### Hardware Tiers
 
-1. **Proxmox Tier**: Virtualized LXC nodes on Proxmox VE. Hosts the Swarm managers and core infrastructure (Traefik).
-1. **Edge Tier**: A cluster of **Raspberry Pi 5** nodes. Optimized for distributed, low-power horizontal scaling of web services.
-1. **AI Tier**: Dedicated hardware (e.g., Mac Studio) for hosting local large language models (LLMs) and supporting agentic workflows.
-1. **Gaming Tier**: High-performance nodes acting as game server runners.
+1.  **Proxmox Tier**: Virtualized LXC nodes on Proxmox VE. Hosts the Swarm managers and core infrastructure (Traefik, Portainer).
+2.  **Edge Tier**: A cluster of **Raspberry Pi 5** nodes. Optimized for distributed, low-power horizontal scaling of web services.
+3.  **AI Tier**: Dedicated hardware (e.g., Mac Studio) for hosting local large language models (LLMs) and supporting agentic workflows.
+4.  **Gaming Tier**: High-performance nodes acting as game server runners.
 
 ## 🚀 GitOps & Automation
 
-This cluster utilizes a **GitOps** workflow for seamless deployments:
+This cluster utilizes a **GitOps** workflow for seamless, declarative deployments:
 
-- **`swarm-cd`**: Automatically reconciles stack definitions from this repository to the Swarm cluster.
-- **Cluster Configuration**: Located in `docker/clusters/adams/`, defining the source of truth for deployed services via `stacks.yml`.
-- **Infrastructure as Code**: All services are defined as Docker Compose stacks in `docker/stacks/`.
-
-## 📂 Repository Structure
-
-| Path | Purpose |
-| ------------ | --------------------------------------------- |
-| `docker/stacks/` | Declarative Docker Compose stack definitions. |
-| `docker/clusters/` | Cluster-specific configurations and GitOps definitions. |
-| `lancedb/` | Vector database storage for agent memory. |
-| `TODO.md` | Migration roadmap from Kubernetes (Talos) to Swarm. |
+-   **`swarm-cd`**: Automatically reconciles stack definitions from this repository to the Swarm cluster.
+-   **Cluster Configuration**: Located in `docker/clusters/adams/`, defining the source of truth for deployed services via `stacks.yml`.
+-   **Infrastructure as Code**: All services are defined as Docker Compose stacks in `docker/stacks/`.
 
 ## 🔐 Secret Management
 
 We maintain a strict distinction between developer and service secrets:
 
-- **Developer Secrets**: Managed via environment variables and `.envrc` (using `direnv`).
-- **Service Secrets**: Encrypted via `sops` or managed as native Docker secrets. See stack definitions for specific implementations.
+-   **Developer Secrets**: Managed as local environment variables (e.g., in a `.env` file or shell session). these are for tools interacting with the cluster or external APIs.
+-   **Service Secrets**: Encrypted via `sops` or managed as native Docker secrets. Service-specific secrets are located within their respective stack directories.
 
 ## 🛠️ Getting Started
 
-### 1. Enter the Environment
+### 1. Environment Setup
 
-Ensure you have `direnv` and `docker` installed.
-
-```bash
-direnv allow
-```
+Ensure you have `docker`, `sops`, and `trunk` installed.
 
 ### 2. Management Tools
 
-- `docker`: Directly interact with the Swarm manager.
-- `sops`: For secret encryption/decryption (requires age key).
-- `trunk`: For linting and formatting.
+-   `docker`: Directly interact with the Swarm manager.
+-   `sops`: For secret encryption/decryption (requires a configured age key).
+-   [trunk](https://trunk.io): For linting and formatting compliance across the repository.
 
-______________________________________________________________________
+---
 
 For detailed contribution guidelines, see [**`CONTRIBUTING.md`**](CONTRIBUTING.md).
 For AI Agent specific context, see [**`AGENTS.md`**](AGENTS.md).
-

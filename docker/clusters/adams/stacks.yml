@@ -2,3 +2,8 @@ reverse-proxy:
   repo: cluster
   branch: main
   compose_file: docker/stacks/traefik/docker-compose.yml
+
+portainer:
+  repo: cluster
+  branch: main
+  compose_file: docker/stacks/portainer/docker-compose.yml
