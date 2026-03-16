@@ -6,5 +6,4 @@ reverse-proxy:
 pihole:
   repo: cluster
   branch: main
-  compose_file: stacks/pihole/docker-compose.yml
-
+  compose_file: docker/stacks/pihole/docker-compose.yml
