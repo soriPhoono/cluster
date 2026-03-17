@@ -30,10 +30,14 @@ fi
 : "${N8N_DB_USER:=n8n}"
 : "${N8N_DB_NAME:=n8n}"
 
+echo "==> Debug: Testing connection to ${PGHOST}:${PGPORT}..."
+echo "==> Debug: Resolving ${PGHOST}..."
+getent hosts "$PGHOST" || echo "WARNING: Cannot resolve ${PGHOST}"
+
 echo "==> Waiting for PostgreSQL at ${PGHOST}:${PGPORT}..."
-until pg_isready -h "$PGHOST" -p "$PGPORT" -U postgres -q; do
+until pg_isready -h "$PGHOST" -p "$PGPORT" -U postgres; do
   sleep 5
-  echo "Still waiting for PostgreSQL at ${PGHOST}:${PGPORT}..."
+  echo "Still waiting for PostgreSQL at ${PGHOST}:${PGPORT}... (Checking network shared-services_postgres)"
 done
 echo "==> PostgreSQL is ready."
 
@@ -68,3 +72,4 @@ psql -v ON_ERROR_STOP=1 -h "$PGHOST" -p "$PGPORT" -U postgres -d "$N8N_DB_NAME" 
 EOSQL
 
 echo "==> Migration complete. Database '${N8N_DB_NAME}' is ready for user '${N8N_DB_USER}'."
+
