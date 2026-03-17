@@ -16,7 +16,7 @@ x-n8n-shared: &n8n-shared
   environment:
     # --- Database (shared PostgreSQL, provisioned by n8n-db-migrate) ---
     - DB_TYPE=postgresdb
-    - DB_POSTGRESDB_HOST=shared-services_postgres
+    - DB_POSTGRESDB_HOST=postgres
     - DB_POSTGRESDB_PORT=5432
     - DB_POSTGRESDB_DATABASE=n8n
     - DB_POSTGRESDB_USER=n8n
@@ -62,7 +62,7 @@ services:
     image: postgres:18-alpine
     entrypoint: ["bash", "/scripts/migrate-n8n-db.sh"]
     environment:
-      - PGHOST=shared-services_postgres
+      - PGHOST=postgres
       - PGPORT=5432
       - PGPASSWORD_FILE=/run/secrets/postgres_root_password
       - N8N_DB_USER=n8n
