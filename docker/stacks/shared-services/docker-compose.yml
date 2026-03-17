@@ -41,7 +41,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.adminer.rule=Host(`db.admin.${DOMAIN_NAME}`)"
-        - "traefik.http.routers.adminer.entrypoints=websecure"
+        - "traefik.http.routers.adminer.tls.certresolver=dnsresolver"
         - "traefik.http.routers.adminer.tls.certresolver=dnschallenge"
         - "traefik.http.services.adminer.loadbalancer.server.port=8080"
 
