@@ -15,4 +15,4 @@ services:
       - /dev/dri/card1
       - /dev/uinput
       - /dev/uhid
-    restart: on-failure
+    restart: unless-stopped
