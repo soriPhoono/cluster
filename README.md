@@ -4,44 +4,45 @@ Welcome to the **Data Fortress**, a high-performance, resource-efficient, and fu
 
 ## 🏗️ Architecture Overview
 
-The Data Fortress is distributed across specialized hardware tiers to optimize for CPU, RAM, and specialized AI/Gaming workloads.
+The Data Fortress is distributed across specialized hardware tiers to optimize for productivity, privacy, and gaming, leveraging a mix of local resources and frontier AI intelligence.
 
 ```mermaid
 graph TD
-    subgraph "Proxmox Tier (LXC Nodes)"
-        M[Swarm Managers]
-        P[Management UI]
-        CS[Core Services]
+    subgraph "Workstation Tier (EndeavourOS)"
+        PC["Gaming & Dev Workstation"]
+        PH["Pi-Hole (Docker)"]
+        VM["VPS Manager Node (LXC)"]
+        VW["VPS Worker Node (LXC)"]
     end
 
-    subgraph "Edge Tier (Raspberry Pi 5 Cluster)"
-        W[Swarm Workers]
-        LW[Lightweight Workloads]
+    subgraph "Edge Tier (Mini-PC Cluster)"
+        E1["Node 1 (Debian x86) Manager/Worker"]
+        E2["Node 2 (Debian x86) Manager/Worker"]
+        E3["Node 3 (Debian x86) Worker Only"]
+        PW["Pterodactyl Wings (Local Game Servers)"]
     end
 
-    subgraph "AI Tier (Mac Studio)"
-        LLM[Self-Hosted LLMs]
-        AI[AI/ML Agents]
+    subgraph "AI Cluster (Framework 128GB)"
+        OL["Ollama (Private/Uncensored)"]
+        N8["n8n Integration"]
+        ext["Frontier Intelligence (Gemini, Claude, Venice)"]
     end
 
-    subgraph "Gaming Tier (Mini PCs)"
-        G[Game Runners]
-        GS[Private Game Servers]
-    end
-
-    M -- Orchestrates --> W
-    M -- Orchestrates --> LW
-    M -- Orchestrates --> LLM
-    P -- Manages --> G
-    G -- Hosts --> GS
+    PC -- Runs --> PH
+    PC -- Runs --> VM
+    PC -- Runs --> VW
+    VM -- Orchestrates --> E1
+    VM -- Orchestrates --> E2
+    VM -- Orchestrates --> E3
+    E3 -- Hosts --> PW
+    OL -- Connects --> N8
 ```
 
 ### Hardware Tiers
 
-1.  **Proxmox Tier**: Virtualized LXC nodes on Proxmox VE. Hosts the Swarm managers and core infrastructure (Traefik, Portainer).
-2.  **Edge Tier**: A cluster of **Raspberry Pi 5** nodes. Optimized for distributed, low-power horizontal scaling of web services.
-3.  **AI Tier**: Dedicated hardware (e.g., Mac Studio) for hosting local large language models (LLMs) and supporting agentic workflows.
-4.  **Gaming Tier**: High-performance nodes acting as game server runners.
+1.  **Workstation Tier**: A high-spec EndeavourOS desktop serving as a primary workstation and gaming PC. It hosts LXC containers for core management (`vps-manager`, `vps-worker`) and network services (`pi-hole` on Docker).
+2.  **Edge Tier**: A cluster of three **Debian x86 Mini-PCs** (16GB RAM each). Nodes 1 and 2 operate as both Swarm managers and workers, while Node 3 acts as a dedicated worker hosting **Pterodactyl Wings** for local game server deployment.
+3.  **AI Cluster**: A **Framework 128GB** laptop running **Ollama** for free, private, and uncensored agentic workflows. This local cluster integrates with **n8n** and leverages external frontier intelligence from **Gemini API**, **Claude (Anthropic)**, **Venice AI** (Web3 integrated), and **OpenRouter**.
 
 ## 🚀 GitOps & Automation
 

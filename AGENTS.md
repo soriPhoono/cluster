@@ -36,7 +36,22 @@ Pre-configured tools that agents should leverage:
 -   **`docker`**: Primary interface for Swarm management (`docker stack deploy`, `docker stack ps`).
 -   **`swarm-cd`**: The GitOps controller. To trigger deployments, update the stack definition or `docker/clusters/adams/stacks.yml`.
 -   **`sops`**: Used for editing and rotating service secrets.
--   [**`trunk`**](https://trunk.io): Used for linting and formatting compliance.
+
+## 🧠 AI Infrastructure & Intelligence
+
+The Data Fortress leverages a hybrid AI model, combining local private resources with frontier external intelligence.
+
+### 1. Local AI Cluster (Private & Uncensored)
+- **Hardware**: Framework Laptop (128GB RAM).
+- **Core Engine**: **Ollama** hosting various models for private, uncensored access.
+- **Workflow Automation**: Integrated with **n8n** for agentic task orchestration.
+
+### 2. Frontier Intelligence (Global Scale)
+For broad or highly targeted intelligence where privacy/censorship constraints are acceptable:
+- **Gemini API**: Utilized for frontier broad intelligence and deep reasoning.
+- **Claude (Anthropic)**: Leveraged for frontier targeted intelligence and complex coding tasks.
+- **Venice AI**: Paid private access to frontier models, integrated with Web3 development systems.
+- **OpenRouter**: Used for general access and scaling when local/targeted systems are at capacity.
 
 ## 📈 Migration Status
-The Data Fortress has successfully transitioned from a Kubernetes (Talos) architecture to a fully declarative Docker Swarm environment. All legacy references to `socket-proxy` have been removed in favor of controlled direct socket access.
+The Data Fortress has successfully transitioned from a Kubernetes (Talos/Proxmox) architecture to a fully declarative Docker Swarm environment running on a unified EndeavourOS workstation and x86 mini-PC Edge tier.
