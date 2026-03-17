@@ -30,44 +30,6 @@ fi
 : "${N8N_DB_USER:=n8n}"
 : "${N8N_DB_NAME:=n8n}"
 
-echo "==> Debug: Network Environment..."
-echo "--- /etc/resolv.conf ---"
-cat /etc/resolv.conf
-echo "--- /etc/hosts ---"
-cat /etc/hosts
-echo "-----------------------"
-
-echo "==> Debug: Searching for PostgreSQL host..."
-# List of potential hostnames in order of probability
-POTENTIAL_HOSTS=(
-  "shared-services_postgres"
-  "postgres"
-  "shared-services-postgres"
-  "portainer_postgres"
-  "portainer"
-  "tasks.shared-services_postgres"
-  "tasks.postgres"
-  "postgres.shared-services_postgres"
-)
-
-FOUND_HOST=""
-for host in "${POTENTIAL_HOSTS[@]}"; do
-  echo "==> Debug: Testing resolution of '$host'..."
-  if getent hosts "$host" > /dev/null; then
-    echo "==> SUCCESS: Found resolvable host: $host"
-    getent hosts "$host"
-    FOUND_HOST="$host"
-    break
-  fi
-done
-
-if [ -n "$FOUND_HOST" ]; then
-  PGHOST="$FOUND_HOST"
-  echo "==> Using discovered host: $PGHOST"
-else
-  echo "==> WARNING: No hosts from the discovery list resolved. Falling back to default: $PGHOST"
-fi
-
 echo "==> Waiting for PostgreSQL at ${PGHOST}:${PGPORT}..."
 until pg_isready -h "$PGHOST" -p "$PGPORT" -U postgres; do
   sleep 5
