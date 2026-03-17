@@ -62,7 +62,7 @@ services:
     image: postgres:18-alpine
     entrypoint: ["bash", "/scripts/migrate-n8n-db.sh"]
     environment:
-      - PGHOST=postgres
+      - PGHOST=shared-services_postgres
       - PGPORT=5432
       - PGPASSWORD_FILE=/run/secrets/postgres_root_password
       - N8N_DB_USER=n8n
