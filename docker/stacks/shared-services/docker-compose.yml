@@ -1,4 +1,6 @@
 services:
+  # Relational databases
+
   postgres:
     image: postgres:18
     environment:
@@ -23,6 +25,8 @@ services:
       restart_policy:
         condition: on-failure
 
+  # Relational database frontend
+
   adminer:
     image: adminer:latest
     networks:
@@ -43,6 +47,7 @@ services:
         - traefik.http.routers.adminer.tls.certresolver=dnsresolver
         - traefik.http.services.adminer.loadbalancer.server.port=8080
 
+  # NoSQL databases
 
   mongodb:
     image: mongo:8.0-noble
@@ -63,6 +68,7 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
+
 volumes:
   mongodb_data:
   postgres_data:
