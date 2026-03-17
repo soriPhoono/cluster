@@ -26,16 +26,31 @@ services:
 
   adminer:
     image: adminer:latest
-    restart: unless-stopped
     networks:
       - postgres
       - reverse-proxy_public
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.adminer.rule=Host(`db.admin.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.adminer.entrypoints=websecure"
-      - "traefik.http.routers.adminer.tls.certresolver=dnschallenge"
-      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.adminer.rule=Host(`db.admin.${DOMAIN_NAME}`)"
+        - "traefik.http.routers.adminer.entrypoints=websecure"
+        - "traefik.http.routers.adminer.tls.certresolver=dnschallenge"
+        - "traefik.http.services.adminer.loadbalancer.server.port=8080"
 
 volumes:
   postgres_data:
