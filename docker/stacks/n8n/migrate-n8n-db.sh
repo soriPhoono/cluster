@@ -25,7 +25,7 @@ if [ -f "${N8N_DB_PASSWORD_FILE:-}" ]; then
 fi
 
 # Defaults
-: "${PGHOST:=postgres}"
+: "${PGHOST:=shared-services_postgres}"
 : "${PGPORT:=5432}"
 : "${N8N_DB_USER:=n8n}"
 : "${N8N_DB_NAME:=n8n}"
