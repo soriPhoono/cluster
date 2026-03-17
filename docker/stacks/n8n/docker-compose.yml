@@ -68,8 +68,10 @@ services:
       - N8N_DB_USER=n8n
       - N8N_DB_NAME=n8n
       - N8N_DB_PASSWORD_FILE=/run/secrets/n8n_db_password
-    volumes:
-      - ./migrate-n8n-db.sh:/scripts/migrate-n8n-db.sh:ro
+    configs:
+      - source: migrate_n8n_db
+        target: /scripts/migrate-n8n-db.sh
+        mode: 0555
     networks:
       - shared-services_postgres
     secrets:
@@ -257,6 +259,13 @@ secrets:
   # Shared-services root password — needed by the migration container
   postgres_root_password:
     file: ../shared-services/secrets/postgres_root_password
+
+# ---------------------------------------------------------------------------
+# Configs
+# ---------------------------------------------------------------------------
+configs:
+  migrate_n8n_db:
+    file: ./migrate-n8n-db.sh
 
 # ---------------------------------------------------------------------------
 # Networks
