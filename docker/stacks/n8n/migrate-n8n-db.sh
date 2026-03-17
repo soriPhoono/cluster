@@ -32,7 +32,8 @@ fi
 
 echo "==> Waiting for PostgreSQL at ${PGHOST}:${PGPORT}..."
 until pg_isready -h "$PGHOST" -p "$PGPORT" -U postgres -q; do
-  sleep 1
+  sleep 5
+  echo "Still waiting for PostgreSQL at ${PGHOST}:${PGPORT}..."
 done
 echo "==> PostgreSQL is ready."
 
