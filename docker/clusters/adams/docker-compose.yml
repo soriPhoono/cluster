@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   swarm-cd:
     image: ghcr.io/m-adawi/swarm-cd:latest
