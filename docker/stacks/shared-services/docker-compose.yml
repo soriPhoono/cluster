@@ -35,13 +35,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 128M
-        reservations:
-          cpus: '0.1'
-          memory: 64M
       restart_policy:
         condition: on-failure
         max_attempts: 3
