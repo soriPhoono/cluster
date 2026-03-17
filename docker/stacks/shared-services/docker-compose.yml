@@ -4,7 +4,7 @@ services:
     environment:
       - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_root_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - postgres
     secrets:

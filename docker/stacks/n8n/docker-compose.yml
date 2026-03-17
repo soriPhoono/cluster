@@ -216,7 +216,7 @@ services:
       - POSTGRES_PASSWORD_FILE=/run/secrets/n8n_agent_postgres_password
       - POSTGRES_DB=n8n_agents
     volumes:
-      - agent_postgres_data:/var/lib/postgresql/data
+      - agent_postgres_data:/var/lib/postgresql
     networks:
       - internal
     secrets:
