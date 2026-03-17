@@ -12,7 +12,7 @@
 # Shared YAML anchors
 # ---------------------------------------------------------------------------
 x-n8n-shared: &n8n-shared
-  image: docker.n8n.io/n8nio/n8n:latest
+  image: n8nio/n8n:latest
   environment:
     # --- Database (shared PostgreSQL, provisioned by n8n-db-migrate) ---
     - DB_TYPE=postgresdb
