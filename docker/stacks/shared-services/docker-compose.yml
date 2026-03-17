@@ -37,11 +37,11 @@ services:
       restart_policy:
         condition: on-failure
       labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.adminer.rule=Host(`db.admin.${DOMAIN_NAME}`)"
-        - "traefik.http.routers.adminer.tls.certresolver=dnsresolver"
-        - "traefik.http.routers.adminer.tls.certresolver=dnschallenge"
-        - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+        - traefik.enable=true
+        - traefik.http.routers.adminer.rule=Host(`db.admin.${DOMAIN_NAME}`)
+        - traefik.http.routers.adminer.entrypoints=websecure
+        - traefik.http.routers.adminer.tls.certresolver=dnsresolver
+        - traefik.http.services.adminer.loadbalancer.server.port=8080
 
 volumes:
   postgres_data:
