@@ -1,3 +1,13 @@
+shepherd:
+  repo: cluster
+  branch: main
+  compose_file: docker/stacks/shepherd/docker-compose.yml
+
+shared-services:
+  repo: cluster
+  branch: main
+  compose_file: docker/stacks/shared-services/docker-compose.yml
+
 reverse-proxy:
   repo: cluster
   branch: main
@@ -7,8 +17,3 @@ portainer:
   repo: cluster
   branch: main
   compose_file: docker/stacks/portainer/docker-compose.yml
-
-shared-services:
-  repo: cluster
-  branch: main
-  compose_file: docker/stacks/shared-services/docker-compose.yml

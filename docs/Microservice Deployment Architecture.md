@@ -27,6 +27,7 @@ Deployed automatically via GitOps. These are foundational stacks that the cluste
 | `reverse-proxy` (Traefik) | Ingress, TLS termination, routing |
 | `portainer` | Cluster management UI, GitOps engine |
 | `shared-services` | Shared PostgreSQL |
+| `shepherd` | Automatic Docker image updates |
 
 Core stacks are registered in `docker/clusters/adams/stacks.yml` and reconciled by `swarm-cd`.
 

@@ -1,0 +1,14 @@
+services:
+  shepherd:
+    image: mazzolino/shepherd:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+    environment:
+      SLEEP_TIME: 1h # Check for updates every hour
