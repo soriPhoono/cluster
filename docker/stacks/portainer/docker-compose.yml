@@ -44,7 +44,7 @@ services:
         max_attempts: 3
       labels:
         - traefik.enable=true
-        - traefik.http.routers.portainer.rule=Host(`portainer.admin.${DOMAIN_NAME}`)
+        - traefik.http.routers.portainer.rule=Host(`admin.${DOMAIN_NAME}`)
         - traefik.http.routers.portainer.entrypoints=websecure
         - traefik.http.routers.portainer.tls.certresolver=dnsresolver
         - traefik.http.services.portainer.loadbalancer.server.port=9000
