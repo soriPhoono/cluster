@@ -71,7 +71,7 @@ services:
     configs:
       - source: migrate_n8n_db
         target: /scripts/migrate-n8n-db.sh
-        mode: 0555
+        mode: 0755
     networks:
       - shared-services_postgres
     secrets:
@@ -92,8 +92,6 @@ services:
       - internal
       - shared-services_postgres
       - reverse-proxy_public
-    dns:
-      - 100.100.100.100
     deploy:
       mode: replicated
       replicas: 1
