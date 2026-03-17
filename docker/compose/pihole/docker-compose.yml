@@ -2,7 +2,7 @@ services:
   pihole:
     image: pihole/pihole:2025.11.1
     container_name: pihole
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - 53:53/tcp
       - 53:53/udp
