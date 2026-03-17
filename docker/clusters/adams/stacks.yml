@@ -1,8 +1,3 @@
-reverse-proxy:
-  repo: cluster
-  branch: main
-  compose_file: docker/stacks/traefik/docker-compose.yml
-
 shepherd:
   repo: cluster
   branch: main
@@ -12,8 +7,3 @@ shared-services:
   repo: cluster
   branch: main
   compose_file: docker/stacks/shared-services/docker-compose.yml
-
-portainer:
-  repo: cluster
-  branch: main
-  compose_file: docker/stacks/portainer/docker-compose.yml

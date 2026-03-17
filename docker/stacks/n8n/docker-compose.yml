@@ -84,6 +84,27 @@ services:
         condition: none
 
   # -------------------------------------------------------------------------
+  # Satellite: Redis (Bull queue backend)
+  # -------------------------------------------------------------------------
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  # -------------------------------------------------------------------------
   # Core: n8n main server
   # -------------------------------------------------------------------------
   n8n:
@@ -154,27 +175,6 @@ services:
       - runners_auth_token
     depends_on:
       - n8n-worker
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
-
-  # -------------------------------------------------------------------------
-  # Satellite: Redis (Bull queue backend)
-  # -------------------------------------------------------------------------
-  redis:
-    image: redis:alpine
-    volumes:
-      - redis_data:/data
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
     deploy:
       mode: replicated
       replicas: 1
