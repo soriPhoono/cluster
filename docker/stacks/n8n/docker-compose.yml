@@ -12,7 +12,7 @@
 # Shared YAML anchors
 # ---------------------------------------------------------------------------
 x-n8n-shared: &n8n-shared
-  image: docker.n8n.io/n8nio/n8n:2.11.4
+  image: docker.n8n.io/n8nio/n8n:latest
   environment:
     # --- Database (shared PostgreSQL, provisioned by n8n-db-migrate) ---
     - DB_TYPE=postgresdb
@@ -46,7 +46,7 @@ x-n8n-shared: &n8n-shared
     - redis
 
 x-runner: &runner
-  image: n8nio/runners:2.11.4
+  image: n8nio/runners:latest
   networks:
     - internal
 
@@ -59,7 +59,7 @@ services:
   # Runs once, then exits. All n8n services depend on this completing.
   # -------------------------------------------------------------------------
   n8n-db-migrate:
-    image: postgres:16
+    image: postgres:18-alpine
     entrypoint: ["bash", "/scripts/migrate-n8n-db.sh"]
     environment:
       - PGHOST=postgres
@@ -165,7 +165,7 @@ services:
   # Satellite: Redis (Bull queue backend)
   # -------------------------------------------------------------------------
   redis:
-    image: redis:7-alpine
+    image: redis:alpine
     volumes:
       - redis_data:/data
     networks:
@@ -187,7 +187,7 @@ services:
   # One instance shared by all agents that need document storage.
   # -------------------------------------------------------------------------
   n8n-agent-mongo:
-    image: mongo:7
+    image: mongo:noble
     volumes:
       - agent_mongo_data:/data/db
     networks:
@@ -210,7 +210,7 @@ services:
   # Separate from the shared-services postgres — this is agent-private data.
   # -------------------------------------------------------------------------
   n8n-agent-postgres:
-    image: postgres:16-alpine
+    image: postgres:18
     environment:
       - POSTGRES_USER=n8n_agent
       - POSTGRES_PASSWORD_FILE=/run/secrets/n8n_agent_postgres_password

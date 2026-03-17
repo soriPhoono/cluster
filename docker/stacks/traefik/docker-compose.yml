@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.6.9 # Base version of v3 that supports docker API 1.44
+    image: traefik:latest # Base version of v3 that supports docker API 1.44
     command:
       # Entrypoints
       - --entryPoints.web.address=:80
