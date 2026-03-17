@@ -42,10 +42,8 @@ x-n8n-shared: &n8n-shared
     - runners_auth_token
     - n8n_db_password
   depends_on:
-    redis:
-      condition: service_healthy
-    n8n-db-migrate:
-      condition: service_completed_successfully
+    - n8n-db-migrate
+    - redis
 
 x-runner: &runner
   image: n8nio/runners:2.11.4
