@@ -22,7 +22,6 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
-        max_attempts: 3
 
   adminer:
     image: adminer:latest
@@ -37,7 +36,6 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
-        max_attempts: 3
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.adminer.rule=Host(`db.admin.${DOMAIN_NAME}`)"

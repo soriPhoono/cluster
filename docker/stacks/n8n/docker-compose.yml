@@ -102,7 +102,6 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-        max_attempts: 3
 
   # -------------------------------------------------------------------------
   # Core: n8n main server
@@ -121,7 +120,6 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
-        max_attempts: 3
       labels:
         - traefik.enable=true
         - traefik.http.routers.n8n.rule=Host(`automation.ts.cryptic-coders.net`)
@@ -142,7 +140,6 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-        max_attempts: 3
 
   # -------------------------------------------------------------------------
   # Satellite: Task runner for n8n main (JS/Python code execution)
@@ -161,7 +158,6 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-        max_attempts: 3
 
   # -------------------------------------------------------------------------
   # Satellite: Task runner for worker
@@ -180,7 +176,6 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-        max_attempts: 3
 
   # -------------------------------------------------------------------------
   # Satellite: MongoDB for agent workflows
@@ -202,7 +197,6 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-        max_attempts: 3
 
   # -------------------------------------------------------------------------
   # Satellite: PostgreSQL for agent workflows
@@ -231,7 +225,6 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-        max_attempts: 3
 
 # ---------------------------------------------------------------------------
 # Volumes

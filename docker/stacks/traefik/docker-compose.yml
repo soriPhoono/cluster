@@ -59,7 +59,6 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
-        max_attempts: 3
       labels:
         - traefik.enable=true
         - traefik.http.routers.traefik.rule=Host(`proxy.admin.${DOMAIN_NAME}`)
