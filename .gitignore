@@ -1,8 +1,4 @@
-.direnv/
-
-.pre-commit-config.yaml
-
 .gemini/
 gha-creds-*.json
 
-komodo/
+.env

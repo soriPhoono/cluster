@@ -8,50 +8,55 @@ This project is designed with **Agent-First** automation in mind. The repository
 
 ## 🏗️ Architectural Constraints
 
-When modifying or adding stacks in `docker/stacks/`, agents **MUST** adhere to these rules:
+When modifying or adding workloads to this repository, agents **MUST** adhere to these rules:
 
 1.  **Image Pinning**: Always use a specific version tag or digest. Never use `latest`.
-2.  **Network Isolation**: Use internal overlay networks for service-to-service communication. Only expose services through the **Traefik** reverse proxy using labels.
-3.  **Security**:
-    -   Mount the Docker socket (`/var/run/docker.sock`) directly only for services that require cluster orchestration.
-    -   **Permissions**: Most infrastructure services (like Traefik) **MUST** mount the socket as read-only (`ro`).
-    -   **Management**: Only core management/deployment services (like `swarm-cd`) should be granted read-write access to the socket.
+2.  **GitOps Driven**: All configuration must be defined declaratively in this repository and reconciled by **FluxCD**. Manual cluster changes are strictly forbidden.
+3.  **Namespace Isolation**: Workloads must be grouped logically into namespaces, typically defined in `infrastructure/base/namespaces`.
+4.  **Kustomize**: Rely primarily on Kustomize to structure and combine manifests (e.g. `apps/base/` and `apps/production/`).
 
 ## 🔐 Secret Management Archetypes
 
 Agents must understand the two distinct archetypes for secrets:
 
 ### 1. Developer Environment Secrets
+
 - Used for human/agent tool usage (e.g., repository API tokens, management keys).
 - **Consumption**: Managed as local environment variables (e.g., in a `.env` file or shell session).
 
-### 2. Service/Runtime Secrets (**Docker Swarm / SOPS**)
-- Used for containerized workloads at runtime.
-- **Storage**: Encrypted using `sops` within stack directories.
-- **Consumption**: Injected into Swarm services via the `secrets` section of a `docker-compose.yml`.
+### 2. Service/Runtime Secrets (**SOPS**)
+
+- Used for Kubernetes workloads at runtime.
+- **Storage**: Encrypted using **SOPS** (`.sops.yaml`) directly in the git repository. FluxCD handles decryption on the cluster side during reconciliation.
 
 ## 🛠️ Essential Agent Tools
 
 Pre-configured tools that agents should leverage:
--   **`docker`**: Primary interface for Swarm management (`docker stack deploy`, `docker stack ps`).
--   **`swarm-cd`**: The GitOps controller. To trigger deployments, update the stack definition or `docker/clusters/adams/stacks.yml`.
--   **`sops`**: Used for editing and rotating service secrets.
+
+- **`kubectl` / `k9s`**: Primary interface for visualizing cluster state.
+- **`flux`**: The GitOps controller used for bootstrapping and reconciling. Example components include `kustomizations` in `clusters/homelab/`.
+- **`kustomize`**: Used heavily to assemble the YAML structures.
+- **`sops`**: Used for editing and rotating service secrets within the repository structure.
 
 ## 🧠 AI Infrastructure & Intelligence
 
 The Data Fortress leverages a hybrid AI model, combining local private resources with frontier external intelligence.
 
 ### 1. Local AI Cluster (Private & Uncensored)
+
 - **Hardware**: Framework Laptop (128GB RAM).
 - **Core Engine**: **Ollama** hosting various models for private, uncensored access.
 - **Workflow Automation**: Integrated with **n8n** for agentic task orchestration.
 
 ### 2. Frontier Intelligence (Global Scale)
+
 For broad or highly targeted intelligence where privacy/censorship constraints are acceptable:
+
 - **Gemini API**: Utilized for frontier broad intelligence and deep reasoning.
 - **Claude (Anthropic)**: Leveraged for frontier targeted intelligence and complex coding tasks.
 - **Venice AI**: Paid private access to frontier models, integrated with Web3 development systems.
 - **OpenRouter**: Used for general access and scaling when local/targeted systems are at capacity.
 
 ## 📈 Migration Status
-The Data Fortress has successfully transitioned from a Kubernetes (Talos/Proxmox) architecture to a fully declarative Docker Swarm environment running on a unified EndeavourOS workstation and x86 mini-PC Edge tier.
+
+The Data Fortress has transitioned to a fully declarative **K3s Kubernetes** environment driven by **FluxCD**, running on a unified EndeavourOS workstation and x86 mini-PC Edge tier.
