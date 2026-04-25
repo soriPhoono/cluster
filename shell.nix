@@ -13,6 +13,15 @@ with pkgs;
       agenix-cli
       ssh-to-age
       sops
+
+      jq
+      yq
+
+      k3d
+      kubectl
+      helm
+      k9s
+      fluxcd
     ];
 
     shellHook = ''

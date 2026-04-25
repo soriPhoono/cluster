@@ -6,10 +6,6 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    agenix = {
-      url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     agenix-shell = {
       url = "github:aciceri/agenix-shell";
       inputs.nixpkgs.follows = "nixpkgs";

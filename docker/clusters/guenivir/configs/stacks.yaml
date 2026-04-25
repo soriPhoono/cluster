@@ -1,4 +1,0 @@
-authentik:
-  repo: homelab
-  branch: main
-  compose_file: docker/stacks/authentik/docker-compose.yml
