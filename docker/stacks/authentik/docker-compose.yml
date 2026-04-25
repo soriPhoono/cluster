@@ -1,0 +1,165 @@
+# Authentik Identity Provider Stack
+# Tailscale Serve acts as the reverse proxy, exposing Authentik
+# at https://auth.<tailnet>.ts.net over the tailnet only.
+#
+# Prerequisites:
+#   1. Create Docker secrets before deploying:
+#      echo "tskey-auth-..." | docker secret create ts_authkey -
+#      openssl rand -base64 36 | docker secret create authentik_secret_key -
+#      openssl rand -base64 24 | docker secret create authentik_pg_password -
+#
+#   2. Deploy:
+#      docker stack deploy -c docker-compose.yml authentik
+services:
+  # --- Tailscale Reverse Proxy ---
+  # Registers as "auth" on the tailnet and proxies HTTPS → Authentik server:9000
+  tailscale:
+    image: tailscale/tailscale:latest
+    hostname: auth
+    environment:
+      - TS_AUTHKEY_FILE=/run/secrets/ts_authkey
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SERVE_CONFIG=/config/serve-config.json
+      - TS_USERSPACE=true
+      - TS_EXTRA_ARGS=--advertise-tags=tag:guenivir-node --reset
+    volumes:
+      - ts-state:/var/lib/tailscale
+    configs:
+      - source: serve-config
+        target: /config/serve-config.json
+        mode: 0444
+    secrets:
+      - ts_authkey
+    networks:
+      - authentik
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+  # --- Authentik Server ---
+  # Web UI, API, and embedded outpost
+  server:
+    image: ghcr.io/goauthentik/server:2026.2.2
+    command: server
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: file:///run/secrets/authentik_pg_password
+      AUTHENTIK_SECRET_KEY: file:///run/secrets/authentik_secret_key
+      AUTHENTIK_REDIS__HOST: redis
+    secrets:
+      - authentik_secret_key
+      - authentik_pg_password
+    volumes:
+      - authentik-media:/media
+      - authentik-templates:/templates
+    networks:
+      - authentik
+    depends_on:
+      - postgresql
+      - redis
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+  # --- Authentik Worker ---
+  # Background task processing
+  worker:
+    image: ghcr.io/goauthentik/server:2026.2.2
+    command: worker
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: file:///run/secrets/authentik_pg_password
+      AUTHENTIK_SECRET_KEY: file:///run/secrets/authentik_secret_key
+      AUTHENTIK_REDIS__HOST: redis
+    secrets:
+      - authentik_secret_key
+      - authentik_pg_password
+    volumes:
+      - authentik-media:/media
+      - authentik-templates:/templates
+      - authentik-certs:/certs
+    networks:
+      - authentik
+    depends_on:
+      - postgresql
+      - redis
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+  # --- PostgreSQL ---
+  postgresql:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: authentik
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD_FILE: /run/secrets/authentik_pg_password
+    secrets:
+      - authentik_pg_password
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - authentik
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d authentik -U authentik"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+  # --- Redis ---
+  redis:
+    image: docker.io/library/redis:7-alpine
+    command: --save 60 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+    networks:
+      - authentik
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+configs:
+  serve-config:
+    file: ./configs/serve-config.json
+secrets:
+  ts_authkey:
+    file: ./secrets/ts_authkey
+  authentik_secret_key:
+    file: ./secrets/authentik_secret_key
+  authentik_pg_password:
+    file: ./secrets/authentik_pg_password
+volumes:
+  ts-state:
+  pg-data:
+  redis-data:
+  authentik-media:
+  authentik-templates:
+  authentik-certs:
+networks:
+  authentik:
+    driver: overlay
+    attachable: true

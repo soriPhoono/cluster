@@ -9,8 +9,10 @@ with pkgs;
       nixd
       alejandra
 
-      # age
-      # agenix-cli
+      age
+      agenix-cli
+      ssh-to-age
+      sops
     ];
 
     shellHook = ''
