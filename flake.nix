@@ -45,6 +45,7 @@
         ];
         secrets = {
           GITHUB_TOKEN.file = ./secrets/github_token.age;
+          TESTING_AGE_KEY.file = ./secrets/testing_age_key.age;
         };
       };
 
@@ -80,6 +81,9 @@
 
                 CLUSTER_NAME=k3d-$(basename "$(git rev-parse --show-toplevel)")
 
+                echo "Creating cluster..."
+                echo "----------------------------------------"
+
                 k3d cluster create \
                   --k3s-arg '--disable=traefik@server:*' \
                   --servers 1 \
@@ -89,9 +93,10 @@
                   --timeout 120s \
                   "$CLUSTER_NAME" || (k3d cluster delete "$CLUSTER_NAME")
 
-                echo "Deploying Flux to testing cluster"
-                echo "Using token: $GITHUB_TOKEN"
+                echo "Deploying Flux to testing cluster..."
+                echo "----------------------------------------"
 
+                echo "Creating Flux namespace..."
                 flux bootstrap github \
                   --owner=soriphoono \
                   --repository=cluster \
@@ -99,6 +104,14 @@
                   --path=k3s/clusters/testing \
                   --personal \
                   --token-auth || (k3d cluster delete "$CLUSTER_NAME")
+
+                echo "Creating cluster secret..."
+                kubectl create secret generic sops-age \
+                  --namespace=flux-system \
+                  --from-file=age.agekey="$TESTING_AGE_KEY_PATH"
+
+                echo "Done!"
+                echo "----------------------------------------"
               '';
             }}/bin/deploy";
           };
