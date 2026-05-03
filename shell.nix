@@ -20,8 +20,8 @@ with pkgs;
       k3d
       kubectl
       helm
-      k9s
       fluxcd
+      k9s
     ];
 
     shellHook = ''

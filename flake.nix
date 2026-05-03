@@ -43,7 +43,9 @@
         identityPaths = [
           "$HOME/.ssh/id_ed25519"
         ];
-        secrets = {};
+        secrets = {
+          GITHUB_TOKEN.file = ./secrets/github_token.age;
+        };
       };
 
       perSystem = {
@@ -67,6 +69,34 @@
         # --- Configuration Builders --- #
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
         pre-commit = import ./pre-commit.nix {inherit lib pkgs;};
+
+        apps = rec {
+          deploy = {
+            type = "app";
+            program = "${pkgs.writeShellApplication {
+              name = "deploy";
+              text = ''
+                k3d cluster create \
+                  --k3s-arg '--disable=traefik@server:*' \
+                  --servers 1 \
+                  --agents 2 \
+                  --image rancher/k3s:v1.31.5-k3s1 \
+                  --wait \
+                  --timeout 120s \
+                  k3d-testing
+
+                flux bootstrap github \
+                  --owner=soriphonoo \
+                  --repository=cluster \
+                  --branch="$(git rev-parse --abbrev-ref HEAD)" \
+                  --path=k3s/clusters/testing \
+                  --personal \
+                  --token-auth
+              '';
+            }}/bin/deploy";
+          };
+          default = deploy;
+        };
       };
     };
 }

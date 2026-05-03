@@ -1,0 +1,9 @@
+# Key material must match `secrets.nix` (for Nix/agenix-shell) so rekeying stays consistent.
+# Edit secrets with: `agenix -e secrets/<name>.age` (from repo root, in `nix develop`).
+
+[identities]
+soriphoono = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMsLDpds7sJGuczBvZEIkqEBwjdk22MbiML/WYzHwzkT"
+
+[[paths]]
+glob = "secrets/*.age"
+identities = ["soriphoono"]
