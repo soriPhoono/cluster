@@ -1,4 +1,10 @@
 _: {
+  settings = {
+    excludes = [
+      "k3s/clusters/*/flux-system/*.yaml"
+    ];
+  };
+
   projectRootFile = "flake.nix";
 
   programs = {
