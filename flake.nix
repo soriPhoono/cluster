@@ -76,6 +76,10 @@
             program = "${pkgs.writeShellApplication {
               name = "deploy";
               text = ''
+                set -euo pipefail
+
+                CLUSTER_NAME=k3d-$(basename "$(git rev-parse --show-toplevel)")
+
                 k3d cluster create \
                   --k3s-arg '--disable=traefik@server:*' \
                   --servers 1 \
@@ -83,15 +87,18 @@
                   --image rancher/k3s:v1.31.5-k3s1 \
                   --wait \
                   --timeout 120s \
-                  k3d-testing
+                  "$CLUSTER_NAME" || (k3d cluster delete "$CLUSTER_NAME")
+
+                echo "Deploying Flux to testing cluster"
+                echo "Using token: $GITHUB_TOKEN"
 
                 flux bootstrap github \
-                  --owner=soriphonoo \
+                  --owner=soriphoono \
                   --repository=cluster \
                   --branch="$(git rev-parse --abbrev-ref HEAD)" \
                   --path=k3s/clusters/testing \
                   --personal \
-                  --token-auth
+                  --token-auth || (k3d cluster delete "$CLUSTER_NAME")
               '';
             }}/bin/deploy";
           };
