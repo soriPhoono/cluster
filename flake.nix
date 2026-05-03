@@ -93,10 +93,16 @@
                   --timeout 120s \
                   "$CLUSTER_NAME" || (k3d cluster delete "$CLUSTER_NAME")
 
+                echo "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..."
+                echo "----------------------------------------"
+                kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -
+                kubectl create secret generic sops-age \
+                  --namespace=flux-system \
+                  --from-file=age.agekey="$TESTING_AGE_KEY_PATH" \
+                  --dry-run=client -o yaml | kubectl apply -f -
+
                 echo "Deploying Flux to testing cluster..."
                 echo "----------------------------------------"
-
-                echo "Creating Flux namespace..."
                 flux bootstrap github \
                   --owner=soriphoono \
                   --repository=cluster \
@@ -104,11 +110,6 @@
                   --path=k3s/clusters/testing \
                   --personal \
                   --token-auth || (k3d cluster delete "$CLUSTER_NAME")
-
-                echo "Creating cluster secret..."
-                kubectl create secret generic sops-age \
-                  --namespace=flux-system \
-                  --from-file=age.agekey="$TESTING_AGE_KEY_PATH"
 
                 echo "Done!"
                 echo "----------------------------------------"
