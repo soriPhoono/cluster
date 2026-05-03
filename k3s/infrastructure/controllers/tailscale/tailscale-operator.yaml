@@ -37,7 +37,7 @@ spec:
   values:
     installCRDs: true
     operatorConfig:
-      hostname: guenivir-cluster
+      hostname: guenivir-operator
       logging: info
       defaultTags:
-        - "tag:guenivir-node"
+        - "tag:guenivir-operator"

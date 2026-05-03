@@ -79,7 +79,7 @@
               text = ''
                 set -euo pipefail
 
-                CLUSTER_NAME=k3d-$(basename "$(git rev-parse --show-toplevel)")
+                CLUSTER_NAME=k3d-guenivir-testing
 
                 echo "Creating cluster..."
                 echo "----------------------------------------"
@@ -92,6 +92,8 @@
                   --wait \
                   --timeout 120s \
                   "$CLUSTER_NAME" || (k3d cluster delete "$CLUSTER_NAME")
+
+                sleep 2
 
                 echo "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..."
                 echo "----------------------------------------"
