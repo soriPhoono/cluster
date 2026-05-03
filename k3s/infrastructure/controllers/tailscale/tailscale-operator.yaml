@@ -1,6 +1,6 @@
-# If the operator pod crash-loops with "requested tags [tag:k8s-operator] are invalid or
-# not permitted", set tagOwners in the tailnet ACL (tag:k8s-operator, tag:k8s) and ensure the
-# OAuth client is allowed to use tag:k8s-operator. https://tailscale.com/kb/1236/kubernetes-operator
+# If the operator crash-loops on auth, allow tag:guenivir-node in ACL tagOwners and on the OAuth
+# client. Proxies still default to tag:k8s unless you override proxyConfig.defaultTags.
+# https://tailscale.com/kb/1236/kubernetes-operator
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -39,4 +39,4 @@ spec:
     operatorConfig:
       logging: info
       defaultTags:
-        - guenivir-node
+        - "tag:guenivir-node"
