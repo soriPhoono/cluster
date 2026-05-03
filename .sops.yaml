@@ -1,18 +1,4 @@
 keys:
-  - &cluster_guenivir age1yyge5wa25la3lwkaa7gnzse0gzyjkkv3wkjpum66jylem7j525mqe524ws
+  - &cluster_guenivir age1frm803u6eet5dm4t6ugy77mkj4v980tqzfmn9wwnnk937me6dayqcyskw4
   - &admin_sphoono age1y4x8gzzcdhxvqaf9matt0eze3z3yxwx607avq4cexfkgwal4psesj39lvn
 creation_rules:
-  - path_regex: k3s/.*\.sops\.(ya?ml|json|env)$
-    key_groups:
-      - age:
-          - *admin_sphoono
-          - *cluster_guenivir
-  - path_regex: docker/clusters/guenivir/secrets/.*\.(yml|json|env|ini)$
-    key_groups:
-      - age:
-          - *admin_sphoono
-  - path_regex: docker/stacks/authentik/secrets/.*$
-    key_groups:
-      - age:
-          - *admin_sphoono
-          - *cluster_guenivir
