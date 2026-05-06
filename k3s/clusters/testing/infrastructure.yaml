@@ -6,7 +6,7 @@ metadata:
 spec:
   interval: 1h
   retryInterval: 2m
-  timeout: 5m
+  timeout: 15m
   decryption:
     provider: sops
     secretRef:
@@ -24,13 +24,19 @@ metadata:
   name: infra-configs
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: infra-controllers
   interval: 1h
   retryInterval: 2m
-  timeout: 5m
+  timeout: 15m
+  dependsOn:
+    - name: infra-controllers
+      namespace: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   sourceRef:
     kind: GitRepository
     name: flux-system
   path: ./k3s/infrastructure/configs
   prune: true
+  wait: true

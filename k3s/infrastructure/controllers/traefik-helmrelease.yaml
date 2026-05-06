@@ -1,4 +1,3 @@
-# Traefik as cluster ingress. k3s is installed with --disable=traefik (see flake.nix).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -8,17 +7,16 @@ spec:
   interval: 1h
   timeout: 15m
   targetNamespace: traefik
+  dependsOn:
+    - name: cert-manager
+      namespace: flux-system
   install:
     createNamespace: true
-    crds: CreateReplace
     remediation:
       retries: 3
   upgrade:
     remediation:
       retries: 3
-  dependsOn:
-    - name: tailscale-operator
-      namespace: flux-system
   chart:
     spec:
       chart: traefik
@@ -27,11 +25,17 @@ spec:
         kind: HelmRepository
         name: traefik
         namespace: flux-system
+      interval: 12h
   values:
-    ingressRoute:
-      dashboard:
-        enabled: true
+    deployment:
+      replicas: 1
     providers:
+      kubernetesCRD:
+        enabled: true
       kubernetesIngress:
-        publishedService:
-          enabled: true
+        enabled: true
+    ingressClass:
+      enabled: true
+      isDefaultClass: true
+    # Stable Service name for TunnelBinding (same namespace as HelmRelease target).
+    fullnameOverride: traefik

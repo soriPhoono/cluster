@@ -1,0 +1,17 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: testing-app
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infra-controllers
+  interval: 30m
+  retryInterval: 2m
+  timeout: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./k3s/apps/testing/nginx-hello
+  prune: true
+  wait: true

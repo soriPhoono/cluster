@@ -1,0 +1,14 @@
+# Requires Secret `cloudflare-api-credentials` in `cloudflare-operator-system` (ClusterTunnel is cluster-scoped).
+# If Cloudflare returns 1013 "tunnel name already exists", use existingTunnel (below) or delete the tunnel in Zero Trust / pick a new newTunnel.name.
+apiVersion: networking.cfargotunnel.com/v1alpha2
+kind: ClusterTunnel
+metadata:
+  name: root
+spec:
+  cloudflare:
+    email: soriphoono@gmail.com
+    domain: cryptic-coders.net
+    secret: cloudflare-api-credentials
+    accountId: b6e9a277e1c46db22032d0e2c04fb6ae
+  newTunnel:
+    name: root-tunnel-cloudflare-operator

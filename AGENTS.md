@@ -13,7 +13,7 @@ direnv allow   # auto-loads flake devShell via .envrc
 ```bash
 nix develop                  # enter dev shell
 nix fmt                      # run treefmt (all formatters)
-# nix build                    # build the flake (Not ready, there will be a package exposed for each cluster organized by runtime (k3s/docker swarm/docker compose))
+nix run                      # deploy a testing cluster, install the testing cluster key if authorized, then deploy the cluster stack using flux-cd
 ```
 
 ## Tools

@@ -10,9 +10,8 @@ with pkgs;
       alejandra
 
       age
-      agenix-cli
-      ssh-to-age
       sops
+      ssh-to-age
 
       jq
       yq
