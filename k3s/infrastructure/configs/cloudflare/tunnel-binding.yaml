@@ -5,12 +5,13 @@ kind: TunnelBinding
 metadata:
   name: root
   namespace: traefik
-tunnelRef:
-  kind: ClusterTunnel
-  name: root
-subjects:
-  - kind: Service
-    name: traefik
-    spec:
-      fqdn: '*.cryptic-coders.net'
-      protocol: http
+spec:
+  tunnelRef:
+    kind: ClusterTunnel
+    name: root
+  subjects:
+    - kind: Service
+      name: traefik
+      spec:
+        fqdn: demo.cryptic-coders.net
+        protocol: http
