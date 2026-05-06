@@ -18,7 +18,7 @@ with pkgs;
 
       k3d
       kubectl
-      helm
+      kubernetes-helm
       fluxcd
       k9s
     ];
