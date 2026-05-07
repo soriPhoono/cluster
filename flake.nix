@@ -105,7 +105,7 @@
                 operation "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..." "Failed to prepare namespace and SOPS key" "kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -"
                 operation "Creating secret sops-age..." "Failed to create secret sops-age" "kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey='$TESTING_AGE_KEY_PATH' --dry-run=client -o yaml | kubectl apply -f -"
 
-                operation "Deploying Flux to testing cluster..." "Failed to deploy Flux" "flux bootstrap github --owner=soriphoono --repository=cluster --branch='$(git rev-parse --abbrev-ref HEAD)' --path=k3s/clusters/testing --personal --token-auth"
+                operation "Deploying Flux to testing cluster..." "Failed to deploy Flux" "flux bootstrap github --owner=soriphoono --repository=guenivir --branch='$(git rev-parse --abbrev-ref HEAD)' --path=k3s/clusters/testing --personal --token-auth"
 
                 echo "Done!"
                 echo "----------------------------------------"
