@@ -9,5 +9,5 @@ spec:
   cloudflare:
     email: soriphoono@gmail.com
     domain: cryptic-coders.net
-    secret: cloudflare-api-token
+    secret: cloudflare-secrets
     accountId: b254033da4cc43c5aab75062fe1c3346
