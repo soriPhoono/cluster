@@ -5,4 +5,28 @@ metadata:
     namespace: cloudflare-operator-system
 type: Opaque
 stringData:
-    CLOUDFLARE_API_TOKEN: 
+    CLOUDFLARE_API_TOKEN: ENC[AES256_GCM,data:Hn/lOPKfZqakHG4aQzHSu/8ywvfi2WYFAiS6A0beUOgeSFt5erv1mtzX/rmaWRrvuK6KVSY=,iv:RI68ARSsE4AGv4HhH5YxB8SRA+qn6kcAbcbgpFbBLf4=,tag:KZ82CPLEyq4LAR3knYZknw==,type:str]
+sops:
+    age:
+        - recipient: age1frm803u6eet5dm4t6ugy77mkj4v980tqzfmn9wwnnk937me6dayqcyskw4
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSArRi9iSEZyOTFzSmVuL3hM
+            d3dCdmp6TThBeEN6Ty80SGxRZkYrQU93Z3p3ClBQYyt5b3ZIOHF4UlhyZGt4Yjlx
+            a0E1dXVOeVhQdUFISGdzNENoVTFNK1EKLS0tIGFBZGplZjcvMGg3SGlZNTFBcXJS
+            dFJFSk54SHVzaUFTNDZQZHhaQ09DNncKi8oi+Co7AfFxY+6IyQPeSe95Rsh1MOD4
+            KlMIdo4vf7TG+BkJ4axJmAjlp21i86B1u0SWaely454Jclx7HkFVhA==
+            -----END AGE ENCRYPTED FILE-----
+        - recipient: age1y4x8gzzcdhxvqaf9matt0eze3z3yxwx607avq4cexfkgwal4psesj39lvn
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBuMkpPeUhwY3JLTitOcmd0
+            dVZ2WEp0WXdyRThFRlFySVhHejZOOHVkYlFRCkxQQ3pJUy9sdjMvdHNWZCt6YXlN
+            ZTZQRDUzL1RJRE83eHFienFtNGY2VW8KLS0tIEppM05kd2c5aW4wZ0tKdk1IQnk2
+            ZlNyK0ZpYkRkaGtSYjNBQ2l5elc0YWsKD0wvobjTKovo46YI4cNHWZt5xGIY0hIt
+            Y2WD7kiPydRrQjr0BbdlulqnfTor03nLS0ObT62UEMVqzj8IW3oj/g==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-05-07T19:39:26Z"
+    mac: ENC[AES256_GCM,data:WCy+pHLQd+nfp5ibS1DK1NehSqgBtna27LQtBMa8RHRSsDP2uxV9aWZTGvvczBizW6/RD0VvYx92QrmF4CKtn416G6ReDHuOiAcnCi4ivKqbzW1PyiPubydhvzda/MznnS2DEAUWwkvEWT1FbbmOHpE9zzzWB7EE6FxstE/aTgI=,iv:+1CFwAtTDHcVDE5ALZry+3HN5TOOdoo7pbL+e+3DbMQ=,tag:bl31W+YdL3A8mKZ3p17x5Q==,type:str]
+    encrypted_regex: ^(stringData|data)$
+    version: 3.12.2
