@@ -1,5 +1,34 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
+apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
-resources:
-  - ../controllers/source
-  - ../controllers/core
+metadata:
+  name: infra-core
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 2m
+  timeout: 15m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./k3s/infrastructure/controllers/core
+  prune: true
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-cloudflare-operator
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 2m
+  timeout: 15m
+  dependsOn:
+    - name: infra-core
+      namespace: flux-system
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./k3s/infrastructure/controllers/dns/cloudflare-operator
+  prune: true
+  wait: true
