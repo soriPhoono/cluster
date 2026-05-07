@@ -7,6 +7,9 @@ spec:
   interval: 1h
   retryInterval: 2m
   timeout: 15m
+  dependsOn:
+    - name: infra-core
+      namespace: flux-system
   sourceRef:
     kind: GitRepository
     name: flux-system
