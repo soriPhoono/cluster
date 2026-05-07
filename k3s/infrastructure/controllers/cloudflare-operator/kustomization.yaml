@@ -4,3 +4,5 @@ resources:
   - namespace.yaml
   - cloudflare-api-token.sops.yaml
   - cloudflare-operator-helmrelease.yaml
+  - cloudflare-cluster-tunnel.yaml
+  - cloudflare-cluster-tunnel-binding.yaml
