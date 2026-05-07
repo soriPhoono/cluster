@@ -3,15 +3,13 @@
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
-  name: root
-  namespace: traefik
+  name: nginx-hello-guenivir-tunnel-binding
 spec:
   tunnelRef:
-    kind: ClusterTunnel
-    name: root
+    kind: Tunnel
+    name: nginx-hello-guenivir-tunnel
   subjects:
-    - kind: Service
-      name: traefik
+    - name: nginx-hello
       spec:
         fqdn: demo.cryptic-coders.net
-        protocol: http
+        target: traefik.traefik.svc.cluster.local:443
