@@ -5,12 +5,12 @@ kind: TunnelBinding
 metadata:
   name: nginx-hello
   namespace: nginx-hello
-spec:
-  tunnelRef:
-    kind: Tunnel
-    name: nginx-hello
-  subjects:
-    - name: nginx-hello
-      spec:
-        fqdn: demo.cryptic-coders.net
-        target: traefik.traefik.svc.cluster.local:443
+subjects:
+  - name: nginx-hello
+    spec:
+      fqdn: demo.cryptic-coders.net
+      target: traefik.traefik.svc.cluster.local:443
+tunnelRef:
+  kind: Tunnel
+  name: nginx-hello
+  namespace: nginx-hello
