@@ -21,7 +21,7 @@ spec:
       retries: 3
   chart:
     spec:
-      chart: personal/cloudflare-operator
+      chart: cloudflare-operator
       sourceRef:
         kind: HelmRepository
         name: personal
