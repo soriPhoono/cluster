@@ -4,6 +4,7 @@ apiVersion: networking.cfargotunnel.com/v1alpha2
 kind: Tunnel
 metadata:
   name: nginx-hello
+  namespace: nginx-hello
 spec:
   cloudflare:
     email: soriphoono@gmail.com
