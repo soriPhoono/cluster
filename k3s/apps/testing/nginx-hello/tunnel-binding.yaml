@@ -1,15 +1,17 @@
-# Sends tunnel traffic to Traefik `web` (HTTP). subjects[].name must be an existing Service in this namespace.
-# Use a concrete fqdn (matches IngressRoute Host()); *.zone wildcards often hit TXT/DNS validation errors in the operator.
+# Routes fqdn traffic to Traefik `web` via cloudflared. subjects[].name must be
+# an existing Service in this namespace.
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
   name: nginx-hello
   namespace: traefik
 subjects:
-  - name: nginx-hello
+  - kind: Service
+    name: traefik
     spec:
       fqdn: demo.cryptic-coders.net
-      target: traefik.svc.cluster.local:443
+      protocol: http
+      target: http://traefik.traefik.svc.cluster.local:80
 tunnelRef:
   kind: Tunnel
   name: nginx-hello
