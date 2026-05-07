@@ -2,6 +2,7 @@ apiVersion: networking.cfargotunnel.com/v1alpha2
 kind: Tunnel
 metadata:
   name: hello-world-tunnel
+  namespace: traefik
 spec:
   newTunnel:
     name: hello-world-guenivir-testing
