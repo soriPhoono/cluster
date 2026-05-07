@@ -4,12 +4,12 @@ apiVersion: networking.cfargotunnel.com/v1alpha2
 kind: Tunnel
 metadata:
   name: nginx-hello
-  namespace: nginx-hello
+  namespace: traefik
 spec:
   cloudflare:
     email: soriphoono@gmail.com
     domain: cryptic-coders.net
-    secret: cloudflare-api-credentials
+    secret: cloudflare-api-token
     accountId: b6e9a277e1c46db22032d0e2c04fb6ae
   newTunnel:
-    name: nginx-hello-guenivir
+    name: nginx-hello

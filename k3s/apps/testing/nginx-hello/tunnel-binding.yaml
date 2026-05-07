@@ -4,12 +4,12 @@ apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
   name: nginx-hello
-  namespace: nginx-hello
+  namespace: traefik
 subjects:
   - name: nginx-hello
     spec:
       fqdn: demo.cryptic-coders.net
-      target: traefik.traefik.svc.cluster.local:443
+      target: traefik.svc.cluster.local:443
 tunnelRef:
   kind: Tunnel
   name: nginx-hello
