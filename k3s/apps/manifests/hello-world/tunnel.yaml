@@ -1,0 +1,12 @@
+apiVersion: networking.cfargotunnel.com/v1alpha2
+kind: Tunnel
+metadata:
+  name: hello-world-tunnel
+spec:
+  newTunnel:
+    name: hello-world-guenivir-testing
+  cloudflare:
+    email: soriphoono@gmail.com
+    domain: cryptic-coders.net
+    secret: cloudflare-api-token
+    accountId: b254033da4cc43c5aab75062fe1c3346
