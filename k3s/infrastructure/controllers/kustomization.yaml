@@ -4,4 +4,4 @@ resources:
   - source
   - cert-manager-helmrelease.yaml
   - traefik-helmrelease.yaml
-  - cloudflare-operator-helmrelease.yaml
+  - cloudflare-operator

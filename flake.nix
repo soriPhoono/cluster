@@ -81,6 +81,10 @@
 
                 CLUSTER_NAME=k3d-guenivir-testing
 
+                echo "Deleting old cluster..."
+                echo "----------------------------------------"
+                k3d cluster delete "$CLUSTER_NAME" || true
+
                 echo "Creating cluster..."
                 echo "----------------------------------------"
 
