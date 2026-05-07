@@ -13,4 +13,3 @@ subjects:
 tunnelRef:
   kind: Tunnel
   name: nginx-hello
-  namespace: nginx-hello
