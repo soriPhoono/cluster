@@ -3,7 +3,7 @@
 apiVersion: networking.cfargotunnel.com/v1alpha2
 kind: Tunnel
 metadata:
-  name: nginx-hello-guenivir-tunnel
+  name: nginx-hello
 spec:
   cloudflare:
     email: soriphoono@gmail.com
@@ -11,4 +11,4 @@ spec:
     secret: cloudflare-api-credentials
     accountId: b6e9a277e1c46db22032d0e2c04fb6ae
   newTunnel:
-    name: nginx-hello-guenivir-tunnel
+    name: nginx-hello-guenivir

@@ -3,11 +3,11 @@
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
-  name: nginx-hello-guenivir-tunnel-binding
+  name: nginx-hello
 spec:
   tunnelRef:
     kind: Tunnel
-    name: nginx-hello-guenivir-tunnel
+    name: nginx-hello
   subjects:
     - name: nginx-hello
       spec:
