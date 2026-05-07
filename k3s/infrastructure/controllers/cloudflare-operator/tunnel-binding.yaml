@@ -12,5 +12,5 @@ subjects:
       protocol: http
       target: http://traefik.traefik.svc.cluster.local:80
 tunnelRef:
-  kind: Tunnel
+  kind: ClusterTunnel
   name: guenivir-tunnel

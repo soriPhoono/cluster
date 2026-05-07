@@ -1,10 +1,9 @@
-# Requires Secret `cloudflare-api-token` in the `traefik` namespace.
+# Requires Secret `cloudflare-api-token` in the `cloudflare-operator-system` namespace.
 # If Cloudflare returns 1013 "tunnel name already exists", use existingTunnel (below) or delete the tunnel in Zero Trust / pick a new newTunnel.name.
 apiVersion: networking.cfargotunnel.com/v1alpha2
-kind: Tunnel
+kind: ClusterTunnel
 metadata:
   name: guenivir-tunnel
-  namespace: cloudflare-operator-system
 spec:
   cloudflare:
     email: soriphoono@gmail.com
