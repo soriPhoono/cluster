@@ -4,6 +4,7 @@ apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
   name: guenivir-tunnel-binding
+  namespace: cloudflare-operator-system
 subjects:
   - kind: Service
     name: guenivir-demo-app
