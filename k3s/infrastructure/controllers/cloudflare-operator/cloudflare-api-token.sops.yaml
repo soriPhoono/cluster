@@ -2,31 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
     name: cloudflare-api-token
-    namespace: traefik
+    namespace: cloudflare-operator-system
 type: Opaque
 stringData:
-    CLOUDFLARE_API_TOKEN: ENC[AES256_GCM,data:rIBgomFuHdObCM2hBi3URb/JDzUpSEMiM5vnHIH2vHVaws8D4+BxlhxLeqr5kilVTc/7nSI=,iv:TYlOeV2hjSkg2LpmCR3bpxnnoAGZnYNTVOlxHD6DjyQ=,tag:c91TLsySh7QSZrwIDKNHEA==,type:str]
-sops:
-    age:
-        - recipient: age1frm803u6eet5dm4t6ugy77mkj4v980tqzfmn9wwnnk937me6dayqcyskw4
-          enc: |
-            -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAzaTBqU3VkeElDWW1Pb1Vv
-            YlNtSXkvNGdpV2VKenNMSVJKOVMzck5wV1ZvCllOMzk2QmF0R1E0dTQxR3p0S2p2
-            ZlR0OTl0WlBzQmxVM3NWY1h5dE50cjAKLS0tIDFjT2pEL2tSSXFCWmJvUGZVeE1o
-            STZlNGJsL3NIdUlncjNBaXJaUnpXUmcKEe7v9oOioHQshaKV+ugvnjcRKp+2LVCr
-            v6ufyR+KYEsJLShxM3rlSdKSCE0hWiOyTF2XlMA7XwUjBB7lj4509A==
-            -----END AGE ENCRYPTED FILE-----
-        - recipient: age1y4x8gzzcdhxvqaf9matt0eze3z3yxwx607avq4cexfkgwal4psesj39lvn
-          enc: |
-            -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB1Qk11L2hSSy80Y0sveWpX
-            Y1VmQ05FMXE4OEloaElieUk5aWFQckRvS0JJCjBBR0x0S0NqMm9lOTFNVkpDdTR2
-            Qjg3ZDlIUWdoVDU2MWw4cGNlWTJObmsKLS0tIGIzNTJKcTJBNXVsUGNYRm45dThh
-            eFptS09nRTBNOWdmUDkwMExvMjBUTDQKFT5EPootnqbml4dXJiPJCdtjgbcmCYwG
-            eGe2k4tFnZgca1EF3h+yQUHiId4lGnajCPMVfS735mCQBN0Iqz/koQ==
-            -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-05-07T15:15:45Z"
-    mac: ENC[AES256_GCM,data:pYbav+jWEsapvuNCa4A1guUbjZ4+/gbkHtaeNO1K3m3Qb6LDBq1NgH3XVfcNrDVVsVPDW2YfSfXmtFnMnHkJgrJHn0d+30QI/5ug9MzzLogUanKgtPO+gwboldIjpImjDgPCC7NrJ+c7OdJzAhAszr689voYB2N6+gamXEull6I=,iv:+WGBx1GRjyWyY8dc8AWFnfrSXMyYr94+RGbkH29kLvs=,tag:g/V0QN8gEzz1v4SK/hg1zg==,type:str]
-    encrypted_regex: ^(stringData|data)$
-    version: 3.12.2
+    CLOUDFLARE_API_TOKEN: 
