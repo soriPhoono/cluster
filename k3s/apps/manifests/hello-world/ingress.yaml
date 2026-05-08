@@ -21,7 +21,7 @@ metadata:
 subjects:
   - name: wildcard
     spec:
-      fqdn: "*.cryptic-coders.net"
+      fqdn: "hello-world.cryptic-coders.net"
       # IngressRoute uses `web` (:80); :443/`websecure` has no matching route.
       target: http://traefik.traefik.svc.cluster.local:80
 tunnelRef:
