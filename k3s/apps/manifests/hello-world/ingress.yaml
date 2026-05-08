@@ -22,7 +22,8 @@ subjects:
   - name: wildcard
     spec:
       fqdn: "*.cryptic-coders.net"
-      target: https://traefik.traefik.svc.cluster.local:443
+      # Must match Traefik entryPoints on the IngressRoute (`web` == :80). HTTPS :443 would hit `websecure`, which has no route → gateway/404.
+      target: http://traefik.traefik.svc.cluster.local:80
 tunnelRef:
   kind: ClusterTunnel
   name: guenivir-testing-tunnel
