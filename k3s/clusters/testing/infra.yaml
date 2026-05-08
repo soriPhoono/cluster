@@ -10,6 +10,10 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   path: ./k3s/infrastructure/testing
   prune: true
   wait: true
