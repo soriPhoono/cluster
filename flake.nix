@@ -80,6 +80,10 @@
                 set -euo pipefail
 
                 CLUSTER_NAME=k3d-guenivir-testing
+                BRANCH=''${FLUX_BOOTSTRAP_BRANCH:-$(git branch --show-current || true)}
+                if [ -z "$BRANCH" ]; then
+                  BRANCH=main
+                fi
 
                 function operation() {
                   message="$1"
@@ -103,14 +107,14 @@
 
                 sleep 2
 
-                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --servers 1 --agents 2 --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
+                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --k3s-arg '--flannel-backend=none@server:*' --k3s-arg '--disable-network-policy@server:*' --servers 1 --agents 2 --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
 
                 sleep 2
 
                 operation "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..." "Failed to prepare namespace and SOPS key" "kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -"
                 operation "Creating secret sops-age..." "Failed to create secret sops-age" "kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey='$TESTING_AGE_KEY_PATH' --dry-run=client -o yaml | kubectl apply -f -"
 
-                operation "Deploying Flux to testing cluster..." "Failed to deploy Flux" "flux bootstrap github --owner=soriphoono --repository=guenivir --branch='$(git rev-parse --abbrev-ref HEAD)' --path=k3s/clusters/testing --personal --token-auth"
+                operation "Deploying Flux to testing cluster..." "Failed to deploy Flux" "flux bootstrap github --owner=soriphoono --repository=guenivir --branch='$BRANCH' --path=k3s/clusters/testing --personal --token-auth"
 
                 echo "Done!"
                 echo "----------------------------------------"
