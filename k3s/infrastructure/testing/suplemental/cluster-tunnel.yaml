@@ -11,3 +11,4 @@ spec:
     secret: cloudflare-secrets # The secret created before
     # accountId and accountName cannot be both empty. If both are provided, Account ID is used if valid, else falls back to Account Name.
     accountId: b6e9a277e1c46db22032d0e2c04fb6ae
+    accountName: homelab
