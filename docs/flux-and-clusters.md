@@ -9,7 +9,7 @@
 | --- | --- |
 | Flux sync root (`Kustomization` `spec.path`) | [`../k3s/clusters/testing`](../k3s/clusters/testing) |
 | Cluster `Kustomization` list | [`../k3s/clusters/testing/kustomization.yaml`](../k3s/clusters/testing/kustomization.yaml) |
-| Infrastructure Flux `Kustomization`s | [`../k3s/clusters/testing/infrastructure.yaml`](../k3s/clusters/testing/infrastructure.yaml) — `infra-controllers` then `infra-cloudflare` (depends on controllers) |
+| Infrastructure Flux `Kustomization`s | [`../k3s/clusters/testing/infra.yaml`](../k3s/clusters/testing/infra.yaml) — `infra-cilium` (CNI), then `infra` (depends on `infra-cilium`), then `infra-suplemental` (depends on `infra`) |
 | Controllers (Helm releases, repos, Cloudflare operator remote install) | [`../k3s/infrastructure/controllers`](../k3s/infrastructure/controllers) |
 | Cloudflare tunnels (ClusterTunnel, binding, SOPS secret) | [`../k3s/infrastructure/cloudflare`](../k3s/infrastructure/cloudflare) |
 | Optional configs layer | [`../k3s/infrastructure/configs`](../k3s/infrastructure/configs) (directory may be empty until used) |
@@ -24,7 +24,7 @@ The **k3d** workflow (`nix run` in this flake) bootstraps Flux with path `./k3s/
 
 ## Dependency order
 
-[`infrastructure.yaml`](../k3s/clusters/testing/infrastructure.yaml) applies `infra-controllers` first (`./k3s/infrastructure/controllers`). A second `Kustomization` for `./k3s/infrastructure/configs` can be uncommented when you add manifests that must run after controllers (and optionally `dependsOn: infra-controllers`).
+[`infra.yaml`](../k3s/clusters/testing/infra.yaml) applies **`infra-cilium`** first so the CNI is ready, then **`infra`** (`./k3s/infrastructure/testing`). Helm releases for MetalLB, cert-manager, and Envoy Gateway declare `dependsOn` for the Cilium `HelmRelease`. The Cloudflare operator `Kustomization` depends on **`infra-cilium`**. Optional extra paths can be added with `dependsOn` as needed.
 
 ## Upstream
 

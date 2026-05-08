@@ -15,6 +15,7 @@
 
 ## Behavior in this cluster
 
+- Pod networking is provided by **Cilium** (see [cilium.md](cilium.md)); MetalLB handles `LoadBalancer` IPs only.
 - The testing k3d network is currently `172.18.0.0/16`.
 - MetalLB allocates external service IPs from `172.18.255.200-172.18.255.250`.
 - `L2Advertisement` `default-l2` announces addresses from `default-pool`.

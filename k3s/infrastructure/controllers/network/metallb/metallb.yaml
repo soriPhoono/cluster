@@ -13,6 +13,9 @@ metadata:
   name: metallb
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: cilium
+      namespace: flux-system
   interval: 1h
   timeout: 15m
   targetNamespace: metallb-system

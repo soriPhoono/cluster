@@ -12,7 +12,7 @@ Per-stack notes for this GitOps repo: what is **deployed** today versus **planne
 | [cloudflare-operator.md](cloudflare-operator.md) | Deployed | Tunnels to Traefik; placeholders for zone/token |
 | [netbird.md](netbird.md) | Planned | Control plane, Mullvad exits; mesh IdP via Authentik |
 | [authentik.md](authentik.md) | Planned | Network IdP: NetBird OIDC + Traefik / app SSO |
-| [cilium.md](cilium.md) | Planned | CNI + eBGP networking migration and rollout plan |
+| [cilium.md](cilium.md) | Phase 1 deployed | CNI installed; eBGP rollout documented for phase 2 |
 | [vmstack.md](vmstack.md) | Planned | Monitoring/observability stack rollout and alerting plan |
 | [cloudnativepg.md](cloudnativepg.md) | Planned | PostgreSQL via CloudNativePG |
 

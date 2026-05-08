@@ -76,10 +76,17 @@
             type = "app";
             program = "${pkgs.writeShellApplication {
               name = "deploy";
+              runtimeInputs = with pkgs; [
+                k3d
+                kubectl
+                kubernetes-helm
+                fluxcd
+              ];
               text = ''
                 set -euo pipefail
 
                 CLUSTER_NAME=k3d-guenivir-testing
+                CILIUM_CHART_VERSION=1.19.3
 
                 function operation() {
                   message="$1"
@@ -103,7 +110,11 @@
 
                 sleep 2
 
-                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --servers 1 --agents 2 --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
+                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --k3s-arg '--flannel-backend=none@server:*' --k3s-arg '--flannel-backend=none@agent:*' --k3s-arg '--disable-network-policy@server:*' --k3s-arg '--disable-network-policy@agent:*' --servers 1 --agents 2 --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
+
+                sleep 2
+
+                operation "Installing Cilium (pod network; required when Flannel is disabled)..." "Failed to install Cilium" "helm repo add cilium https://helm.cilium.io/ --force-update && helm repo update cilium && helm upgrade --install cilium cilium/cilium --namespace kube-system --version \"$CILIUM_CHART_VERSION\" --set ipam.mode=kubernetes --set routingMode=tunnel --set-string kubeProxyReplacement=false --set bgpControlPlane.enabled=false --kube-context \"k3d-$CLUSTER_NAME\" --wait --timeout 20m0s"
 
                 sleep 2
 

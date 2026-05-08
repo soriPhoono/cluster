@@ -1,8 +1,8 @@
 # Cilium (eBGP networking)
 
-**Status:** Planned - **not** present in `k3s/` yet
+**Status:** **Phase 1 deployed** — Cilium is the cluster CNI with conservative defaults (tunnel datapath, Kubernetes IPAM, kube-proxy left enabled, **BGP control plane off**). BGP CRDs and homelab peer config are reserved for phase 2 under `k3s/infrastructure/controllers/network/cilium/bgp/`.
 
-**Scope:** Introduce **Cilium** as the cluster CNI and enable **BGP control plane (eBGP)** for routable service IP advertisement to the homelab network.
+**Scope:** **Cilium** as the cluster CNI; **BGP control plane (eBGP)** for routable service IP advertisement is planned next (see rollout below).
 
 ## Goals
 
@@ -11,57 +11,55 @@
 - Keep ingress exposure predictable for Envoy Gateway and future services while reducing ad-hoc L2 behavior.
 - Establish a network-policy baseline (`default-deny` + explicit allow rules) after migration stability.
 
-## Prerequisites and assumptions
+## GitOps layout
 
-- k3s version and host kernel support required eBPF features for target Cilium release.
-- Router/switch peers can run eBGP sessions with cluster node addresses (or dedicated loopbacks).
-- BGP ASN and peering plan are reserved (local ASN, peer ASNs, prefixes to advertise).
-- Maintenance window exists for networking cutover and test-cluster validation before production.
+| Resource | Path |
+| --- | --- |
+| HelmRepository + HelmRelease | [`../k3s/infrastructure/controllers/network/cilium/cilium.yaml`](../k3s/infrastructure/controllers/network/cilium/cilium.yaml) |
+| Kustomize wrapper | [`../k3s/infrastructure/controllers/network/cilium/kustomization.yaml`](../k3s/infrastructure/controllers/network/cilium/kustomization.yaml) |
+| BGP manifests (phase 2) | [`../k3s/infrastructure/controllers/network/cilium/bgp/`](../k3s/infrastructure/controllers/network/cilium/bgp/) (placeholder; add `CiliumBGPClusterConfig`, `CiliumBGPPeerConfig`, advertisements, pools when enabling BGP) |
+| Flux: CNI before rest of infra | [`../k3s/clusters/testing/infra.yaml`](../k3s/clusters/testing/infra.yaml) — `infra-cilium` applies `./k3s/infrastructure/controllers/network/cilium` first; `infra` and the Cloudflare operator `Kustomization` depend on it |
 
-## Proposed GitOps layout
+Cilium is **not** listed under [`../k3s/infrastructure/testing/kustomization.yaml`](../k3s/infrastructure/testing/kustomization.yaml) so it is not reconciled twice; the dedicated `infra-cilium` Flux `Kustomization` enforces ordering before MetalLB, cert-manager, Envoy Gateway, and the remote Cloudflare install.
 
-When implemented, place manifests under the network controller tree:
+## k3d / `nix run` bootstrap
 
-- `k3s/infrastructure/controllers/network/cilium/cilium.yaml` - HelmRepository + HelmRelease.
-- `k3s/infrastructure/controllers/network/cilium/kustomization.yaml` - wrapper.
-- `k3s/infrastructure/controllers/network/cilium/bgp/` - `CiliumBGPPeeringPolicy`, pools, advertisements.
-- `k3s/infrastructure/testing/kustomization.yaml` - include `../controllers/network/cilium`.
+The testing cluster is created **without Flannel** and **without** the built-in k3s network policy controller (Cilium provides policy). The deploy app in [`../flake.nix`](../flake.nix) installs Cilium with Helm **after** `k3d cluster create` and **before** Flux bootstrap so the control plane and Flux pods have pod networking.
+
+Keep chart version in sync: `CILIUM_CHART_VERSION` in `flake.nix` and `spec.chart.spec.version` in the Cilium `HelmRelease`.
+
+## Production k3s
+
+Install servers/agents with an equivalent of:
+
+- `--flannel-backend=none`
+- `--disable-network-policy`
+
+Bring up Cilium (Helm or Flux) before scheduling application workloads. Mirror the same Flux paths as testing so `infra-cilium` runs first.
+
+## Current Helm values (phase 1)
+
+- `ipam.mode=kubernetes` — use `Node.spec.podCIDR` from Kubernetes (matches k3s defaults).
+- `routingMode=tunnel` — overlay between nodes; fits k3d and typical single-L2 homelab segments.
+- `kubeProxyReplacement=false` — keep k3s kube-proxy until you deliberately migrate.
+- `bgpControlPlane.enabled=false` — enable in Helm when adding manifests under `bgp/`.
 
 ## Implementation plan (phased)
 
-1. **Design and inventory**
+1. **Design and inventory** — Record node interfaces/subnets and current service exposure paths; decide native routing vs tunnel for production; define BGP peering matrix.
 
-   - Record node interfaces/subnets and current service exposure paths.
-   - Decide Cilium mode (`kubeProxyReplacement`, tunnel/native routing, IPAM mode).
-   - Define BGP peering matrix (neighbors, ASN, timers, failure behavior).
+1. **Bootstrap Cilium in testing** — Done for phase 1: Helm release + k3d bootstrap hook; BGP off.
 
-1. **Bootstrap Cilium in testing**
+1. **Enable BGP control plane** — Set `bgpControlPlane.enabled=true`, add BGP CRs under `bgp/`, advertise test prefixes, verify peers.
 
-   - Add Cilium Helm source/release with conservative defaults.
-   - Keep BGP disabled initially; verify pod networking, DNS, and API reachability.
-   - Validate existing workloads (`hello-world`, Envoy Gateway control/data plane, cert-manager webhooks).
+1. **Traffic and policy hardening** — Baseline network policies; confirm Envoy Gateway and tunnel paths.
 
-1. **Enable BGP control plane**
-
-   - Add BGP CRDs/policies and service advertisement config.
-   - Advertise a controlled test prefix first, then production-intended LB/service ranges.
-   - Verify peering health and route propagation on both cluster and router sides.
-
-1. **Traffic and policy hardening**
-
-   - Add baseline network policies in audit-first sequence.
-   - Confirm ingress behavior with Envoy Gateway and Cloudflare tunnel dependencies.
-   - Document operational runbooks (peer loss, route flap, rollout/rollback commands).
-
-1. **Production promotion**
-
-   - Mirror tested values/manifests into prod cluster path with environment-specific peers/ASNs.
-   - Roll out node groups incrementally and confirm route convergence after each step.
+1. **Production promotion** — Environment-specific ASNs/peers; incremental node rollout.
 
 ## Validation checklist
 
 - `cilium status` and operator health are green.
-- BGP peers are `Established` and expected prefixes are advertised/received.
+- BGP peers are `Established` and expected prefixes are advertised/received (after phase 2).
 - Service reachability works from LAN and tunnel entrypoints.
 - DNS, cert-manager ACME/webhook paths, and Envoy Gateway routes remain functional.
 - No packet-loss spikes or route-flap storms during steady state.

@@ -1,26 +1,23 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: jetstack
+  name: cilium
   namespace: flux-system
 spec:
   interval: 1h
-  url: https://charts.jetstack.io
+  url: https://helm.cilium.io/
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: cert-manager
+  name: cilium
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: cilium
-      namespace: flux-system
   interval: 1h
-  timeout: 15m
-  targetNamespace: cert-manager
+  timeout: 20m
+  releaseName: cilium
+  targetNamespace: kube-system
   install:
-    createNamespace: true
     remediation:
       retries: 3
   upgrade:
@@ -28,12 +25,17 @@ spec:
       retries: 3
   chart:
     spec:
-      chart: cert-manager
-      version: v1.20.2
+      chart: cilium
+      version: 1.19.3
       sourceRef:
         kind: HelmRepository
-        name: jetstack
+        name: cilium
         namespace: flux-system
       interval: 12h
   values:
-    installCRDs: true
+    ipam:
+      mode: kubernetes
+    routingMode: tunnel
+    kubeProxyReplacement: "false"
+    bgpControlPlane:
+      enabled: false

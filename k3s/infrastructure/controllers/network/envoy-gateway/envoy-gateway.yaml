@@ -15,6 +15,9 @@ metadata:
   name: envoy-gateway
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: cilium
+      namespace: flux-system
   interval: 1h
   timeout: 15m
   releaseName: envoy-gateway

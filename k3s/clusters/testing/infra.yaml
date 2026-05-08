@@ -1,9 +1,32 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: infra-cilium
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 2m
+  timeout: 25m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  path: ./k3s/infrastructure/controllers/network/cilium
+  prune: true
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: infra
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infra-cilium
+      namespace: flux-system
   interval: 1h
   retryInterval: 2m
   timeout: 15m
