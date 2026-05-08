@@ -6,6 +6,7 @@ Per-stack notes for this GitOps repo: what is **deployed** today versus **planne
 | --- | --- | --- |
 | [flux-and-clusters.md](flux-and-clusters.md) | Deployed | Flux entrypoint, testing vs prod, `infrastructure.yaml` flow |
 | [traefik.md](traefik.md) | Deployed | Ingress controller, dashboard, GitOps paths |
+| [metallb.md](metallb.md) | Deployed | Service LoadBalancer IP allocation for testing cluster |
 | [cert-manager.md](cert-manager.md) | Deployed | TLS operator, Helm release |
 | [gitops-and-secrets.md](gitops-and-secrets.md) | Deployed | SOPS, Flux decryption, developer secrets |
 | [cloudflare-operator.md](cloudflare-operator.md) | Deployed | Tunnels to Traefik; placeholders for zone/token |

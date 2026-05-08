@@ -38,6 +38,9 @@ spec:
   values:
     deployment:
       replicas: 1
+    service:
+      annotations:
+        metallb.universe.tf/address-pool: default-pool
     providers:
       kubernetesCRD:
         enabled: true

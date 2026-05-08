@@ -7,17 +7,19 @@
 
 | Resource | Path |
 | --- | --- |
-| HelmRelease | [`../k3s/infrastructure/controllers/traefik/traefik.yaml`](../k3s/infrastructure/controllers/traefik/traefik.yaml) |
-| Kustomize wrapper | [`../k3s/infrastructure/controllers/traefik/kustomization.yaml`](../k3s/infrastructure/controllers/traefik/kustomization.yaml) |
-| HelmRepository source | [`../k3s/infrastructure/controllers/source/traefik.yaml`](../k3s/infrastructure/controllers/source/traefik.yaml) |
+| HelmRepository + HelmRelease | [`../k3s/infrastructure/controllers/core/traefik.yaml`](../k3s/infrastructure/controllers/core/traefik.yaml) |
+| Testing infra aggregator | [`../k3s/infrastructure/testing/kustomization.yaml`](../k3s/infrastructure/testing/kustomization.yaml) |
+| Testing cluster infra kustomizations | [`../k3s/clusters/testing/infra.yaml`](../k3s/clusters/testing/infra.yaml) |
 
 ## Behavior in this cluster
 
 - **k3s** is installed with bundled Traefik **disabled** so this Helm-managed Traefik is the ingress controller (see `--disable=traefik` in [`../flake.nix`](../flake.nix) `k3d cluster create` arguments).
+- **k3s servicelb** is disabled (see `--disable=servicelb` in [`../flake.nix`](../flake.nix)) so MetalLB is the only `LoadBalancer` controller.
 - The Helm chart enables the **IngressRoute dashboard** (`ingressRoute.dashboard.enabled: true`).
 - **Published service** for Ingress status is enabled (`providers.kubernetesIngress.publishedService.enabled: true`) so external-dns or LB integrations can resolve the ingress hostname correctly when configured.
+- Traefik service IP allocation is pinned to MetalLB pool `default-pool` via service annotation in `values.service.annotations`.
 
-Add `Ingress`, `IngressRoute`, or middleware manifests under [`../k3s/infrastructure/configs`](../k3s/infrastructure/configs) when you introduce them, and enable the `infra-configs` `Kustomization` in [`../k3s/clusters/testing/infrastructure.yaml`](../k3s/clusters/testing/infrastructure.yaml).
+App and tunnel resources for testing are reconciled from the `apps-testing` and `infra-suplemental` Flux kustomizations defined in [`../k3s/clusters/testing/kustomization.yaml`](../k3s/clusters/testing/kustomization.yaml).
 
 ## Upstream
 
