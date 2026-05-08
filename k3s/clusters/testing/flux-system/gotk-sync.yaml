@@ -8,7 +8,7 @@ metadata:
 spec:
   interval: 1m0s
   ref:
-    branch: cursor/cf-tunnel-publish-fix-4d47
+    branch: cilium-service-layer
   secretRef:
     name: flux-system
   url: https://github.com/soriphoono/guenivir.git
