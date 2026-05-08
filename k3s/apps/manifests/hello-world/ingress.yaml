@@ -1,29 +1,41 @@
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: hello-world-gateway
+  namespace: hello-world
+spec:
+  gatewayClassName: envoy
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: hello-world.cryptic-coders.net
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: hello-world
   namespace: hello-world
 spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`hello-world.cryptic-coders.net`)
-      services:
+  parentRefs:
+    - name: hello-world-gateway
+  hostnames:
+    - hello-world.cryptic-coders.net
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
         - name: hello-world
           port: 80
----
-apiVersion: networking.cfargotunnel.com/v1alpha1
-kind: TunnelBinding
-metadata:
-  name: hello-world-tunnel-binding
-  namespace: hello-world
-subjects:
-  - name: wildcard
-    spec:
-      fqdn: "hello-world.cryptic-coders.net"
-      # IngressRoute uses `web` (:80); :443/`websecure` has no matching route.
-      target: http://traefik.traefik.svc.cluster.local:80
-tunnelRef:
-  kind: ClusterTunnel
-  name: guenivir-testing-tunnel

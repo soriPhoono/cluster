@@ -1,6 +1,6 @@
 # MetalLB
 
-**Status:** Deployed  
+**Status:** Deployed\
 **Scope:** Service `LoadBalancer` IP assignment for the testing cluster.
 
 ## GitOps paths

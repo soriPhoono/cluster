@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - ../controllers/core
   - ../controllers/network/metallb
+  - ../controllers/network/envoy-gateway
   - ../controllers/dns/cloudflare-operator
