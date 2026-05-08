@@ -27,7 +27,7 @@ Details: [docs/flux-and-clusters.md](docs/flux-and-clusters.md), [docs/cloudflar
 
 | Planned order | Goal | Doc |
 | --- | --- | --- |
-| **1** | Harden **Cilium** for production (real eBGP peers, routable LB pools, optional kube-proxy replacement) | [docs/cilium.md](docs/cilium.md) |
+| **1** | Harden **Cilium** for production (real eBGP peers, routable LB pools) | [docs/cilium.md](docs/cilium.md) |
 | **2** | Install **VMStack** for cluster monitoring, observability, and alerting. | [docs/vmstack.md](docs/vmstack.md) |
 | **3** | Install **CloudNativePG** for PostgreSQL, then add operators for other major database vendors (for example MariaDB and MongoDB). | [docs/cloudnativepg.md](docs/cloudnativepg.md) |
 | **4** | Install **Authentik** as the homelab public/private identity provider (IdP). | [docs/authentik.md](docs/authentik.md) |

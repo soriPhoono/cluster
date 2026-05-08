@@ -110,11 +110,11 @@
 
                 sleep 2
 
-                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --k3s-arg '--flannel-backend=none@server:*' --k3s-arg '--flannel-backend=none@agent:*' --k3s-arg '--disable-network-policy@server:*' --k3s-arg '--disable-network-policy@agent:*' --servers 1 --agents 2 --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
+                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --k3s-arg '--disable=kube-proxy@server:*' --k3s-arg '--disable=kube-proxy@agent:*' --k3s-arg '--flannel-backend=none@server:*' --k3s-arg '--flannel-backend=none@agent:*' --k3s-arg '--disable-network-policy@server:*' --k3s-arg '--disable-network-policy@agent:*' --servers 1 --agents 2 --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
 
                 sleep 2
 
-                operation "Installing Cilium (pod network; required when Flannel is disabled)..." "Failed to install Cilium" "helm repo add cilium https://helm.cilium.io/ --force-update && helm repo update cilium && helm upgrade --install cilium cilium/cilium --namespace kube-system --version \"$CILIUM_CHART_VERSION\" --set ipam.mode=kubernetes --set routingMode=tunnel --set-string kubeProxyReplacement=false --set enableLBIPAM=true --set defaultLBServiceIPAM=lbipam --set bgpControlPlane.enabled=true --kube-context \"k3d-$CLUSTER_NAME\" --wait --timeout 20m0s"
+                operation "Installing Cilium (pod network + kube-proxy replacement; required when Flannel/kube-proxy are disabled)..." "Failed to install Cilium" "helm repo add cilium https://helm.cilium.io/ --force-update && helm repo update cilium && helm upgrade --install cilium cilium/cilium --namespace kube-system --version \"$CILIUM_CHART_VERSION\" --set ipam.mode=kubernetes --set routingMode=tunnel --set-string kubeProxyReplacement=true --set-string k8sServiceHost=auto --set k8sServicePort=6443 --set enableLBIPAM=true --set defaultLBServiceIPAM=lbipam --set bgpControlPlane.enabled=true --kube-context \"k3d-$CLUSTER_NAME\" --wait --timeout 20m0s"
 
                 sleep 2
 
