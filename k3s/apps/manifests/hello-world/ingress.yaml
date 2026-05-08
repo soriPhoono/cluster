@@ -12,3 +12,16 @@ spec:
       services:
         - name: hello-world
           port: 80
+---
+apiVersion: networking.cfargotunnel.com/v1alpha1
+kind: TunnelBinding
+metadata:
+  name: hello-world-tunnel-binding
+subjects:
+  - name: wildcard
+    spec:
+      fqdn: "*.cryptic-coders.net"
+      target: https://traefik.traefik.svc.cluster.local:443
+tunnelRef:
+  kind: ClusterTunnel
+  name: guenivir-testing-tunnel
