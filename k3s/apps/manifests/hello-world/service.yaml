@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-hello
-  namespace: nginx-hello
+  name: hello-world
+  namespace: hello-world
   labels:
-    app: nginx-hello
+    app: hello-world
 spec:
   selector:
-    app: nginx-hello
+    app: hello-world
   ports:
     - port: 80
       targetPort: 80

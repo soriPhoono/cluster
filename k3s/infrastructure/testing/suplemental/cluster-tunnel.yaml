@@ -1,0 +1,14 @@
+apiVersion: networking.cfargotunnel.com/v1alpha2
+kind: ClusterTunnel
+metadata:
+  name: guenivir-testing-tunnel # The ClusterTunnel Custom Resource Name
+spec:
+  newTunnel:
+    name: guenivir-testing-tunnel # Name of your new tunnel on Cloudflare
+  cloudflare:
+    email: soriphoono@gmail.com # Your email used to login to the Cloudflare Dashboard
+    domain: cryptic-coders.net # Domain under which the tunnel runs and adds DNS entries to
+    secret: cloudflare-secrets # The secret created before
+    # accountId and accountName cannot be both empty. If both are provided, Account ID is used if valid, else falls back to Account Name.
+    accountId: b6e9a277e1c46db22032d0e2c04fb6ae
+    accountName: homelab
