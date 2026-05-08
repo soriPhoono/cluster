@@ -22,7 +22,7 @@ subjects:
   - name: wildcard
     spec:
       fqdn: "*.cryptic-coders.net"
-      # Must match Traefik entryPoints on the IngressRoute (`web` == :80). HTTPS :443 would hit `websecure`, which has no route → gateway/404.
+      # IngressRoute uses `web` (:80); :443/`websecure` has no matching route.
       target: http://traefik.traefik.svc.cluster.local:80
 tunnelRef:
   kind: ClusterTunnel
