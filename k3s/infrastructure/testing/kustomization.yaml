@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
   - ../controllers/core
   - ../controllers/dns/cloudflare-operator
-  - suplemental
