@@ -20,6 +20,9 @@ metadata:
   name: infra-suplemental
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infra
+      namespace: flux-system
   interval: 1h
   retryInterval: 2m
   timeout: 15m
