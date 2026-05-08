@@ -1,0 +1,20 @@
+# eBGP template: set peerAddress (and ASNs) to your upstream router(s).
+# 192.0.2.1 is TEST-NET-1 documentation space — it will not peer until replaced.
+# k3d: LB IPs are still allocated locally; BGP stays idle without a real peer on-path.
+apiVersion: cilium.io/v2
+kind: CiliumBGPClusterConfig
+metadata:
+  name: homelab-ebgp
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/os: linux
+  bgpInstances:
+    - name: homelab
+      localASN: 64512
+      peers:
+        - name: upstream-router
+          peerASN: 64496
+          peerAddress: 192.0.2.1
+          peerConfigRef:
+            name: homelab-peer

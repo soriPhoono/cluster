@@ -24,7 +24,7 @@ The **k3d** workflow (`nix run` in this flake) bootstraps Flux with path `./k3s/
 
 ## Dependency order
 
-[`infra.yaml`](../k3s/clusters/testing/infra.yaml) applies **`infra-cilium`** first so the CNI is ready, then **`infra`** (`./k3s/infrastructure/testing`). Helm releases for MetalLB, cert-manager, and Envoy Gateway declare `dependsOn` for the Cilium `HelmRelease`. The Cloudflare operator `Kustomization` depends on **`infra-cilium`**. Optional extra paths can be added with `dependsOn` as needed.
+[`infra.yaml`](../k3s/clusters/testing/infra.yaml) applies **`infra-cilium`** first so the CNI is ready, then **`infra`** (`./k3s/infrastructure/testing`). Helm releases for cert-manager and Envoy Gateway declare `dependsOn` for the Cilium `HelmRelease`. The Cloudflare operator `Kustomization` depends on **`infra-cilium`**. Optional extra paths can be added with `dependsOn` as needed.
 
 ## Upstream
 

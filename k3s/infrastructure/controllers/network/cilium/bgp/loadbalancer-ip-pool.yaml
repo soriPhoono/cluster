@@ -1,0 +1,10 @@
+# Replaces the former MetalLB default pool for the k3d docker network (172.18.0.0/16).
+# For production, change blocks to your routable service/LB range on the LAN.
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: default-lb-pool
+spec:
+  blocks:
+    - start: 172.18.255.200
+      stop: 172.18.255.250

@@ -1,0 +1,20 @@
+# Advertises node Pod CIDRs and LoadBalancer VIPs (from LB IPAM) toward eBGP peers.
+apiVersion: cilium.io/v2
+kind: CiliumBGPAdvertisement
+metadata:
+  name: homelab-advertisements
+  labels:
+    cilium.io/bgp-advertisement: homelab
+spec:
+  advertisements:
+    - advertisementType: PodCIDR
+    - advertisementType: Service
+      service:
+        addresses:
+          - LoadBalancerIP
+      selector:
+        matchExpressions:
+          - key: nonexistent.cilium.io/sentinel
+            operator: NotIn
+            values:
+              - __never__

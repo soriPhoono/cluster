@@ -1,15 +1,16 @@
-# Cilium (eBGP networking)
+# Cilium (full k3s network stack + eBGP)
 
-**Status:** **Phase 1 deployed** — Cilium is the cluster CNI with conservative defaults (tunnel datapath, Kubernetes IPAM, kube-proxy left enabled, **BGP control plane off**). BGP CRDs and homelab peer config are reserved for phase 2 under `k3s/infrastructure/controllers/network/cilium/bgp/`.
+**Status:** **Deployed** — Cilium replaces **Flannel** (CNI), **k3s ServiceLB** (disabled at install), and **MetalLB**. Pod networking, **LoadBalancer IPAM**, and **eBGP** advertisement of Pod CIDRs plus `LoadBalancer` VIPs are owned by Cilium.
 
-**Scope:** **Cilium** as the cluster CNI; **BGP control plane (eBGP)** for routable service IP advertisement is planned next (see rollout below).
+**Scope:** Single network data plane: Cilium CNI + LB IPAM + BGP control plane toward upstream routers (eBGP). kube-proxy remains enabled (`kubeProxyReplacement: "false"`) until you deliberately move to kube-proxy-free mode.
 
-## Goals
+## What Cilium replaces
 
-- Replace/standardize cluster networking on Cilium with kube-proxy replacement enabled where supported.
-- Use Cilium BGP control plane to advertise service VIPs/LB ranges toward upstream router peers.
-- Keep ingress exposure predictable for Envoy Gateway and future services while reducing ad-hoc L2 behavior.
-- Establish a network-policy baseline (`default-deny` + explicit allow rules) after migration stability.
+| Former component | Replacement |
+| --- | --- |
+| Flannel | Cilium CNI (tunnel datapath, Kubernetes IPAM) |
+| k3s ServiceLB (`klipper-lb`) | Disabled in `k3d`/`k3s` args; no in-cluster LB shim |
+| MetalLB | **CiliumLoadBalancerIPPool** + **Cilium BGP** advertisement of `LoadBalancerIP` |
 
 ## GitOps layout
 
@@ -17,61 +18,59 @@
 | --- | --- |
 | HelmRepository + HelmRelease | [`../k3s/infrastructure/controllers/network/cilium/cilium.yaml`](../k3s/infrastructure/controllers/network/cilium/cilium.yaml) |
 | Kustomize wrapper | [`../k3s/infrastructure/controllers/network/cilium/kustomization.yaml`](../k3s/infrastructure/controllers/network/cilium/kustomization.yaml) |
-| BGP manifests (phase 2) | [`../k3s/infrastructure/controllers/network/cilium/bgp/`](../k3s/infrastructure/controllers/network/cilium/bgp/) (placeholder; add `CiliumBGPClusterConfig`, `CiliumBGPPeerConfig`, advertisements, pools when enabling BGP) |
-| Flux: CNI before rest of infra | [`../k3s/clusters/testing/infra.yaml`](../k3s/clusters/testing/infra.yaml) — `infra-cilium` applies `./k3s/infrastructure/controllers/network/cilium` first; `infra` and the Cloudflare operator `Kustomization` depend on it |
+| LB pool + BGP CRs | [`../k3s/infrastructure/controllers/network/cilium/bgp/`](../k3s/infrastructure/controllers/network/cilium/bgp/) |
+| Flux: CNI before rest of infra | [`../k3s/clusters/testing/infra.yaml`](../k3s/clusters/testing/infra.yaml) — `infra-cilium` first; `infra` and Cloudflare operator depend on it |
 
-Cilium is **not** listed under [`../k3s/infrastructure/testing/kustomization.yaml`](../k3s/infrastructure/testing/kustomization.yaml) so it is not reconciled twice; the dedicated `infra-cilium` Flux `Kustomization` enforces ordering before MetalLB, cert-manager, Envoy Gateway, and the remote Cloudflare install.
+Cilium is applied only via **`infra-cilium`**, not duplicated under [`../k3s/infrastructure/testing/kustomization.yaml`](../k3s/infrastructure/testing/kustomization.yaml).
 
-## k3d / `nix run` bootstrap
+## Helm values (testing baseline)
 
-The testing cluster is created **without Flannel** and **without** the built-in k3s network policy controller (Cilium provides policy). The deploy app in [`../flake.nix`](../flake.nix) installs Cilium with Helm **after** `k3d cluster create` and **before** Flux bootstrap so the control plane and Flux pods have pod networking.
+- `ipam.mode: kubernetes` — per-node `podCIDR` from Kubernetes (k3s defaults).
+- `routingMode: tunnel` — overlay between nodes.
+- `kubeProxyReplacement: "false"` — keep k3s kube-proxy unless you migrate.
+- `enableLBIPAM: true`, `defaultLBServiceIPAM: lbipam` — Cilium assigns `LoadBalancer` `.status.ingress[].ip` from pools.
+- `bgpControlPlane.enabled: true` — `CiliumBGPClusterConfig` / `CiliumBGPPeerConfig` / `CiliumBGPAdvertisement` take effect.
 
-Keep chart version in sync: `CILIUM_CHART_VERSION` in `flake.nix` and `spec.chart.spec.version` in the Cilium `HelmRelease`.
+## BGP and pools (homelab)
+
+Under `bgp/`:
+
+- **`CiliumLoadBalancerIPPool`** `default-lb-pool` — same range as the old MetalLB pool for k3d (`172.18.255.200–172.18.255.250` on `172.18.0.0/16`). **Change** `spec.blocks` for production to your routable service range.
+- **`CiliumBGPClusterConfig`** `homelab-ebgp` — eBGP template: `localASN: 64512`, `peerASN: 64496`, `peerAddress: 192.0.2.1` (RFC 5737 TEST-NET-1 placeholder). **Replace** `peerAddress` and ASNs with your router; until then, k3d still gets LB IPs locally while BGP sessions stay idle or retry.
+- **`CiliumBGPPeerConfig`** / **`CiliumBGPAdvertisement`** — IPv4 unicast; advertises **PodCIDR** per node and **LoadBalancerIP** for all services (sentinel `NotIn` selector). Tighten selectors if you should not leak VIPs to the fabric.
+
+Optional: add a second peer, MD5 secret (`authSecretRef`), or `ebgpMultihop` in `CiliumBGPPeerConfig` per [Cilium BGP configuration](https://docs.cilium.io/en/stable/network/bgp-control-plane/bgp-control-plane-configuration.html).
+
+## k3d / `nix run`
+
+[`../flake.nix`](../flake.nix) creates the cluster with **`--disable=servicelb`**, **`--flannel-backend=none`**, **`--disable-network-policy`**, then **Helm-installs Cilium** (matching values) before Flux so the API server and Flux have pod networking. Chart version: `CILIUM_CHART_VERSION` in the flake and `spec.chart.spec.version` in the `HelmRelease` must stay aligned.
 
 ## Production k3s
 
-Install servers/agents with an equivalent of:
+Server/agent flags should mirror testing:
 
+- `--disable=servicelb` (or equivalent: no ServiceLB)
 - `--flannel-backend=none`
 - `--disable-network-policy`
 
-Bring up Cilium (Helm or Flux) before scheduling application workloads. Mirror the same Flux paths as testing so `infra-cilium` runs first.
+Install Cilium before application workloads; use the same Flux paths. Tune **`CiliumLoadBalancerIPPool`** and **`CiliumBGPClusterConfig`** for your LAN and ASN plan.
 
-## Current Helm values (phase 1)
+## Validation
 
-- `ipam.mode=kubernetes` — use `Node.spec.podCIDR` from Kubernetes (matches k3s defaults).
-- `routingMode=tunnel` — overlay between nodes; fits k3d and typical single-L2 homelab segments.
-- `kubeProxyReplacement=false` — keep k3s kube-proxy until you deliberately migrate.
-- `bgpControlPlane.enabled=false` — enable in Helm when adding manifests under `bgp/`.
-
-## Implementation plan (phased)
-
-1. **Design and inventory** — Record node interfaces/subnets and current service exposure paths; decide native routing vs tunnel for production; define BGP peering matrix.
-
-1. **Bootstrap Cilium in testing** — Done for phase 1: Helm release + k3d bootstrap hook; BGP off.
-
-1. **Enable BGP control plane** — Set `bgpControlPlane.enabled=true`, add BGP CRs under `bgp/`, advertise test prefixes, verify peers.
-
-1. **Traffic and policy hardening** — Baseline network policies; confirm Envoy Gateway and tunnel paths.
-
-1. **Production promotion** — Environment-specific ASNs/peers; incremental node rollout.
-
-## Validation checklist
-
-- `cilium status` and operator health are green.
-- BGP peers are `Established` and expected prefixes are advertised/received (after phase 2).
-- Service reachability works from LAN and tunnel entrypoints.
-- DNS, cert-manager ACME/webhook paths, and Envoy Gateway routes remain functional.
-- No packet-loss spikes or route-flap storms during steady state.
+- `cilium status` — agents and operator healthy.
+- `kubectl get ippools` (short name for `CiliumLoadBalancerIPPool`) — pool not `Conflicting`, IPs available.
+- `cilium bgp peers` (via CLI) or operator logs — eBGP `Established` after you set a real `peerAddress`.
+- `LoadBalancer` services receive an external IP from the pool; `/32` (or `/128`) routes appear on the upstream router when BGP is up.
 
 ## Risks and rollback
 
-- **Primary risk:** transient cluster networking disruption during CNI migration.
-- **Mitigation:** phased testing first, explicit maintenance window, pre-staged rollback manifests.
-- **Rollback approach:** revert Flux to prior networking stack commit and force reconcile; keep known-good previous manifests tagged for fast recovery.
+- **Risk:** CNI/LB/BGP misconfiguration breaks reachability.
+- **Mitigation:** staged rollout, router-side neighbor limits (ECMP), documented AS/path policy.
+- **Rollback:** revert Git to the previous networking commit and reconcile; keep a known-good revision tagged.
 
 ## Upstream
 
 - [Cilium documentation](https://docs.cilium.io/)
-- [Cilium BGP Control Plane](https://docs.cilium.io/en/stable/network/bgp-control-plane/)
-- [Cilium Kubernetes installation](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/)
+- [BGP control plane configuration](https://docs.cilium.io/en/stable/network/bgp-control-plane/bgp-control-plane-configuration.html)
+- [LoadBalancer IPAM (LB IPAM)](https://docs.cilium.io/en/stable/network/lb-ipam/)
+- [Kubernetes installation](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/)

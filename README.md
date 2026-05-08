@@ -15,19 +15,19 @@ Reconciliation entrypoint: [`k3s/clusters/testing`](k3s/clusters/testing) (see [
 | Layer | Role |
 | --- | --- |
 | **Flux Kustomizations** ([`k3s/clusters/testing`](k3s/clusters/testing)) | `infra-cilium` deploys [`k3s/infrastructure/controllers/network/cilium`](k3s/infrastructure/controllers/network/cilium) first; `infra` deploys [`k3s/infrastructure/testing`](k3s/infrastructure/testing); `infra-suplemental` deploys supplemental infra resources; `apps-testing` deploys [`k3s/apps/manifests/hello-world`](k3s/apps/manifests/hello-world). |
-| **Network controllers** ([`k3s/infrastructure/controllers/network`](k3s/infrastructure/controllers/network)) | **Cilium** ([`cilium/cilium.yaml`](k3s/infrastructure/controllers/network/cilium/cilium.yaml)) as CNI; **cert-manager** ([`cert-manager/cert-manager.yaml`](k3s/infrastructure/controllers/network/cert-manager/cert-manager.yaml)), **MetalLB** ([`metallb/metallb.yaml`](k3s/infrastructure/controllers/network/metallb/metallb.yaml)) for service IPs, and **Envoy Gateway** ([`envoy-gateway/envoy-gateway.yaml`](k3s/infrastructure/controllers/network/envoy-gateway/envoy-gateway.yaml)) for ingress/gateway APIs. |
+| **Network controllers** ([`k3s/infrastructure/controllers/network`](k3s/infrastructure/controllers/network)) | **Cilium** ([`cilium/cilium.yaml`](k3s/infrastructure/controllers/network/cilium/cilium.yaml)) for CNI, LoadBalancer IPAM, and eBGP; **cert-manager** ([`cert-manager/cert-manager.yaml`](k3s/infrastructure/controllers/network/cert-manager/cert-manager.yaml)) and **Envoy Gateway** ([`envoy-gateway/envoy-gateway.yaml`](k3s/infrastructure/controllers/network/envoy-gateway/envoy-gateway.yaml)) for ingress/gateway APIs. |
 | **DNS / tunnel controller** ([`k3s/infrastructure/controllers/dns/cloudflare-operator`](k3s/infrastructure/controllers/dns/cloudflare-operator)) | **Cloudflare operator** deployment plus SOPS-managed API token secret. |
-| **Supplemental testing resources** ([`k3s/infrastructure/testing/suplemental`](k3s/infrastructure/testing/suplemental)) | Environment-specific resources layered after base infra (currently Cloudflare `ClusterTunnel` and MetalLB address pools/advertisement). |
+| **Supplemental testing resources** ([`k3s/infrastructure/testing/suplemental`](k3s/infrastructure/testing/suplemental)) | Environment-specific resources layered after base infra (Cloudflare `ClusterTunnel`; LB pools live under Cilium, not supplemental). |
 
-Details: [docs/flux-and-clusters.md](docs/flux-and-clusters.md), [docs/cloudflare-operator.md](docs/cloudflare-operator.md), [docs/metallb.md](docs/metallb.md), [docs/cert-manager.md](docs/cert-manager.md).
+Details: [docs/flux-and-clusters.md](docs/flux-and-clusters.md), [docs/cloudflare-operator.md](docs/cloudflare-operator.md), [docs/cilium.md](docs/cilium.md), [docs/cert-manager.md](docs/cert-manager.md).
 
-**Current testing status:** the testing cluster is an active integration environment for **Cilium**, cert-manager, MetalLB, Envoy Gateway, Cloudflare operator/tunnel, plus a sample workload under `k3s/apps/manifests/hello-world`.
+**Current testing status:** the testing cluster exercises **Cilium** (CNI, LB IPAM, BGP), cert-manager, Envoy Gateway, Cloudflare operator/tunnel, plus a sample workload under `k3s/apps/manifests/hello-world`.
 
 ## Roadmap
 
 | Planned order | Goal | Doc |
 | --- | --- | --- |
-| **1** | Extend **Cilium** with **eBGP** (BGP control plane, service/LB advertisement) on the homelab routers. | [docs/cilium.md](docs/cilium.md) |
+| **1** | Harden **Cilium** for production (real eBGP peers, routable LB pools, optional kube-proxy replacement) | [docs/cilium.md](docs/cilium.md) |
 | **2** | Install **VMStack** for cluster monitoring, observability, and alerting. | [docs/vmstack.md](docs/vmstack.md) |
 | **3** | Install **CloudNativePG** for PostgreSQL, then add operators for other major database vendors (for example MariaDB and MongoDB). | [docs/cloudnativepg.md](docs/cloudnativepg.md) |
 | **4** | Install **Authentik** as the homelab public/private identity provider (IdP). | [docs/authentik.md](docs/authentik.md) |
@@ -67,11 +67,11 @@ k3s/                              # Flux-managed cluster config
 │       └── hello-world/          # Example workload for testing cluster
 ├── infrastructure/
 │   ├── controllers/
-│   │   ├── network/              # cilium, cert-manager, metallb, envoy-gateway
+│   │   ├── network/              # cilium, cert-manager, envoy-gateway
 │   │   └── dns/                  # cloudflare-operator
 │   └── testing/
 │       ├── kustomization.yaml    # Base testing infrastructure composition
-│       └── suplemental/          # Testing-specific extras (ClusterTunnel, MetalLB pools)
+│       └── suplemental/          # Testing-specific extras (e.g. ClusterTunnel)
 docs/                             # Per-stack documentation (see docs/README.md)
 ```
 

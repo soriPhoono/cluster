@@ -1,0 +1,15 @@
+apiVersion: cilium.io/v2
+kind: CiliumBGPPeerConfig
+metadata:
+  name: homelab-peer
+spec:
+  timers:
+    connectRetryTimeSeconds: 10
+    holdTimeSeconds: 9
+    keepAliveTimeSeconds: 3
+  families:
+    - afi: ipv4
+      safi: unicast
+      advertisements:
+        matchLabels:
+          cilium.io/bgp-advertisement: homelab

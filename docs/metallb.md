@@ -1,35 +1,14 @@
-# MetalLB
+# MetalLB (removed)
 
-**Status:** Deployed\
-**Scope:** Service `LoadBalancer` IP assignment for the testing cluster.
+**Status:** **Removed** — **MetalLB is no longer used.** LoadBalancer VIPs and their advertisement are handled by **Cilium LB IPAM** and the **Cilium BGP control plane** (see [cilium.md](cilium.md)).
 
-## GitOps paths
+## Historical paths (deleted)
 
-| Resource | Path |
-| --- | --- |
-| MetalLB Helm source + release | [`../k3s/infrastructure/controllers/network/metallb/metallb.yaml`](../k3s/infrastructure/controllers/network/metallb/metallb.yaml) |
-| MetalLB controller wrapper | [`../k3s/infrastructure/controllers/network/metallb/kustomization.yaml`](../k3s/infrastructure/controllers/network/metallb/kustomization.yaml) |
-| Testing infra aggregator | [`../k3s/infrastructure/testing/kustomization.yaml`](../k3s/infrastructure/testing/kustomization.yaml) |
-| Pool + L2 advertisement | [`../k3s/infrastructure/testing/suplemental/metallb-pools.yaml`](../k3s/infrastructure/testing/suplemental/metallb-pools.yaml) |
-| Supplemental wrapper | [`../k3s/infrastructure/testing/suplemental/kustomization.yaml`](../k3s/infrastructure/testing/suplemental/kustomization.yaml) |
+The following were deleted when migrating to Cilium:
 
-## Behavior in this cluster
-
-- Pod networking is provided by **Cilium** (see [cilium.md](cilium.md)); MetalLB handles `LoadBalancer` IPs only.
-- The testing k3d network is currently `172.18.0.0/16`.
-- MetalLB allocates external service IPs from `172.18.255.200-172.18.255.250`.
-- `L2Advertisement` `default-l2` announces addresses from `default-pool`.
-- Traefik is annotated to use this pool, keeping ingress allocation deterministic.
-- Cloudflare tunnel routing remains available; MetalLB adds direct `LoadBalancer` service IP support.
-
-## Verification
-
-- `kubectl -n metallb-system get pods`
-- `kubectl get ipaddresspools -A`
-- `kubectl get l2advertisements -A`
-- `kubectl -n traefik get svc traefik -o wide`
+- `k3s/infrastructure/controllers/network/metallb/`
+- `k3s/infrastructure/testing/suplemental/metallb-pools.yaml`
 
 ## Upstream
 
-- [MetalLB documentation](https://metallb.io/)
-- [MetalLB Helm chart](https://artifacthub.io/packages/helm/metallb/metallb)
+- [MetalLB documentation](https://metallb.io/) — reference only if you compare behavior while debugging.
