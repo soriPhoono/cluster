@@ -6,49 +6,50 @@ GitOps repository for a personal homelab **Kubernetes** stack. Production runs *
 
 ## Repository and Flux source
 
-The Flux `GitRepository` in [`k3s/clusters/testing/flux-system/gotk-sync.yaml`](k3s/clusters/testing/flux-system/gotk-sync.yaml) points at `https://github.com/soriphoono/cluster.git`. This checkout may live under a different directory name (for example `guenivir`); the reconciled path is always `./k3s/clusters/testing` on the branch Flux tracks.
+The Flux `GitRepository` in [`k3s/clusters/testing/flux-system/gotk-sync.yaml`](k3s/clusters/testing/flux-system/gotk-sync.yaml) points at `https://github.com/soriphoono/guenivir.git`. This checkout may live under a different directory name (for example `guenivir`); the reconciled path is always `./k3s/clusters/` on the branch Flux tracks, where the cluster being deployed is either the official cluster [`guenivir`](k3s/clusters/guenivir/) or the [`testing`](k3s/clusters/testing/) cluster with experimental changes.
 
 ## What Flux deploys today
 
-Reconciliation entrypoint: [`k3s/clusters/testing`](k3s/clusters/testing) (see [`infrastructure.yaml`](k3s/clusters/testing/infrastructure.yaml)).
+Reconciliation entrypoint: [`k3s/clusters/testing`](k3s/clusters/testing) (see [`kustomization.yaml`](k3s/clusters/testing/kustomization.yaml) for this testing cluster).
 
 | Layer | Role |
 | --- | --- |
-| **Flux** | Watches the Git repository and applies `Kustomization` resources. |
-| **Controllers** ([`k3s/infrastructure/controllers`](k3s/infrastructure/controllers)) | Helm repositories, [**Cloudflare operator**](https://github.com/adyanth/cloudflare-operator) ([`cloudflare-operator/`](k3s/infrastructure/controllers/cloudflare-operator)), **Traefik** ([`traefik/traefik.yaml`](k3s/infrastructure/controllers/traefik/traefik.yaml)), **cert-manager** ([`cert-manager.yaml`](k3s/infrastructure/controllers/cert-manager.yaml)). |
-| **Cloudflare tunnels** ([`k3s/infrastructure/cloudflare`](k3s/infrastructure/cloudflare)) | Flux `Kustomization` **`infra-cloudflare`** (after controllers): ClusterTunnel, wildcard **TunnelBinding** → Traefik, SOPS secret for the API token. Replace placeholders per [docs/cloudflare-operator.md](docs/cloudflare-operator.md). |
-| **Configs** | [`k3s/infrastructure/configs`](k3s/infrastructure/configs) is reserved for manifests layered after controllers (for example extra `Ingress` or `IngressRoute` objects). The Flux `Kustomization` for that path is commented out in [`infrastructure.yaml`](k3s/clusters/testing/infrastructure.yaml). |
+| **Flux Kustomizations** ([`k3s/clusters/testing`](k3s/clusters/testing)) | `infra` deploys [`k3s/infrastructure/testing`](k3s/infrastructure/testing), then `infra-suplemental` deploys supplemental infra resources, and `apps-testing` deploys [`k3s/apps/manifests/hello-world`](k3s/apps/manifests/hello-world). |
+| **Network controllers** ([`k3s/infrastructure/controllers/network`](k3s/infrastructure/controllers/network)) | **cert-manager** ([`cert-manager/cert-manager.yaml`](k3s/infrastructure/controllers/network/cert-manager/cert-manager.yaml)), **MetalLB** ([`metallb/metallb.yaml`](k3s/infrastructure/controllers/network/metallb/metallb.yaml)) for service IPs, and **Envoy Gateway** ([`envoy-gateway/envoy-gateway.yaml`](k3s/infrastructure/controllers/network/envoy-gateway/envoy-gateway.yaml)) for ingress/gateway APIs. |
+| **DNS / tunnel controller** ([`k3s/infrastructure/controllers/dns/cloudflare-operator`](k3s/infrastructure/controllers/dns/cloudflare-operator)) | **Cloudflare operator** deployment plus SOPS-managed API token secret. |
+| **Supplemental testing resources** ([`k3s/infrastructure/testing/suplemental`](k3s/infrastructure/testing/suplemental)) | Environment-specific resources layered after base infra (currently Cloudflare `ClusterTunnel` and MetalLB address pools/advertisement). |
 
-Details: [docs/flux-and-clusters.md](docs/flux-and-clusters.md), [docs/cloudflare-operator.md](docs/cloudflare-operator.md), [docs/traefik.md](docs/traefik.md), [docs/cert-manager.md](docs/cert-manager.md).
+Details: [docs/flux-and-clusters.md](docs/flux-and-clusters.md), [docs/cloudflare-operator.md](docs/cloudflare-operator.md), [docs/metallb.md](docs/metallb.md), [docs/cert-manager.md](docs/cert-manager.md).
 
-**Dashboard:** Traefik’s API/dashboard is enabled in the Helm values. Exposure is whatever you add under `configs/` or via separate ingress objects; the intended direction is **Authentik** as the **identity authority** for the network (OIDC for **NetBird**, ForwardAuth or similar for **Traefik** and other UIs) plus **NetBird** for mesh access—see the roadmap and linked docs.
+**Current testing status:** the testing cluster is an active integration environment for the core network/control-plane pieces (cert-manager, MetalLB, Envoy Gateway, Cloudflare operator/tunnel) plus a sample workload under `k3s/apps/manifests/hello-world`.
 
 ## Roadmap
 
-| Goal | Doc |
-| --- | --- |
-| Self-hosted **NetBird** control plane on-cluster | [docs/netbird.md](docs/netbird.md) |
-| **Five exit-node** workloads; each pod routes egress through **Mullvad** (Tailscale-style “exit via VPN vendor”) | [docs/netbird.md](docs/netbird.md) |
-| **Authentik** as **IdP** for **NetBird** and SSO / reverse-proxy auth for Traefik and other services | [docs/authentik.md](docs/authentik.md) |
-| **CloudNativePG** operator for PostgreSQL | [docs/cloudnativepg.md](docs/cloudnativepg.md) |
+| Planned order | Goal | Doc |
+| --- | --- | --- |
+| **1** | Install **Cilium** with eBGP networking as the next network foundation step. | [docs/cilium.md](docs/cilium.md) |
+| **2** | Install **VMStack** for cluster monitoring, observability, and alerting. | [docs/vmstack.md](docs/vmstack.md) |
+| **3** | Install **CloudNativePG** for PostgreSQL, then add operators for other major database vendors (for example MariaDB and MongoDB). | [docs/cloudnativepg.md](docs/cloudnativepg.md) |
+| **4** | Install **Authentik** as the homelab public/private identity provider (IdP). | [docs/authentik.md](docs/authentik.md) |
+| **5** | Install **NetBird** secured with Authentik OAuth to create an isolated mesh network and domain-based routing behavior. | [docs/netbird.md](docs/netbird.md) |
 
 ```mermaid
 flowchart LR
   users[Users]
-  auth[Authentik]
-  traefik[Traefik]
-  svc[Services]
-  nb[NetBird_mesh]
-  exit[Exit_pods]
-  mv[Mullvad]
-  inet[Internet]
+  auth[Authentik_IdP]
+  nb[vpn.cryptic-coders.net_(NetBird)]
+  mesh[NetBird_mesh]
+  catchall["*.cryptic-coders.net catchall via NetBird reverse proxy"]
+  private["*.vpn.cryptic-coders.net private VPN-only routes"]
+  svc[Private_services]
+
   users --> auth
-  auth --> traefik
   auth --> nb
-  traefik --> svc
   users --> nb
-  exit --> mv
-  mv --> inet
+  nb --> mesh
+  mesh --> catchall
+  mesh --> private
+  private --> svc
 ```
 
 ## Repository layout
@@ -58,19 +59,21 @@ k3s/                              # Flux-managed cluster config
 ├── clusters/
 │   └── testing/                  # Flux bootstrap path (same stack as prod)
 │       ├── flux-system/          # Flux sync (often generated by flux bootstrap)
-│       ├── infrastructure.yaml   # Infra Kustomizations (controllers / configs)
+│       ├── infra.yaml            # Infra Kustomizations (infra + infra-suplemental)
+│       ├── apps-testing.yaml     # Test apps Kustomization
 │       └── kustomization.yaml
+├── apps/
+│   └── manifests/
+│       └── hello-world/          # Example workload for testing cluster
 ├── infrastructure/
-│   ├── controllers/              # Helm releases, Helm repos, Cloudflare operator (remote kustomize)
-│   │   ├── source/
-│   │   ├── traefik/
-│   │   └── cloudflare-operator/
-│   ├── cloudflare/               # ClusterTunnel, TunnelBinding → Traefik, SOPS API token
-│   └── configs/                  # Optional second layer (enable in infrastructure.yaml)
+│   ├── controllers/
+│   │   ├── network/              # cert-manager, metallb, envoy-gateway
+│   │   └── dns/                  # cloudflare-operator
+│   └── testing/
+│       ├── kustomization.yaml    # Base testing infrastructure composition
+│       └── suplemental/          # Testing-specific extras (ClusterTunnel, MetalLB pools)
 docs/                             # Per-stack documentation (see docs/README.md)
 ```
-
-There is no `k3s/apps/` tree yet; application workloads can be added alongside new Flux `Kustomization` entries when needed.
 
 ## Getting started
 

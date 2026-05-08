@@ -1,6 +1,7 @@
 # AGENTS.md
 
-This is a Nix flake project.
+This is a Nix flake project. To interact with critical functions you must be using the devshell or have the devshells tooling available on your path in some other form.
+This is done via direnv hooks into your shell.
 
 ## Dev environment
 
