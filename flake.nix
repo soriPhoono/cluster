@@ -103,7 +103,7 @@
 
                 sleep 2
 
-                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --servers 1 --agents 2 --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
+                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
 
                 sleep 2
 
