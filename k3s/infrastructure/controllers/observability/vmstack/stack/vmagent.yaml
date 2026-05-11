@@ -1,0 +1,26 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: vmstack
+  namespace: observability
+spec:
+  replicaCount: 1
+  scrapeInterval: 30s
+  remoteWrite:
+    - url: http://vmsingle-vmstack.observability.svc:8428/api/v1/write
+  serviceScrapeSelector:
+    matchLabels:
+      monitoring.guenivir.io/stack: vmstack
+  podScrapeSelector:
+    matchLabels:
+      monitoring.guenivir.io/stack: vmstack
+  nodeScrapeSelector:
+    matchLabels:
+      monitoring.guenivir.io/stack: vmstack
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

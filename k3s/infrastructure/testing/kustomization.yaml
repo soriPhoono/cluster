@@ -5,3 +5,4 @@ resources:
   - ../controllers/network/envoy-gateway
   - ../controllers/network/cert-manager
   - ../controllers/dns/cloudflare-operator
+  - ../controllers/observability/vmstack/operator
