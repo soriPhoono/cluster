@@ -1,26 +1,38 @@
 # Authentik
 
-**Status:** Planned — **not** present in `k3s/` yet
+**Status:** Implemented in `k3s/` for the testing cluster
 
-**Scope:** **De facto identity authority** for the homelab network—**OIDC IdP for NetBird** (who can join the mesh and group claims) and **SSO / reverse-proxy auth** for the Traefik dashboard and other HTTP services. Mesh design: [netbird.md](netbird.md).
+**Scope:** **De facto identity authority** for the homelab network—**OIDC IdP for NetBird** (who can join the mesh and group claims) and the future auth layer for private HTTP services. Mesh design: [netbird.md](netbird.md).
 
-## Goals
+## Current design
 
-- Run **Authentik** on-cluster (or a supported external deployment) as the single place users and groups are defined for **both** VPN access and web apps.
-- Configure **NetBird** self-hosted management to use Authentik as its **OpenID Connect** identity provider (users sign in to NetBird through Authentik; optional group-to-policy mapping per NetBird docs).
-- Integrate with **Traefik** using common patterns such as **ForwardAuth** middleware, or Authentik’s application proxy integration, so only authenticated users reach the Traefik dashboard API and other admin surfaces.
+- Run **Authentik** on-cluster as a dedicated application in the `authentik` namespace.
+- Back Authentik with **CloudNativePG-managed PostgreSQL** instead of chart-managed database dependencies.
+- Expose Authentik through **Envoy Gateway** using **Gateway API** on `auth.cryptic-coders.net`.
+- Keep **Cloudflare tunnel publication deferred** for now, so the route host already matches the final public hostname without creating the tunnel binding in this step.
+- Keep **NetBird OIDC integration** for a later step once the NetBird control plane is present.
+
+## Notes
+
+- Current Authentik releases no longer require **Redis**; PostgreSQL is the only external stateful dependency needed for this rollout.
+- The initial Authentik route is HTTP on the internal Envoy/Gateway path. Later tunnel publication can front the same host without renaming Gateway or HTTPRoute resources.
 
 ## GitOps paths
 
-None yet. When added, typical artifacts include:
+- `k3s/infrastructure/controllers/databases/cloudnative-pg/` - CloudNativePG operator install.
+- `k3s/apps/manifests/authentik/` - Authentik namespace, encrypted secrets, PostgreSQL cluster, Gateway, and Helm release.
+- `k3s/clusters/testing/authentik-testing.yaml` - Flux `Kustomization` for the Authentik app bundle.
 
-- Authentik Helm release or upstream manifests.
-- Traefik `Middleware` CRDs (or Ingress annotations) pointing at Authentik’s outpost / verify URL.
-- `Ingress` or `IngressRoute` for Authentik itself, backed by cert-manager `Certificate` objects.
-- NetBird management `openid` (or equivalent) settings and OAuth client registration in Authentik for the NetBird dashboard and agents.
+## Future follow-up
+
+- Configure NetBird to use Authentik as its **OpenID Connect** identity provider.
+- Add a Cloudflare `TunnelBinding` for `auth.cryptic-coders.net`.
+- Add application providers, outposts, and access policies once private apps are onboarded.
 
 ## Upstream
 
 - [Authentik documentation](https://docs.goauthentik.io/)
-- [Traefik ForwardAuth](https://doc.traefik.io/traefik/master/middlewares/http/forwardauth/)
+- [Authentik Kubernetes installation](https://docs.goauthentik.io/docs/install-config/install/kubernetes)
+- [Authentik configuration reference](https://docs.goauthentik.io/install-config/configuration)
 - [NetBird: Self-hosted Identity Providers](https://docs.netbird.io/selfhosted/identity-providers)
+- [CloudNativePG documentation](https://cloudnative-pg.io/documentation/current/)
