@@ -22,6 +22,8 @@ with pkgs;
       kubernetes-helm
       fluxcd
       k9s
+
+      google-cloud-sdk
     ];
 
     shellHook = ''
