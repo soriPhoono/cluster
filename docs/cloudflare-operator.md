@@ -32,7 +32,7 @@
 
 1. **TunnelBinding** — In [`tunnel-binding.yaml`](../k3s/apps/testing/nginx-hello/tunnel-binding.yaml), set `subjects[0].spec.fqdn` to the public host (example: `demo.cryptic-coders.net`) and keep it aligned with Traefik host rules.
 
-1. **Later: Authentik / NetBird** — Add additional `TunnelBinding` objects (more specific hostnames **before** the wildcard binding) so those hostnames reach Traefik; Traefik routes to backends by `Ingress` / `IngressRoute` as usual. See the upstream doc section on route ordering and the `zz-` prefix for catch-all rules.
+1. **Authentik** — [`publication.yaml`](../k3s/apps/manifests/authentik/publication.yaml) binds `auth.cryptic-coders.net` to the Authentik Envoy Gateway proxy (not Traefik). **NetBird** and other hostnames can follow the same `TunnelBinding` + Envoy (or Traefik) pattern; place more specific hostnames **before** any wildcard binding. See the upstream doc section on route ordering and the `zz-` prefix for catch-all rules.
 
 ## Traefik as reverse proxy
 

@@ -6,4 +6,5 @@ resources:
   - authentik-env.sops.yaml
   - database.yaml
   - gateway.yaml
+  - publication.yaml
   - release.yaml
