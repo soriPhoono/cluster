@@ -9,24 +9,23 @@
 - Run **Authentik** on-cluster as a dedicated application in the `authentik` namespace.
 - Back Authentik with **CloudNativePG-managed PostgreSQL** instead of chart-managed database dependencies.
 - Expose Authentik through **Envoy Gateway** using **Gateway API** on `auth.cryptic-coders.net`.
-- Keep **Cloudflare tunnel publication deferred** for now, so the route host already matches the final public hostname without creating the tunnel binding in this step.
+- Publish `auth.cryptic-coders.net` on the testing **ClusterTunnel** via a `TunnelBinding` that targets the Authentik Envoy data plane (same pattern as [`hello-world/publication.yaml`](../k3s/apps/manifests/hello-world/publication.yaml)).
 - Keep **NetBird OIDC integration** for a later step once the NetBird control plane is present.
 
 ## Notes
 
 - Current Authentik releases no longer require **Redis**; PostgreSQL is the only external stateful dependency needed for this rollout.
-- The initial Authentik route is HTTP on the internal Envoy/Gateway path. Later tunnel publication can front the same host without renaming Gateway or HTTPRoute resources.
+- The Authentik route is HTTP on the Envoy/Gateway path; the Cloudflare tunnel forwards public traffic to the Authentik Envoy proxy service in `envoy-gateway-system`.
 
 ## GitOps paths
 
 - `k3s/infrastructure/controllers/databases/cloudnative-pg/` - CloudNativePG operator install.
-- `k3s/apps/manifests/authentik/` - Authentik namespace, encrypted secrets, PostgreSQL cluster, Gateway, and Helm release.
+- `k3s/apps/manifests/authentik/` - Authentik namespace, encrypted secrets, PostgreSQL cluster, Gateway, Cloudflare tunnel binding, and Helm release.
 - `k3s/clusters/testing/authentik-testing.yaml` - Flux `Kustomization` for the Authentik app bundle.
 
 ## Future follow-up
 
 - Configure NetBird to use Authentik as its **OpenID Connect** identity provider.
-- Add a Cloudflare `TunnelBinding` for `auth.cryptic-coders.net`.
 - Add application providers, outposts, and access policies once private apps are onboarded.
 
 ## Upstream
