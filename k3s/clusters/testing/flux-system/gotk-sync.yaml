@@ -8,7 +8,7 @@ metadata:
 spec:
   interval: 1m0s
   ref:
-    branch: main
+    branch: feature/gke-implementation
   secretRef:
     name: flux-system
   url: https://github.com/soriphoono/guenivir.git
