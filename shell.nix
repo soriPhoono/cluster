@@ -6,8 +6,10 @@
 with pkgs;
   mkShell {
     packages = [
-      nil
+      gh
+
       nixd
+      nil
       alejandra
 
       age
