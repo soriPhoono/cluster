@@ -46,13 +46,6 @@ subjects:
     spec:
       fqdn: auth.cryptic-coders.net
       target: http://auth.authentik.svc.cluster.local:80
-      # Disable Cloudflare automatic transforms that can interfere with auth flows
-      noTlsVerify: false
-      http2Origin: false
-      # Disable Cloudflare Insights beacon injection
-      proxyHeaders:
-        - name: Cf-Access-Authenticated-User
-          value: ""
 tunnelRef:
   kind: ClusterTunnel
   name: guenivir-testing-tunnel
