@@ -68,9 +68,9 @@ spec:
         - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
           value: "https://auth.cryptic-coders.net,http://auth.cryptic-coders.net"
         - name: AUTHENTIK_SESSION_COOKIE_SECURE
-          value: "false"
+          value: "true"
         - name: AUTHENTIK_CSRF_COOKIE_SECURE
-          value: "false"
+          value: "true"
     worker:
       resources:
         requests:
@@ -88,6 +88,6 @@ spec:
         - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
           value: "https://auth.cryptic-coders.net,http://auth.cryptic-coders.net"
         - name: AUTHENTIK_SESSION_COOKIE_SECURE
-          value: "false"
+          value: "true"
         - name: AUTHENTIK_CSRF_COOKIE_SECURE
-          value: "false"
+          value: "true"
