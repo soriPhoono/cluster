@@ -59,12 +59,10 @@ spec:
           memory: 1Gi
       # Environment variables for authentik server (Cloudflare Tunnel)
       env:
-        - name: AUTHENTIK_HTTP__PROXY_HEADERS__HOST
-          value: "X-Forwarded-Host"
+        # DON'T set USE_X_FORWARDED_HOST - it conflicts with Envoy proxy
+        # Let Django use the standard Host header which is correctly forwarded
         - name: AUTHENTIK_HTTP__PROXY_HEADERS__SCHEME
           value: "X-Forwarded-Proto"
-        - name: AUTHENTIK_HTTP__USE_X_FORWARDED_HOST
-          value: "true"
         - name: AUTHENTIK_HTTP__SECURE_PROXY_SSL_HEADER
           value: "X-Forwarded-Proto,https"
         - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
@@ -83,12 +81,8 @@ spec:
           memory: 1Gi
       # Environment variables for authentik worker (Cloudflare Tunnel)
       env:
-        - name: AUTHENTIK_HTTP__PROXY_HEADERS__HOST
-          value: "X-Forwarded-Host"
         - name: AUTHENTIK_HTTP__PROXY_HEADERS__SCHEME
           value: "X-Forwarded-Proto"
-        - name: AUTHENTIK_HTTP__USE_X_FORWARDED_HOST
-          value: "true"
         - name: AUTHENTIK_HTTP__SECURE_PROXY_SSL_HEADER
           value: "X-Forwarded-Proto,https"
         - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
