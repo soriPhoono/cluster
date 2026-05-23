@@ -37,24 +37,6 @@ spec:
     authentik:
       existingSecret:
         secretName: authentik-env
-    # Environment variables applied to ALL Deployments (server + worker)
-    env:
-      - name: AUTHENTIK_HTTP__PROXY_HEADERS__HOST
-        value: "X-Forwarded-Host"
-      - name: AUTHENTIK_HTTP__PROXY_HEADERS__SCHEME
-        value: "X-Forwarded-Proto"
-      - name: AUTHENTIK_HTTP__USE_X_FORWARDED_HOST
-        value: "true"
-      - name: AUTHENTIK_HTTP__SECURE_PROXY_SSL_HEADER
-        value: "X-Forwarded-Proto,https"
-      # CSRF settings - trust both HTTP and HTTPS for tunnel
-      - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
-        value: "https://auth.cryptic-coders.net,http://auth.cryptic-coders.net"
-      # Cookie settings for HTTP tunnel traffic
-      - name: AUTHENTIK_SESSION_COOKIE_SECURE
-        value: "false"
-      - name: AUTHENTIK_CSRF_COOKIE_SECURE
-        value: "false"
     postgresql:
       enabled: false
     server:
@@ -75,6 +57,22 @@ spec:
         limits:
           cpu: "1"
           memory: 1Gi
+      # Environment variables for authentik server (Cloudflare Tunnel)
+      env:
+        - name: AUTHENTIK_HTTP__PROXY_HEADERS__HOST
+          value: "X-Forwarded-Host"
+        - name: AUTHENTIK_HTTP__PROXY_HEADERS__SCHEME
+          value: "X-Forwarded-Proto"
+        - name: AUTHENTIK_HTTP__USE_X_FORWARDED_HOST
+          value: "true"
+        - name: AUTHENTIK_HTTP__SECURE_PROXY_SSL_HEADER
+          value: "X-Forwarded-Proto,https"
+        - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
+          value: "https://auth.cryptic-coders.net,http://auth.cryptic-coders.net"
+        - name: AUTHENTIK_SESSION_COOKIE_SECURE
+          value: "false"
+        - name: AUTHENTIK_CSRF_COOKIE_SECURE
+          value: "false"
     worker:
       resources:
         requests:
@@ -83,3 +81,19 @@ spec:
         limits:
           cpu: "1"
           memory: 1Gi
+      # Environment variables for authentik worker (Cloudflare Tunnel)
+      env:
+        - name: AUTHENTIK_HTTP__PROXY_HEADERS__HOST
+          value: "X-Forwarded-Host"
+        - name: AUTHENTIK_HTTP__PROXY_HEADERS__SCHEME
+          value: "X-Forwarded-Proto"
+        - name: AUTHENTIK_HTTP__USE_X_FORWARDED_HOST
+          value: "true"
+        - name: AUTHENTIK_HTTP__SECURE_PROXY_SSL_HEADER
+          value: "X-Forwarded-Proto,https"
+        - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
+          value: "https://auth.cryptic-coders.net,http://auth.cryptic-coders.net"
+        - name: AUTHENTIK_SESSION_COOKIE_SECURE
+          value: "false"
+        - name: AUTHENTIK_CSRF_COOKIE_SECURE
+          value: "false"
