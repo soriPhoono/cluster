@@ -5,6 +5,6 @@ resources:
   - database-credentials.sops.yaml
   - authentik-env.sops.yaml
   - database.yaml
-  - gateway.yaml
-  - publication.yaml
   - release.yaml
+  - ingress.yaml
+  - publication.yaml

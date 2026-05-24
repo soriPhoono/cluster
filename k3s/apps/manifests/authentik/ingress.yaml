@@ -1,15 +1,15 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: hello-world-gateway
-  namespace: hello-world
+  name: authentik-gateway
+  namespace: authentik
 spec:
   gatewayClassName: envoy
   listeners:
     - name: http
       protocol: HTTP
       port: 80
-      hostname: hello-world.cryptic-coders.net
+      hostname: auth.cryptic-coders.net
       allowedRoutes:
         namespaces:
           from: Same
@@ -17,18 +17,18 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: hello-world
-  namespace: hello-world
+  name: authentik
+  namespace: authentik
 spec:
   parentRefs:
-    - name: hello-world-gateway
+    - name: authentik-gateway
   hostnames:
-    - hello-world.cryptic-coders.net
+    - auth.cryptic-coders.net
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: hello-world
-          port: 80
+        - name: authentik-server
+          port: 9000

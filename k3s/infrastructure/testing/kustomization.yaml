@@ -4,6 +4,6 @@ resources:
   - ../controllers/network/metallb
   - ../controllers/network/envoy-gateway
   - ../controllers/network/cert-manager
-  - ../controllers/dns/cloudflare-operator
-  - ../controllers/databases/cloudnative-pg
   - ../controllers/observability/vmstack/operator
+  - ../controllers/databases/cloudnative-pg
+  - ../controllers/dns/cloudflare-operator

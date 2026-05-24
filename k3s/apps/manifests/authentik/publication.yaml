@@ -17,35 +17,18 @@ spec:
       protocol: TCP
       targetPort: 10080
 ---
-# External service reference for Cloudflare TunnelBinding
-# This allows the TunnelBinding in the authentik namespace to route to the envoy proxy
-apiVersion: v1
-kind: Service
-metadata:
-  name: auth
-  namespace: authentik
-  labels:
-    kustomize.toolkit.fluxcd.io/name: authentik-testing
-    kustomize.toolkit.fluxcd.io/namespace: flux-system
-spec:
-  type: ExternalName
-  externalName: authentik-envoy-proxy.envoy-gateway-system.svc.cluster.local
-  ports:
-    - name: http
-      port: 80
-      protocol: TCP
-      targetPort: 80
----
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
   name: authentik-tunnel-binding
   namespace: authentik
 subjects:
-  - name: auth
+  - name: wildcard
     spec:
       fqdn: auth.cryptic-coders.net
-      target: http://auth.authentik.svc.cluster.local:80
+      # Route directly to the Envoy data-plane proxy in the envoy-gateway-system namespace.
+      # The Envoy Gateway uses the HTTPRoute (in ingress.yaml) to route to authentik-server:9000.
+      target: http://authentik-envoy-proxy.envoy-gateway-system.svc.cluster.local:80
 tunnelRef:
   kind: ClusterTunnel
   name: guenivir-testing-tunnel
