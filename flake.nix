@@ -18,6 +18,10 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mcp-servers-nix = {
+      url = "github:natsukium/mcp-servers-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -35,6 +39,7 @@
         agenix-shell.flakeModules.default
         treefmt-nix.flakeModule
         git-hooks-nix.flakeModule
+        mcp-servers-nix.flakeModule
       ];
 
       inherit systems;
@@ -60,62 +65,67 @@
           config.allowUnfree = true;
         };
 
-        devShells.default = import ./shell.nix {
-          inherit lib pkgs;
-          config = {
-            inherit (config) pre-commit agenix-shell;
-          };
-        };
+        devShells.default =
+          (import ./shell.nix {
+            inherit lib pkgs;
+            config = {
+              inherit (config) pre-commit agenix-shell;
+            };
+          })
+          // config.mcp-servers.devShell;
 
         # --- Configuration Builders --- #
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
         pre-commit = import ./pre-commit.nix {inherit lib pkgs;};
+        mcp-servers = import ./mcp.nix {inherit lib pkgs;};
 
         apps = rec {
           deploy = {
             type = "app";
-            program = "${pkgs.writeShellApplication {
-              name = "deploy";
-              text = ''
-                set -euo pipefail
+            program = "${
+              pkgs.writeShellApplication {
+                name = "deploy";
+                text = ''
+                  set -euo pipefail
 
-                CLUSTER_NAME=k3d-guenivir-testing
+                  CLUSTER_NAME=k3d-guenivir-testing
 
-                function operation() {
-                  message="$1"
-                  error_message="$2"
-                  command="$3"
+                  function operation() {
+                    message="$1"
+                    error_message="$2"
+                    command="$3"
 
-                  echo "$message"
+                    echo "$message"
+                    echo "----------------------------------------"
+                    sh -c "$command"
+
+                    local status=$?
+                    if [ $status -ne 0 ]; then
+                      echo "$error_message"
+                      k3d cluster delete "$CLUSTER_NAME"
+                      echo "Cluster deleted with status $status"
+                      exit $status
+                    fi
+                  }
+
+                  operation "Deleting old cluster..." "Failed to delete cluster" "k3d cluster delete '$CLUSTER_NAME' || true"
+
+                  sleep 2
+
+                  operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
+
+                  sleep 2
+
+                  operation "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..." "Failed to prepare namespace and SOPS key" "kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -"
+                  operation "Creating secret sops-age..." "Failed to create secret sops-age" "kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey='$TESTING_AGE_KEY_PATH' --dry-run=client -o yaml | kubectl apply -f -"
+
+                  operation "Deploying Flux to testing cluster..." "Failed to deploy Flux" "flux bootstrap github --owner=soriphoono --repository=guenivir --branch='$(git rev-parse --abbrev-ref HEAD)' --path=k3s/clusters/testing --personal --token-auth"
+
+                  echo "Done!"
                   echo "----------------------------------------"
-                  sh -c "$command"
-
-                  local status=$?
-                  if [ $status -ne 0 ]; then
-                    echo "$error_message"
-                    k3d cluster delete "$CLUSTER_NAME"
-                    echo "Cluster deleted with status $status"
-                    exit $status
-                  fi
-                }
-
-                operation "Deleting old cluster..." "Failed to delete cluster" "k3d cluster delete '$CLUSTER_NAME' || true"
-
-                sleep 2
-
-                operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
-
-                sleep 2
-
-                operation "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..." "Failed to prepare namespace and SOPS key" "kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -"
-                operation "Creating secret sops-age..." "Failed to create secret sops-age" "kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey='$TESTING_AGE_KEY_PATH' --dry-run=client -o yaml | kubectl apply -f -"
-
-                operation "Deploying Flux to testing cluster..." "Failed to deploy Flux" "flux bootstrap github --owner=soriphoono --repository=guenivir --branch='$(git rev-parse --abbrev-ref HEAD)' --path=k3s/clusters/testing --personal --token-auth"
-
-                echo "Done!"
-                echo "----------------------------------------"
-              '';
-            }}/bin/deploy";
+                '';
+              }
+            }/bin/deploy";
           };
           default = deploy;
         };
