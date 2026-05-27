@@ -1,0 +1,13 @@
+apiVersion: networking.cfargotunnel.com/v1alpha1
+kind: TunnelBinding
+metadata:
+  name: authentik-tunnel-binding
+  namespace: authentik
+subjects:
+  - name: authentik-server
+    spec:
+      fqdn: auth.cryptic-coders.net
+      target: http://authentik-server.authentik.svc.cluster.local:80
+tunnelRef:
+  kind: Tunnel
+  name: guenivir-testing-tunnel

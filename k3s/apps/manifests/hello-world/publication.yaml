@@ -1,14 +1,19 @@
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
-  name: hello-world-tunnel-binding
+  name: guenivir-tunnel-binding
   namespace: hello-world
 subjects:
   - name: hello-world
     spec:
       fqdn: "hello-world.cryptic-coders.net"
-      # Direct to hello-world service; Traefik handles Ingress routing.
+      # Direct to hello-world service; Traefik handles ingress routing.
       target: http://hello-world.hello-world.svc.cluster.local:80
+  - name: authentik-server
+    spec:
+      fqdn: "auth.cryptic-coders.net"
+      # Direct to authentik-server service; Traefik handles ingress routing.
+      target: http://authentik-server.authentik.svc.cluster.local:80
 tunnelRef:
   kind: Tunnel
   name: guenivir-testing-tunnel
