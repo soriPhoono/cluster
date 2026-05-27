@@ -6,4 +6,5 @@ resources:
   - service.yaml
   - ingress.yaml
   - tunnel.yaml
+  - cloudflare-secret.sops.yaml
   - publication.yaml
