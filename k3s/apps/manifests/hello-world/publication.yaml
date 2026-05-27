@@ -4,7 +4,7 @@ metadata:
   name: hello-world-tunnel-binding
   namespace: hello-world
 subjects:
-  - name: wildcard
+  - name: hello-world
     spec:
       fqdn: "hello-world.cryptic-coders.net"
       # Direct to hello-world service; Traefik handles Ingress routing.
