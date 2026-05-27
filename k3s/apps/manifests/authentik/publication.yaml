@@ -1,0 +1,14 @@
+apiVersion: networking.cfargotunnel.com/v1alpha1
+kind: TunnelBinding
+metadata:
+  name: guenivir-tunnel-binding
+  namespace: authentik
+subjects:
+  - name: authentik-server
+    spec:
+      fqdn: "auth.cryptic-coders.net"
+      # Direct to authentik-server service; Traefik handles ingress routing.
+      target: http://authentik-server.authentik.svc.cluster.local:80
+tunnelRef:
+  kind: Tunnel
+  name: guenivir-authentik-tunnel

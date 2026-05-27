@@ -95,7 +95,6 @@
                   set -euo pipefail
 
                   CLUSTER_NAME=k3d-guenivir-testing
-                  SOPS_AGE_KEY="${pkgs.writeText "age-key-path" "$HOME/.config/sops/age/keys.txt"}"
 
                   function operation() {
                     message="$1"

@@ -1,0 +1,14 @@
+apiVersion: networking.cfargotunnel.com/v1alpha2
+kind: Tunnel
+metadata:
+  name: guenivir-authentik-tunnel
+  namespace: authentik
+spec:
+  newTunnel:
+    name: guenivir-authentik-tunnel
+  cloudflare:
+    email: soriphoono@gmail.com
+    domain: cryptic-coders.net
+    secret: cloudflare-secrets
+    accountId: b6e9a277e1c46db22032d0e2c04fb6ae
+    accountName: homelab

@@ -3,7 +3,10 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - database.yaml
-  - authentik-env.sops.yaml
   - database-credentials.sops.yaml
+  - authentik-env.sops.yaml
+  - cloudflare-secrets.yaml
   - release.yaml
   - ingress.yaml
+  - tunnel.yaml
+  - publication.yaml
