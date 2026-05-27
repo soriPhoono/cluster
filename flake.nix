@@ -85,10 +85,19 @@
             program = "${
               pkgs.writeShellApplication {
                 name = "deploy";
+                runtimeInputs = [
+                  pkgs.k3d
+                  pkgs.kubectl
+                  pkgs.kubernetes-helm
+                  pkgs.fluxcd
+                  pkgs.git
+                  pkgs.gh
+                ];
                 text = ''
                   set -euo pipefail
 
                   CLUSTER_NAME=k3d-guenivir-testing
+                  SOPS_AGE_KEY="${pkgs.writeText "age-key-path" "$HOME/.config/sops/age/keys.txt"}"
 
                   function operation() {
                     message="$1"
@@ -108,18 +117,21 @@
                     fi
                   }
 
+                  # gh requires $HOME to find its auth config
+                  export HOME="$HOME"
+
                   operation "Deleting old cluster..." "Failed to delete cluster" "k3d cluster delete '$CLUSTER_NAME' || true"
 
                   sleep 2
 
-                  operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
+                  operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
 
                   sleep 2
 
                   operation "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..." "Failed to prepare namespace and SOPS key" "kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -"
-                  operation "Creating secret sops-age..." "Failed to create secret sops-age" "kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey='$TESTING_AGE_KEY_PATH' --dry-run=client -o yaml | kubectl apply -f -"
+                  operation "Creating secret sops-age..." "Failed to create secret sops-age" "kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$HOME/.config/sops/age/keys.txt --dry-run=client -o yaml | kubectl apply -f -"
 
-                  operation "Deploying Flux to testing cluster..." "Failed to deploy Flux" "flux bootstrap github --owner=soriphoono --repository=guenivir --branch='$(git rev-parse --abbrev-ref HEAD)' --path=k3s/clusters/testing --personal --token-auth"
+                  operation "Deploying Flux to testing cluster..." "Failed to deploy Flux" "gh auth token | flux bootstrap github --owner=soriphoono --repository=guenivir --branch='$(git rev-parse --abbrev-ref HEAD)' --path=k3s/clusters/testing --personal --token-auth"
 
                   echo "Done!"
                   echo "----------------------------------------"
