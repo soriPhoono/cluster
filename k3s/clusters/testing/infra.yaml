@@ -16,4 +16,3 @@ spec:
       name: sops-age
   path: ./k3s/infrastructure/testing
   prune: true
-  wait: true
