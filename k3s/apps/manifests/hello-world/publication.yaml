@@ -10,5 +10,5 @@ subjects:
       # Direct to hello-world service; Traefik handles Ingress routing.
       target: http://hello-world.hello-world.svc.cluster.local:80
 tunnelRef:
-  kind: ClusterTunnel
+  kind: Tunnel
   name: guenivir-testing-tunnel
