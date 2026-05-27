@@ -6,4 +6,3 @@ resources:
   - ../controllers/databases/cloudnative-pg
   - ../controllers/dns/cloudflare-operator
   - suplemental
-  - ../controllers/databases/cloudnative-pg
