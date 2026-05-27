@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
   - ../controllers/network/cert-manager
   - ../controllers/network/traefik
-  - ../controllers/databases/cloudnative-pg
   - ../controllers/dns/cloudflare-operator
+  - ../controllers/databases/cloudnative-pg
