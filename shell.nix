@@ -5,6 +5,10 @@
 }:
 with pkgs;
   mkShell {
+    inputsFrom = [
+      config.mcp-servers.devShell
+    ];
+
     packages = [
       gh
 

@@ -65,14 +65,12 @@
           config.allowUnfree = true;
         };
 
-        devShells.default =
-          (import ./shell.nix {
-            inherit lib pkgs;
-            config = {
-              inherit (config) pre-commit agenix-shell;
-            };
-          })
-          // config.mcp-servers.devShell;
+        devShells.default = import ./shell.nix {
+          inherit lib pkgs;
+          config = {
+            inherit (config) pre-commit agenix-shell mcp-servers;
+          };
+        };
 
         # --- Configuration Builders --- #
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
