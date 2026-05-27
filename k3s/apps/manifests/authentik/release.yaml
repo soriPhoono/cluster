@@ -39,6 +39,11 @@ spec:
         secretName: authentik-env
     postgresql:
       enabled: false
+      host: authentik-db-rw.authentik.svc.cluster.local
+      name: authentik
+      user: authentik
+      existingSecret: authentik-db-app
+      existingSecretPasswordKey: password
     server:
       ingress:
         enabled: false
