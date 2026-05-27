@@ -5,4 +5,3 @@ resources:
   - ../controllers/network/traefik
   - ../controllers/databases/cloudnative-pg
   - ../controllers/dns/cloudflare-operator
-  - suplemental

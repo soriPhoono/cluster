@@ -2,7 +2,7 @@ apiVersion: networking.cfargotunnel.com/v1alpha2
 kind: Tunnel
 metadata:
   name: guenivir-testing-tunnel
-  namespace: cloudflare-operator-system
+  namespace: hello-world
 spec:
   newTunnel:
     name: guenivir-testing-tunnel

@@ -5,4 +5,5 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+  - tunnel.yaml
   - publication.yaml
