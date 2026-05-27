@@ -30,8 +30,9 @@ spec:
     deployment:
       replicas: 1
       kind: Deployment
-    globalArguments:
+    additionalArguments:
       - "--global.sendanonymoususage=false"
+      - "--log.level=INFO"
     logs:
       general:
         format: json
@@ -40,16 +41,19 @@ spec:
         format: json
     ports:
       web:
-        port: 80
-        expose: true
+        port: 8000
+        expose:
+          default: true
         exposedPort: 80
       websecure:
-        port: 443
-        expose: true
+        port: 8443
+        expose:
+          default: true
         exposedPort: 443
     ingressRoute:
       dashboard:
         enabled: true
+        entryPoints: ["traefik"]
     providers:
       kubernetesIngress:
         enabled: true
