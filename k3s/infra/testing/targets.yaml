@@ -14,7 +14,7 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ../components/databases/cloudnative-pg
+  path: ./k3s/infra/components/databases/cloudnative-pg
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -33,7 +33,7 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ../components/network/cert-manager
+  path: ./k3s/infra/components/network/cert-manager
   prune: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -55,7 +55,7 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ../components/network/traefik
+  path: ./k3s/infra/components/network/traefik
   prune: true
   wait: true
 ---
@@ -78,6 +78,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ../components/dns/cloudflare-operator
+  path: ./k3s/infra/components/dns/cloudflare-operator
   prune: true
   wait: true
