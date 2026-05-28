@@ -17,7 +17,7 @@ creation_rules:
     age:
       - *cluster_guenivir
       - *admin_sphoono
-  - path_regex: k3s/apps/manifests/authentik/.*\.sops\.yaml$
+  - path_regex: k3s/apps/manifests/netbird/.*\.sops\.yaml$
     encrypted_regex: ^(stringData|data)$
     age:
       - *cluster_guenivir

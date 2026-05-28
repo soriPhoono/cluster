@@ -8,4 +8,5 @@ resources:
   - dashboard-deployment.yaml
   - ingressroute.yaml
   - tunnel.yaml
+  - cloudflare-secret.sops.yaml
   - publication.yaml
