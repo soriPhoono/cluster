@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: apps-testing
+  name: apps
   namespace: flux-system
 spec:
   interval: 1h
@@ -17,6 +17,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ./k3s/apps/manifests/hello-world
+  path: ./k3s/apps/testing/
   prune: true
   wait: true
