@@ -9,7 +9,7 @@ spec:
   timeout: 15m
   sourceRef:
     kind: GitRepository
-    name: cloudflare-operator
+  name: cloudflare-operator-system
   path: ./config/default
   prune: true
   wait: true
