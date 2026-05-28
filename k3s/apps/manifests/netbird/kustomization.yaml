@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - server-config.yaml
+  - dashboard-config.yaml
+  - server-deployment.yaml
+  - dashboard-deployment.yaml
+  - ingressroute.yaml
+  - tunnel.yaml
+  - publication.yaml

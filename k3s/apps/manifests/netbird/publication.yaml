@@ -1,0 +1,13 @@
+apiVersion: networking.cfargotunnel.com/v1alpha1
+kind: TunnelBinding
+metadata:
+  name: guenivir-netbird-binding
+  namespace: netbird
+subjects:
+  - name: netbird-server
+    spec:
+      fqdn: "vpn.cryptic-coders.net"
+      target: http://netbird-server.netbird.svc.cluster.local:80
+tunnelRef:
+  kind: Tunnel
+  name: guenivir-netbird-tunnel

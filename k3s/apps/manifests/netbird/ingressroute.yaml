@@ -1,0 +1,67 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: netbird-h2c
+  namespace: netbird
+spec:
+  serverName: netbird-server
+  rootCAs: []
+  forwardCert: false
+  insecureSkipVerify: false
+---
+# gRPC router — needs h2c backend for HTTP/2 cleartext
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-grpc
+  namespace: netbird
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`vpn.cryptic-coders.net`) && (PathPrefix(`/signalexchange.SignalExchange/`) || PathPrefix(`/management.ManagementService/`))
+      services:
+        - name: netbird-server
+          port: 80
+          scheme: h2c
+          serversTransport: netbird-h2c
+  tls:
+    secretName: netbird-tls
+---
+# Backend router — WebSocket, API, OAuth2
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-backend
+  namespace: netbird
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`vpn.cryptic-coders.net`) && (PathPrefix(`/relay`) || PathPrefix(`/ws-proxy/`) || PathPrefix(`/api`) || PathPrefix(`/oauth2`))
+      services:
+        - name: netbird-server
+          port: 80
+  tls:
+    secretName: netbird-tls
+---
+# Dashboard catch-all — everything that doesn't match the above
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-dashboard
+  namespace: netbird
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`vpn.cryptic-coders.net`)
+      priority: 1
+      services:
+        - name: netbird-dashboard
+          port: 80
+  tls:
+    secretName: netbird-tls

@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: netbird-operator
+  namespace: flux-system
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: netbird-operator
+      sourceRef:
+        kind: HelmRepository
+        name: netbird-operator
+        namespace: flux-system
+  targetNamespace: netbird
+  install:
+    createNamespace: false
+  # Requires a netbird-cloud-secret in the netbird namespace
+  # containing a Personal Access Token (PAT) from the NetBird API.
+  # Create after bootstrapping the admin user via:
+  #   curl -X POST https://vpn.cryptic-coders.net/api/setup \
+  #     -H "Content-Type: application/json" \
+  #     -d '{"email":"admin@cryptic-coders.net","password":"changeme123","create_pat":true}'
+  # Then store the returned PAT in a secret named netbird-cloud-secret
+  # in the netbird namespace.
