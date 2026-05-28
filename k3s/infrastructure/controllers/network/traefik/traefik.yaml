@@ -13,6 +13,7 @@ metadata:
   name: traefik
   namespace: flux-system
 spec:
+  targetNamespace: traefik
   interval: 1h
   timeout: 10m
   chart:
