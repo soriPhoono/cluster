@@ -13,7 +13,7 @@ spec:
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
-  name: guenivir-tunnel-binding
+  name: guenivir-authentik-binding
   namespace: authentik
 subjects:
   - name: traefik-proxy
