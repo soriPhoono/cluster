@@ -1,14 +1,25 @@
+# Service pointing to Traefik in the traefik namespace so the tunnel
+# can route through Traefik, which then routes via the Ingress to
+# hello-world.
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-proxy
+  namespace: hello-world
+spec:
+  type: ExternalName
+  externalName: traefik.traefik.svc.cluster.local
+---
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
   name: guenivir-tunnel-binding
   namespace: hello-world
 subjects:
-  - name: hello-world
+  - name: traefik-proxy
     spec:
       fqdn: "hello-world.cryptic-coders.net"
-      # Direct to hello-world service; Traefik handles ingress routing.
-      target: http://hello-world.hello-world.svc.cluster.local:80
+      target: http://traefik.traefik.svc.cluster.local:80
 tunnelRef:
   kind: Tunnel
   name: guenivir-testing-tunnel

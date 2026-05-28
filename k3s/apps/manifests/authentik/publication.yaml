@@ -1,14 +1,25 @@
+# Service pointing to Traefik in the traefik namespace so the tunnel
+# can route through Traefik, which then routes via the Ingress to
+# authentik-server.
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-proxy
+  namespace: authentik
+spec:
+  type: ExternalName
+  externalName: traefik.traefik.svc.cluster.local
+---
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
   name: guenivir-tunnel-binding
   namespace: authentik
 subjects:
-  - name: authentik-server
+  - name: traefik-proxy
     spec:
       fqdn: "auth.cryptic-coders.net"
-      # Direct to authentik-server service; Traefik handles ingress routing.
-      target: http://authentik-server.authentik.svc.cluster.local:80
+      target: http://traefik.traefik.svc.cluster.local:80
 tunnelRef:
   kind: Tunnel
   name: guenivir-authentik-tunnel
