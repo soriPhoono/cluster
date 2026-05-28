@@ -101,6 +101,7 @@
                     error_message="$2"
                     command="$3"
 
+                    echo
                     echo "$message"
                     echo "----------------------------------------"
                     sh -c "$command"
