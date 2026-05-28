@@ -7,6 +7,5 @@ resources:
   - authentik-env.sops.yaml
   - cloudflare-secret.sops.yaml
   - release.yaml
-  - ingress.yaml
   - tunnel.yaml
   - publication.yaml

@@ -124,7 +124,8 @@
 
                   operation "Creating cluster..." "Failed to create cluster" "k3d cluster create --k3s-arg '--disable=traefik@server:*' --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s '$CLUSTER_NAME'"
 
-                  sleep 2
+                  echo "Waiting for k3s API server to be fully ready..."
+                  kubectl wait --for=condition=Ready node --all --timeout=120s
 
                   operation "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..." "Failed to prepare namespace and SOPS key" "kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -"
                   operation "Creating secret sops-age..." "Failed to create secret sops-age" "kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$HOME/.config/sops/age/keys.txt --dry-run=client -o yaml | kubectl apply -f -"

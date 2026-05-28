@@ -1,25 +1,15 @@
-# Service pointing to Traefik in the traefik namespace so the tunnel
-# can route through Traefik, which then routes via the Ingress to
-# authentik-server.
-apiVersion: v1
-kind: Service
-metadata:
-  name: traefik-proxy
-  namespace: authentik
-spec:
-  type: ExternalName
-  externalName: traefik.traefik.svc.cluster.local
----
+# Cloudflare Tunnel connects directly to the authentik-server service.
+# No Traefik proxy needed — Cloudflare handles TLS termination.
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
   name: guenivir-authentik-binding
   namespace: authentik
 subjects:
-  - name: traefik-proxy
+  - name: authentik-server
     spec:
       fqdn: "auth.cryptic-coders.net"
-      target: http://traefik.traefik.svc.cluster.local:80
+      target: http://authentik-server.authentik.svc.cluster.local:80
 tunnelRef:
   kind: Tunnel
   name: guenivir-authentik-tunnel

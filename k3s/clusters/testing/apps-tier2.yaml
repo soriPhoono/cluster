@@ -1,12 +1,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: infra
+  name: apps-tier2
   namespace: flux-system
 spec:
   interval: 1h
   retryInterval: 2m
   timeout: 15m
+  dependsOn:
+    - name: apps-tier1
+      namespace: flux-system
+    - name: traefik
+      namespace: flux-system
+    - name: cloudflare-operator
+      namespace: flux-system
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -14,5 +21,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ./k3s/infra/testing
+  path: ./k3s/apps/manifests/netbird
   prune: true
+  wait: true
