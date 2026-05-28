@@ -5,7 +5,7 @@ resources:
   - database.yaml
   - database-credentials.sops.yaml
   - authentik-env.sops.yaml
-  - cloudflare-secrets.yaml
+  - cloudflare-secret.sops.yaml
   - release.yaml
   - ingress.yaml
   - tunnel.yaml
