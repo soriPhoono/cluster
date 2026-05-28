@@ -10,6 +10,7 @@ data:
       exposedAddress: "https://vpn.cryptic-coders.net"
       stunPorts: [3478]
       healthcheckAddress: ":9000"
+      authSecret: "nb-relay-secret-change-in-production"
       logLevel: "info"
       dataDir: "/var/lib/netbird"
       auth:
