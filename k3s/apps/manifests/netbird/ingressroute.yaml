@@ -15,7 +15,7 @@ metadata:
   namespace: netbird
 spec:
   entryPoints:
-    - websecure
+    - web
   routes:
     - kind: Rule
       match: Host(`vpn.cryptic-coders.net`) && (PathPrefix(`/signalexchange.SignalExchange/`) || PathPrefix(`/management.ManagementService/`))
@@ -25,7 +25,6 @@ spec:
           port: 80
           scheme: h2c
           serversTransport: netbird-h2c
-  tls: {}
 ---
 # Backend router — WebSocket, API, OAuth2
 apiVersion: traefik.io/v1alpha1
@@ -35,7 +34,7 @@ metadata:
   namespace: netbird
 spec:
   entryPoints:
-    - websecure
+    - web
   routes:
     - kind: Rule
       match: Host(`vpn.cryptic-coders.net`) && (PathPrefix(`/relay`) || PathPrefix(`/ws-proxy/`) || PathPrefix(`/api`) || PathPrefix(`/oauth2`))
@@ -43,7 +42,6 @@ spec:
         - name: netbird-server
           namespace: netbird
           port: 80
-  tls: {}
 ---
 # Dashboard catch-all — everything that doesn't match the above
 apiVersion: traefik.io/v1alpha1
@@ -53,7 +51,7 @@ metadata:
   namespace: netbird
 spec:
   entryPoints:
-    - websecure
+    - web
   routes:
     - kind: Rule
       match: Host(`vpn.cryptic-coders.net`)
@@ -62,4 +60,3 @@ spec:
         - name: netbird-dashboard
           namespace: netbird
           port: 80
-  tls: {}
