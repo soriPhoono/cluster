@@ -1,7 +1,7 @@
 apiVersion: networking.cfargotunnel.com/v1alpha1
 kind: TunnelBinding
 metadata:
-  name: guenivir-authentik-binding
+  name: guenivir-tunnel-binding
   namespace: authentik
 subjects:
   - name: authentik-server
