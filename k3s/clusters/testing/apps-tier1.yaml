@@ -8,6 +8,8 @@ spec:
   retryInterval: 2m
   timeout: 15m
   dependsOn:
+    - name: cert-manager
+      namespace: flux-system
     - name: cloudflare-operator
       namespace: flux-system
     - name: cloudnative-pg
