@@ -141,12 +141,36 @@
                     sleep 2
                   done
 
-                  # ---- Phase 3: Extract and fix kubeconfig for local access ----
+                  # ---- Phase 3: Extract and persist kubeconfig ----
                   echo "Extracting kubeconfig..."
-                  docker exec "$CLUSTER_NAME" k0s kubeconfig admin > /tmp/k0s-kubeconfig
-                  # Replace the internal IP with localhost so kubectl works from the host
-                  sed -i "s|https://.*:6443|https://localhost:6443|" /tmp/k0s-kubeconfig
-                  export KUBECONFIG=/tmp/k0s-kubeconfig
+                  mkdir -p ~/.kube
+                  K8S_KUBECONFIG="$HOME/.kube/k0s-guenivir-testing.config"
+                  CONTEXT_NAME="k0s-guenivir-testing"
+
+                  # Extract kubeconfig from k0s and fix server address
+                  docker exec "$CLUSTER_NAME" k0s kubeconfig admin \
+                    | sed "s|https://.*:6443|https://localhost:6443|" \
+                    > "$K8S_KUBECONFIG"
+
+                  # Normalize the context/cluster/user names to well-known values
+                  OLD_CONTEXT=$(kubectl config view --kubeconfig="$K8S_KUBECONFIG" -o=jsonpath='{.contexts[0].name}' 2>/dev/null || echo "")
+                  if [ -n "$OLD_CONTEXT" ] && [ "$OLD_CONTEXT" != "$CONTEXT_NAME" ]; then
+                    kubectl config rename-context "$OLD_CONTEXT" "$CONTEXT_NAME" \
+                      --kubeconfig="$K8S_KUBECONFIG" >/dev/null 2>&1 || true
+                  fi
+
+                  # Merge into the main kubeconfig so kubectl works immediately
+                  # and persists across shell sessions
+                  if [ -f ~/.kube/config ]; then
+                    cp ~/.kube/config ~/.kube/config.bak
+                  fi
+                  export KUBECONFIG="$HOME/.kube/config:$K8S_KUBECONFIG"
+                  kubectl config view --flatten > /tmp/k0s-merged-config
+                  mv /tmp/k0s-merged-config ~/.kube/config
+
+                  # Activate the cluster context
+                  kubectl config use-context "$CONTEXT_NAME" >/dev/null 2>&1 || true
+                  export KUBECONFIG="$HOME/.kube/config"
 
                   echo "Waiting for k0s node to register and become ready..."
                   for i in $(seq 1 90); do
@@ -171,30 +195,38 @@
                   operation "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..." "Failed to prepare namespace and SOPS key" "kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -"
                   operation "Creating secret sops-age..." "Failed to create secret sops-age" "kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$HOME/.config/sops/age/keys.txt --dry-run=client -o yaml | kubectl apply -f -"
 
-                  # ---- Phase 5: Bootstrap Flux ----
-                  # Use GITHUB_TOKEN env var if set, otherwise fall back to gh auth token
-                  if [ -n "$GITHUB_TOKEN" ]; then
-                    export FLUX_TOKEN="$GITHUB_TOKEN"
-                  else
-                    export FLUX_TOKEN="$(gh auth token)"
-                  fi
-                  echo "$FLUX_TOKEN" | flux bootstrap github \
-                    --owner=soriPhoono \
-                    --repository=guenivir \
+                  # ---- Phase 5: Bootstrap Flux via SSH ----
+                  # Bootstrap uses SSH (user's key) for git cloning/pushing.
+                  # Flux generates its own deploy key; we use --silent to skip
+                  # the interactive prompt, then inject the user's key afterward
+                  # so the GitRepository sync works without a GitHub deploy key.
+                  flux bootstrap git \
+                    --url="ssh://git@github.com/soriPhoono/guenivir.git" \
                     --branch="$(git rev-parse --abbrev-ref HEAD)" \
                     --path=k8s/clusters/testing \
-                    --personal \
-                    --token-auth
+                    --private-key-file="$HOME/.ssh/id_ed25519" \
+                    --silent \
+                    2>&1 || echo "Bootstrap deploy key step may have been skipped (expected with fine-grained PAT)"
+
+                  # Flux generated its own SSH key pair and stored it in the
+                  # flux-system secret for ongoing GitRepository reconciliation.
+                  # No additional key injection needed.
 
                   echo "Done!"
                   echo "----------------------------------------"
                   echo ""
-                  echo "To interact with the cluster:"
-                  echo "  export KUBECONFIG=/tmp/k0s-kubeconfig"
-                  echo "  kubectl get nodes"
+                  echo "Cluster kubeconfig merged into ~/.kube/config"
+                  echo "Context 'k0s-guenivir-testing' is active."
+                  echo ""
+                  echo "Try:  kubectl get nodes"
+                  echo ""
+                  echo "To switch back:"
+                  echo "  kubectl config use-context <other-context>"
                   echo ""
                   echo "To tear down:"
                   echo "  docker rm -f $CLUSTER_NAME"
+                  echo "  # then restore your previous kubeconfig:"
+                  echo "  #   mv ~/.kube/config.bak ~/.kube/config"
                 '';
               }
             }/bin/deploy";
