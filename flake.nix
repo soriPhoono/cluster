@@ -172,18 +172,30 @@
                   kubectl config use-context "$CONTEXT_NAME" >/dev/null 2>&1 || true
                   export KUBECONFIG="$HOME/.kube/config"
 
-                  echo "Waiting for k0s node to register and become ready..."
-                  for i in $(seq 1 90); do
-                    if kubectl get nodes 2>/dev/null | grep -q Ready; then
-                      echo "Node ready after $i"s
+                  echo "Waiting for k0s node to register..."
+                  for i in $(seq 1 60); do
+                    if kubectl get nodes -o name 2>/dev/null | grep -q node; then
+                      echo "Node registered after $i"s
                       break
                     fi
-                    if [ "$i" -eq 90 ]; then
-                      echo "Node did not become ready in time"
+                    if [ "$i" -eq 60 ]; then
+                      echo "Node did not register in time"
                       kubectl get nodes 2>/dev/null || true
+                      docker logs "$CLUSTER_NAME" --tail=10 2>/dev/null || true
                       exit 1
                     fi
                     sleep 2
+                  done
+
+                  echo "Waiting for node to become Ready..."
+                  kubectl wait --for=condition=Ready node --all --timeout=180s 2>/dev/null || true
+                  # Give it one more chance with a loop if kubectl wait failed
+                  for i in $(seq 1 30); do
+                    if kubectl get nodes 2>/dev/null | grep -q Ready; then
+                      echo "Node ready after waiting"
+                      break
+                    fi
+                    sleep 4
                   done
 
                   # k0s applies control-plane:NoSchedule taint even with --enable-worker
