@@ -129,12 +129,22 @@ resource "kubernetes_config_map" "setup_script" {
       echo "Authorization flow: $AUTH_FLOW"
       echo "Invalidation flow: $INVALID_FLOW"
 
-      # Use the default Authentik self-signed certificate for RS256 signing
-      DEFAULT_SIGNING_KEY="9afd2d18-2819-4f9b-ae39-202af1e46234"
-      # Default scope mappings for OpenID email and profile claims
+      # Discover default certificate key pair for RS256 signing
+      echo "Discovering default signing certificate..."
+      DEFAULT_SIGNING_KEY=$(curl -s -H "Authorization: Bearer $BOOTSTRAP_TOKEN" \
+        "$AUTHENTIK_URL/api/v3/crypto/certificatekeypairs/" \
+        | jq -r '.results[] | select(.name == "authentik Self-signed Certificate") | .pk' 2>/dev/null | head -1)
+      echo "Signing key: $DEFAULT_SIGNING_KEY"
+
+      # Discover default scope mappings for OpenID email and profile
       # These provide the "name", "email", and "preferred_username" claims Dex requires
-      EMAIL_SCOPE_MAPPING="f82b9323-e01b-4466-accd-70dd3bdd1f7b"
-      PROFILE_SCOPE_MAPPING="24d4f936-1c62-411b-92a0-09b599107f0a"
+      echo "Discovering scope mappings..."
+      SCOPE_MAPPINGS=$(curl -s -H "Authorization: Bearer $BOOTSTRAP_TOKEN" \
+        "$AUTHENTIK_URL/api/v3/propertymappings/provider/scope/")
+      EMAIL_SCOPE_MAPPING=$(echo "$SCOPE_MAPPINGS" | jq -r '.results[] | select(.name == "authentik default OAuth Mapping: OpenID '\''email'\''") | .pk' 2>/dev/null | head -1)
+      PROFILE_SCOPE_MAPPING=$(echo "$SCOPE_MAPPINGS" | jq -r '.results[] | select(.name == "authentik default OAuth Mapping: OpenID '\''profile'\''") | .pk' 2>/dev/null | head -1)
+      echo "Email scope mapping: $EMAIL_SCOPE_MAPPING"
+      echo "Profile scope mapping: $PROFILE_SCOPE_MAPPING"
 
       build_provider_json() {
         jq -n \
