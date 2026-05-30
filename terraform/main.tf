@@ -110,6 +110,7 @@ resource "kubernetes_config_map" "setup_script" {
       SECRET_NAME="${local.secret_name}"
       REDIRECT_URI_1="${var.redirect_uris[0]}"
       REDIRECT_URI_2="${var.redirect_uris[1]}"
+      REDIRECT_URI_3="${var.redirect_uris[2]}"
 
       echo "=== Authentik NetBird OAuth Setup ==="
 
@@ -136,12 +137,13 @@ resource "kubernetes_config_map" "setup_script" {
           --arg invalid_flow "$INVALID_FLOW" \
           --arg uri1 "$REDIRECT_URI_1" \
           --arg uri2 "$REDIRECT_URI_2" \
+          --arg uri3 "$REDIRECT_URI_3" \
           '{
             name: $name,
             client_type: $client_type,
             authorization_flow: $auth_flow,
             invalidation_flow: $invalid_flow,
-            redirect_uris: [{url: $uri1, matching_mode: "strict"}, {url: $uri2, matching_mode: "strict"}],
+            redirect_uris: [{url: $uri1, matching_mode: "strict"}, {url: $uri2, matching_mode: "strict"}, {url: $uri3, matching_mode: "strict"}],
             token_validity: 14400,
             sub_mode: "hashed_user_id"
           }'
