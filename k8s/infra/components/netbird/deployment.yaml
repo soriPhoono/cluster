@@ -29,6 +29,28 @@ spec:
       namespace: netbird
 
     management:
+      # Provide a valid management.json so the service doesn't crash
+      configmap: |
+        {
+          "StUN": {},
+          "TURN": {},
+          "Signal": {
+            "Proto": "http",
+            "URI": "http://netbird-signal:80"
+          },
+          "Relay": {
+            "AuthSecret": "nb-relay-secret-change-in-production",
+            "Address": ":33080"
+          },
+          "HttpConfig": {
+            "OIDCConfigEndpoint": "https://auth.cryptic-coders.net/application/o/netbird/.well-known/openid-configuration"
+          },
+          "DataDir": "/var/lib/netbird",
+          "SingleAccountMode": true,
+          "SingleAccountModeDomain": "vpn.cryptic-coders.net",
+          "DNSDomain": "vpn.cryptic-coders.net"
+        }
+
       podCommand:
         args:
           - --port=80
@@ -48,7 +70,6 @@ spec:
         NETBIRD_AUTH_OIDC_CONFIGURATION_ENDPOINT: "https://auth.cryptic-coders.net/application/o/netbird/.well-known/openid-configuration"
         NETBIRD_AUTH_SUPPORTED_SCOPES: "openid profile email groups"
         NETBIRD_AUTH_AUDIENCE: "netbird-dashboard"
-        NETBIRD_EMBEDDED_IDP_ENABLED: "false"
 
       persistentVolume:
         enabled: true
@@ -65,9 +86,7 @@ spec:
         enabled: false
 
     relay:
-      enabled: true
-      ingress:
-        enabled: false
+      enabled: false
 
     dashboard:
       envFromSecret:

@@ -168,6 +168,9 @@ resource "kubernetes_config_map" "setup_script" {
         "$AUTHENTIK_URL/api/v3/providers/oauth2/")
       EXISTING_PROVIDER=$(echo "$PROVIDER_LIST" | jq -r '.results[] | select(.name == "netbird") | .pk' 2>/dev/null || echo "")
 
+      CLIENT_ID=""
+      CLIENT_SECRET=""
+
       if [ -n "$EXISTING_PROVIDER" ]; then
         echo "Provider already exists (pk=$EXISTING_PROVIDER), updating..."
         PROVIDER_PK=$EXISTING_PROVIDER
