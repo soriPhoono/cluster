@@ -40,5 +40,5 @@ nix develop -c pre-commit run --all-files
 - Create `/agenix-shell` with `sudo mkdir -p /agenix-shell && sudo chmod 777 /agenix-shell` before entering the dev shell, or the hook will fail with a permission error instead of the harmless identity warning.
 - `nix fmt -- --fail-on-change` is the correct way to check formatting (not `--check`). The treefmt version bundled uses `--fail-on-change` and `--ci` flags.
 - `deadnix` and `statix` are not on PATH directly; they run through `nix fmt` (treefmt) and pre-commit hooks.
-- **k3d / k3s clusters cannot run** in the Cloud Agent VM. The nested container environment (Docker-in-Docker inside Firecracker) lacks cgroup v2 memory controller delegation. k3s exits with `failed to find memory cgroup (v2)`. This means `nix run` (deploy) will not work. All other dev tasks (formatting, linting, editing manifests, pre-commit checks) work normally.
-- Docker is installed and functional for general container operations; only k3s-specific cgroup requirements are unsatisfied.
+- **k0s clusters cannot run** in the Cloud Agent VM. The nested container environment (Docker-in-Docker inside Firecracker) lacks cgroup v2 memory controller delegation. k0s exits with `failed to find memory cgroup (v2)`. This means `nix run` (deploy) will not work. All other dev tasks (formatting, linting, editing manifests, pre-commit checks) work normally.
+- Docker is installed and functional for general container operations; only cgroup-dependent Kubernetes distributions are affected.

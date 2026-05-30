@@ -1,78 +1,82 @@
-# Guenivir Cluster GitOps
+# Guenivir — Multi-Cluster Kubernetes GitOps
 
-GitOps repository for a personal homelab **Kubernetes** stack. Production runs **k3s** on three mini PCs (all server nodes) for basic high availability. A **k3d** cluster applies the **same Flux path and manifests** so changes can be exercised locally before production.
+GitOps repository for a personal **multi-cluster Kubernetes** stack. A single codebase that deploys identical application and infrastructure manifests across multiple Kubernetes targets:
+
+| Cluster | Runtime | Purpose |
+|---|---|---|
+| **`testing`** | k0s in Docker | Local development and validation on laptop |
+| **`guenivir`** | k0s / TalOS Linux | Private homelab bare-metal cluster |
+| **`gke-*`** | GKE (Google Cloud) | Business application workloads |
+
+A **k0s** cluster in Docker applies the **same Flux path and manifests** so changes can be exercised locally before deploying to TalOS or GKE.
 
 **Stack and runbooks:** [docs/](docs/README.md) (per-component pages). **Editor and agent tooling:** [AGENTS.md](AGENTS.md).
 
+## Why k0s
+
+[k0s](https://k0sproject.io/) is a CNCF-certified, single-binary Kubernetes distribution from Mirantis. It provides a standard, upstream-aligned Kubernetes API with zero host dependencies — ideal for running identically across Docker (testing), bare metal (TalOS), and managed cloud (GKE).
+
 ## Repository and Flux source
 
-The Flux `GitRepository` in [`k3s/clusters/testing/flux-system/gotk-sync.yaml`](k3s/clusters/testing/flux-system/gotk-sync.yaml) points at `https://github.com/soriphoono/guenivir.git`. This checkout may live under a different directory name (for example `guenivir`); the reconciled path is always `./k3s/clusters/` on the branch Flux tracks, where the cluster being deployed is either the official cluster [`guenivir`](k3s/clusters/guenivir/) or the [`testing`](k3s/clusters/testing/) cluster with experimental changes.
+The Flux `GitRepository` in [`k8s/clusters/testing/flux-system/gotk-sync.yaml`](k8s/clusters/testing/flux-system/gotk-sync.yaml) points at `https://github.com/soriphoono/guenivir.git`. The reconciled path is `./k8s/clusters/` on the branch Flux tracks, where each subdirectory is a cluster target.
 
 ## What Flux deploys today
 
-Reconciliation entrypoint: [`k3s/clusters/testing`](k3s/clusters/testing) (see [`kustomization.yaml`](k3s/clusters/testing/kustomization.yaml) for this testing cluster).
+Reconciliation entrypoint: [`k8s/clusters/testing`](k8s/clusters/testing) — each cluster directory has `apps/` and `infra/` subdirectories containing Flux `Kustomization` manifests with explicit dependency ordering.
 
-| Layer | Role |
-| --- | --- |
-| **Flux Kustomizations** ([`k3s/clusters/testing`](k3s/clusters/testing)) | `infra` deploys [`k3s/infrastructure/testing`](k3s/infrastructure/testing), then `infra-suplemental` deploys supplemental infra resources, and `apps-testing` deploys [`k3s/apps/manifests/hello-world`](k3s/apps/manifests/hello-world). |
-| **Network controllers** ([`k3s/infrastructure/controllers/network`](k3s/infrastructure/controllers/network)) | **cert-manager** ([`cert-manager/cert-manager.yaml`](k3s/infrastructure/controllers/network/cert-manager/cert-manager.yaml)), **MetalLB** ([`metallb/metallb.yaml`](k3s/infrastructure/controllers/network/metallb/metallb.yaml)) for service IPs, and **Envoy Gateway** ([`envoy-gateway/envoy-gateway.yaml`](k3s/infrastructure/controllers/network/envoy-gateway/envoy-gateway.yaml)) for ingress/gateway APIs. |
-| **DNS / tunnel controller** ([`k3s/infrastructure/controllers/dns/cloudflare-operator`](k3s/infrastructure/controllers/dns/cloudflare-operator)) | **Cloudflare operator** deployment plus SOPS-managed API token secret. |
-| **Supplemental testing resources** ([`k3s/infrastructure/testing/suplemental`](k3s/infrastructure/testing/suplemental)) | Environment-specific resources layered after base infra (currently Cloudflare `ClusterTunnel` and MetalLB address pools/advertisement). |
+### Dependency chain
 
-Details: [docs/flux-and-clusters.md](docs/flux-and-clusters.md), [docs/cloudflare-operator.md](docs/cloudflare-operator.md), [docs/metallb.md](docs/metallb.md), [docs/cert-manager.md](docs/cert-manager.md).
-
-**Current testing status:** the testing cluster is an active integration environment for the core network/control-plane pieces (cert-manager, MetalLB, Envoy Gateway, Cloudflare operator/tunnel) plus a sample workload under `k3s/apps/manifests/hello-world`.
-
-## Roadmap
-
-| Planned order | Goal | Doc |
-| --- | --- | --- |
-| **1** | Install **Cilium** with eBGP networking as the next network foundation step. | [docs/cilium.md](docs/cilium.md) |
-| **2** | Install **VMStack** for cluster monitoring, observability, and alerting. | [docs/vmstack.md](docs/vmstack.md) |
-| **3** | Install **CloudNativePG** for PostgreSQL, then add operators for other major database vendors (for example MariaDB and MongoDB). | [docs/cloudnativepg.md](docs/cloudnativepg.md) |
-| **4** | Install **Authentik** as the homelab public/private identity provider (IdP). | [docs/authentik.md](docs/authentik.md) |
-| **5** | Install **NetBird** secured with Authentik OAuth to create an isolated mesh network and domain-based routing behavior. | [docs/netbird.md](docs/netbird.md) |
-
-```mermaid
-flowchart LR
-  users[Users]
-  auth[Authentik_IdP]
-  nb[vpn.cryptic-coders.net_(NetBird)]
-  mesh[NetBird_mesh]
-  catchall["*.cryptic-coders.net catchall via NetBird reverse proxy"]
-  private["*.vpn.cryptic-coders.net private VPN-only routes"]
-  svc[Private_services]
-
-  users --> auth
-  auth --> nb
-  users --> nb
-  nb --> mesh
-  mesh --> catchall
-  mesh --> private
-  private --> svc
 ```
+cert-manager ─┬── traefik (depends: cert-manager)
+              ├── cloudflare-operator (depends: cert-manager)
+cloudnative-pg
+
+    apps/hello-world (depends: cert-manager, cloudflare-operator, traefik)
+    apps/authentik   (depends: cert-manager, cloudflare-operator, cloudnative-pg)
+    apps/netbird     (depends: authentik, traefik, cloudflare-operator)
+```
+
+### Current stack
+
+| Layer | What |
+|---|---|
+| **Infrastructure** | cert-manager (TLS), Cloudflare Operator (DNS/tunnels), Traefik (ingress), CloudNative-PG (PostgreSQL) |
+| **Applications** | Authentik (identity provider), NetBird (mesh VPN), hello-world (test workload) |
+
+Details: [docs/](docs/README.md).
 
 ## Repository layout
 
 ```
-k3s/                              # Flux-managed cluster config
-├── clusters/
-│   └── testing/                  # Flux bootstrap path (same stack as prod)
-│       ├── flux-system/          # Flux sync (often generated by flux bootstrap)
-│       ├── infra.yaml            # Infra Kustomizations (infra + infra-suplemental)
-│       ├── apps-testing.yaml     # Test apps Kustomization
-│       └── kustomization.yaml
-├── apps/
+k8s/                              # Multi-cluster Kubernetes config
+├── apps/                         # Shared application manifests
 │   └── manifests/
-│       └── hello-world/          # Example workload for testing cluster
-├── infrastructure/
-│   ├── controllers/
-│   │   ├── network/              # cert-manager, metallb, envoy-gateway
-│   │   └── dns/                  # cloudflare-operator
-│   └── testing/
-│       ├── kustomization.yaml    # Base testing infrastructure composition
-│       └── suplemental/          # Testing-specific extras (ClusterTunnel, MetalLB pools)
-docs/                             # Per-stack documentation (see docs/README.md)
+│       ├── hello-world/
+│       ├── authentik/
+│       └── netbird/
+├── infra/                        # Shared infrastructure components
+│   └── components/
+│       ├── databases/cloudnative-pg/
+│       ├── network/cert-manager/
+│       ├── network/traefik/
+│       └── dns/cloudflare-operator/
+├── clusters/
+│   ├── testing/                  # k0s in Docker (laptop / local dev)
+│   │   ├── flux-system/          # Flux sync (generated)
+│   │   ├── apps/                 # Per-cluster app Flux Kustomizations
+│   │   │   ├── hello-world.yaml
+│   │   │   ├── authentik.yaml
+│   │   │   └── netbird.yaml
+│   │   ├── infra/                # Per-cluster infra Flux Kustomizations
+│   │   │   ├── cert-manager.yaml
+│   │   │   ├── cloudnative-pg.yaml
+│   │   │   ├── traefik.yaml
+│   │   │   └── cloudflare-operator.yaml
+│   │   └── kustomization.yaml
+│   └── guenivir/                 # TalOS bare metal (future)
+│       ├── apps/
+│       └── infra/
+docs/                             # Per-stack documentation
 ```
 
 ## Getting started
@@ -80,14 +84,28 @@ docs/                             # Per-stack documentation (see docs/README.md)
 ```bash
 direnv allow    # optional: load dev shell via .envrc
 nix develop     # enter dev shell
-nix run         # create k3d cluster, bootstrap Flux against this repo’s testing path
+nix run         # create k0s cluster in Docker, bootstrap Flux
+```
+
+### What `nix run` does
+
+1. Starts a k0s container in Docker (controller + worker, single-node)
+2. Extracts kubeconfig for local `kubectl` access
+3. Creates `flux-system` namespace and injects the SOPS age key
+4. Bootstraps Flux against `k8s/clusters/testing/`
+5. Flux reconciles all manifests — infra components first, then apps
+
+### Tear down
+
+```bash
+docker rm -f k0s-guenivir-testing
 ```
 
 Formatting, linting, pre-commit, and agent-oriented commands: **[AGENTS.md](AGENTS.md)**.
 
 ## Encrypting secrets
 
-- **Cluster (`k3s/`)**: use SOPS-encrypted manifests; Flux decrypts using the `sops-age` secret. See [docs/gitops-and-secrets.md](docs/gitops-and-secrets.md).
+- **Cluster (`k8s/`)**: use SOPS-encrypted manifests; Flux decrypts using the `sops-age` secret. See [docs/gitops-and-secrets.md](docs/gitops-and-secrets.md).
 - **Developer secrets**: use **age** and **agenix-shell** as configured in the flake; full notes live in [docs/gitops-and-secrets.md](docs/gitops-and-secrets.md).
 
 Quick cluster secret example:
@@ -95,8 +113,8 @@ Quick cluster secret example:
 ```bash
 kubectl create secret generic my-secret \
   --from-literal=key=value \
-  --dry-run=client -o yaml > k3s/infrastructure/controllers/my-secret.sops.yaml
-sops -e -i k3s/infrastructure/controllers/my-secret.sops.yaml
+  --dry-run=client -o yaml > k8s/apps/manifests/my-app/my-secret.sops.yaml
+sops -e -i k8s/apps/manifests/my-app/my-secret.sops.yaml
 ```
 
 (Adjust path to match the Flux `Kustomization` that should include the file.)

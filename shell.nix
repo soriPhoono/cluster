@@ -23,7 +23,7 @@ with pkgs;
       jq
       yq
 
-      k3d
+      k0sctl
       kubectl
       kubernetes-helm
       fluxcd

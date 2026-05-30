@@ -2,22 +2,17 @@ keys:
   - &cluster_guenivir age1frm803u6eet5dm4t6ugy77mkj4v980tqzfmn9wwnnk937me6dayqcyskw4
   - &admin_sphoono age1y4x8gzzcdhxvqaf9matt0eze3z3yxwx607avq4cexfkgwal4psesj39lvn
 creation_rules:
-  - path_regex: k3s/infrastructure/controllers/dns/cloudflare-operator/.*\.sops\.yaml$
+  - path_regex: k8s/apps/manifests/authentik/.*\.sops\.yaml$
     encrypted_regex: ^(stringData|data)$
     age:
       - *cluster_guenivir
       - *admin_sphoono
-  - path_regex: k3s/apps/manifests/authentik/.*\.sops\.yaml$
+  - path_regex: k8s/apps/manifests/hello-world/.*\.sops\.yaml$
     encrypted_regex: ^(stringData|data)$
     age:
       - *cluster_guenivir
       - *admin_sphoono
-  - path_regex: k3s/apps/manifests/hello-world/.*\.sops\.yaml$
-    encrypted_regex: ^(stringData|data)$
-    age:
-      - *cluster_guenivir
-      - *admin_sphoono
-  - path_regex: k3s/apps/manifests/netbird/.*\.sops\.yaml$
+  - path_regex: k8s/apps/manifests/netbird/.*\.sops\.yaml$
     encrypted_regex: ^(stringData|data)$
     age:
       - *cluster_guenivir

@@ -12,7 +12,7 @@ Use the following format:
 - `fix/<issue-number>-<short-description>`
 - `feat/<issue-number>-<short-description>`
 
-Example: `fix/123-update-k3s-flux-config`
+Example: `fix/123-update-k8s-flux-config`
 
 ## Workflow
 

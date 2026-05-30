@@ -1,18 +1,18 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: apps-tier1
+  name: netbird
   namespace: flux-system
 spec:
   interval: 1h
   retryInterval: 2m
   timeout: 15m
   dependsOn:
-    - name: cert-manager
+    - name: authentik
+      namespace: flux-system
+    - name: traefik
       namespace: flux-system
     - name: cloudflare-operator
-      namespace: flux-system
-    - name: cloudnative-pg
       namespace: flux-system
   sourceRef:
     kind: GitRepository
@@ -21,6 +21,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ./k3s/apps/manifests/authentik
+  path: ./k8s/apps/manifests/netbird
   prune: true
   wait: true

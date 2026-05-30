@@ -1,10 +1,10 @@
 ______________________________________________________________________
 
-## name: testing-cluster-deploy description: 'Deploy and manage the local k3d testing cluster that bootstraps FluxCD and reconciles the full GitOps configuration from this repository.'
+## name: testing-cluster-deploy description: 'Deploy and manage the local k0s testing cluster that bootstraps FluxCD and reconciles the full GitOps configuration from this repository.'
 
 # Testing Cluster Deploy Pipeline
 
-**INVOKE WHEN:** The user mentions "testing cluster", "test cluster", "nix run", "k3d", "deploy cluster", "reconcile", "spin up the testing environment", "bootstrap flux", "test the deployment", or asks about exercising the full GitOps pipeline locally.
+**INVOKE WHEN:** The user mentions "testing cluster", "test cluster", "nix run", "k0s", "Docker", "deploy cluster", "reconcile", "spin up the testing environment", "bootstrap flux", "test the deployment", or asks about exercising the full GitOps pipeline locally.
 
 **DO NOT USE FOR:** General cluster debugging of an already-running cluster, Kubernetes manifest edits, or Flux troubleshooting that doesn't involve the deployment lifecycle.
 
@@ -14,12 +14,13 @@ The `nix run` command in this flake executes a full local testing pipeline:
 
 ```
 nix run
-  └─ k3d cluster delete k3d-guenivir-testing     # teardown old
-  └─ k3d cluster create k3d-guenivir-testing     # spin up fresh k3s-in-Docker
-  └─ kubectl create namespace flux-system        # prep bootstrap namespace
-  └─ kubectl create secret sops-age              # inject SOPS age key for encrypted secrets
-  └─ flux bootstrap github ...                   # bootstrap Flux pointing at current branch
-       └─ Flux reconciles k3s/clusters/testing/  # syncs all manifests from the repo
+  └─ docker rm -f k0s-guenivir-testing           # teardown old
+  └─ docker run k0sproject/k0s                    # spin up fresh k0s-in-Docker
+  └─ k0s kubeconfig admin                         # extract admin kubeconfig
+  └─ kubectl create namespace flux-system         # prep bootstrap namespace
+  └─ kubectl create secret sops-age               # inject SOPS age key for encrypted secrets
+  └─ flux bootstrap github ...                    # bootstrap Flux pointing at current branch
+       └─ Flux reconciles k8s/clusters/testing/   # syncs all manifests from the repo
 ```
 
 This creates a **full-stack local test environment** that mirrors production — every CRD, controller, application, and tunnel binding from the repo gets deployed and reconciled by Flux.
@@ -28,7 +29,7 @@ This creates a **full-stack local test environment** that mirrors production —
 
 | Requirement | Details |
 |---|---|
-| **Docker** | k3d runs k3s in Docker containers. Must be installed and the daemon running. |
+| **Docker** | k0s runs in a Docker container. Must be installed and the daemon running. |
 | **Nix** | The Nix daemon must be running (`sudo systemctl start nix-daemon` or equivalent). |
 | **Age keys** | `GITHUB_TOKEN` and `TESTING_AGE_KEY` are decrypted via `agenix-shell` on entering the devShell. Requires your SSH identity key (`~/.ssh/id_ed25519`) to be present. |
 | **GitHub auth** | `flux bootstrap github` uses `--token-auth` — ensure your `GITHUB_TOKEN` is valid and has repo scope. |
@@ -39,7 +40,7 @@ This creates a **full-stack local test environment** that mirrors production —
 ### Standard deploy cycle
 
 ```bash
-# 1. Make your changes to manifests in k3s/
+# 1. Make your changes to manifests in k8s/
 # 2. Commit and push (Flux reconciles from the remote branch)
 git add -A && git commit -m "feat: my change" && git push
 
@@ -54,14 +55,14 @@ nix run
 
 For rapid testing of local changes **before** pushing:
 
-1. Make edits to manifests in `k3s/`
+1. Make edits to manifests in `k8s/`
 1. Run `nix run` to spin up the cluster with Flux bootstrapped from the branch
 1. After bootstrapping, manually apply your uncommitted changes:
 
 ```bash
-kubectl apply -k k3s/apps/manifests/authentik/
+kubectl apply -k k8s/apps/manifests/authentik/
 # or for specific resources:
-kubectl apply -f k3s/apps/manifests/authentik/ingress.yaml
+kubectl apply -f k8s/apps/manifests/authentik/ingress.yaml
 ```
 
 Note: `flux bootstrap` syncs from the **remote** branch. If you haven't pushed, Flux will reconcile whatever is currently on the remote. For local-only changes, apply them with `kubectl` after bootstrap completes.
@@ -81,39 +82,52 @@ nix run
 
 | Step | Command | Purpose |
 |---|---|---|
-| 1 | `k3d cluster delete k3d-guenivir-testing` | Remove any existing test cluster for a clean slate |
-| 2 | `k3d cluster create --k3s-arg '--disable=traefik@server:*' --k3s-arg '--disable=servicelb@server:*' --image rancher/k3s:v1.31.5-k3s1 --wait --timeout 120s k3d-guenivir-testing` | Create single-node k3s cluster in Docker with Traefik and ServiceLB disabled (MetalLB/Envoy Gateway replaces them) |
-| 3 | `kubectl create namespace flux-system` | Ensure the Flux bootstrap namespace exists before SOPS secret injection |
-| 4 | `kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$TESTING_AGE_KEY_PATH` | Inject the cluster's SOPS age key so Flux can decrypt `.sops.yaml` secrets during reconciliation |
-| 5 | `flux bootstrap github --owner=soriphoono --repository=guenivir --branch=$(git rev-parse --abbrev-ref HEAD) --path=k3s/clusters/testing --personal --token-auth` | Bootstrap FluxCD from the current branch, using `k3s/clusters/testing` as the sync root. Flux installs itself, creates the `GitRepository` and `Kustomization` resources, and begins reconciling |
+| 1 | `docker rm -f k0s-guenivir-testing` | Remove any existing test container for a clean slate |
+| 2 | `docker run -d --name k0s-guenivir-testing --hostname k0s-guenivir-testing --privileged -v /var/lib/k0s -v /var/log/pods --tmpfs /run -p 6443:6443 docker.io/k0sproject/k0s:v1.35.3-k0s.0` | Start single-node k0s cluster in Docker (controller + worker in one container). Runs the default `CMD ["k0s", "controller", "--enable-worker"]`. |
+| 3 | `kubectl wait --for=condition=Ready node --all --timeout=180s` | Wait for k0s node to report Ready (using kubeconfig extracted from container, with server address rewritten to `localhost:6443`) |
+| 4 | `kubectl create namespace flux-system` | Ensure the Flux bootstrap namespace exists before SOPS secret injection |
+| 5 | `kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$HOME/.config/sops/age/keys.txt` | Inject the cluster's SOPS age key so Flux can decrypt `.sops.yaml` secrets during reconciliation |
+| 6 | `flux bootstrap github --owner=soriphoono --repository=guenivir --branch=$(git rev-parse --abbrev-ref HEAD) --path=k8s/clusters/testing --personal --token-auth` | Bootstrap FluxCD from the current branch, using `k8s/clusters/testing` as the sync root. Flux installs itself, creates the `GitRepository` and `Kustomization` resources, and begins reconciling |
 
 ## Cluster topology after bootstrap
 
 Once `nix run` completes, the cluster has:
 
 ```
-k3d-guenivir-testing (k3s v1.31.5)
+k0s-guenivir-testing (k0s v1.35.3)
   └── FluxCD (deployed by bootstrap)
       ├── GitRepository (guenivir, current branch)
       ├── Kustomization: infra (infrastructure batch operation)
-      │   ├── metallb (loadbalancing)
-      │   ├── envoy-gateway (ingress)
-      │   ├── cert-manager (certificates)
-      │   ├── vmstack operator (monitoring)
-      │   ├── cloudnative-pg (postgresql management)
-      │   └── cloudflare-operator (cloudflare management)
-      ├── Kustomization: infra-suplemental (infrastructure configuration -- CLUSTER SPECIFIC)
-      │   ├── metallb-pools (IP Address alocations for metallb)
-      │   ├── envoy-gateway (Envoy gateway class)
-      │   └── cluster-tunnel (cloudflare tunnel advertisement, all public resources are bound to this tunnel in cloudflare for the cluster)
+      │   ├── cert-manager (TLS certificates)
+      │   ├── cloudnative-pg (PostgreSQL management)
+      │   ├── traefik (ingress controller)
+      │   └── cloudflare-operator (Cloudflare DNS/tunnel management)
       └── Kustomization: apps
+          ├── hello-world (testing — you can disregard this)
           ├── authentik
           │   ├── PostgreSQL Cluster (CloudNativePG)
           │   ├── Authentik HelmRelease
           │   ├── Gateway Configuration
           │   └── TunnelBinding (Cloudflare)
-          └── hello-world (Testing, you can disregard this)
+          └── netbird
+              ├── NetBird Dashboard
+              ├── NetBird Server
+              └── TunnelBinding (Cloudflare)
 ```
+
+### Dependency ordering enforced by Flux
+
+```
+cert-manager ─┬── traefik (depends: cert-manager)
+              ├── cloudflare-operator (depends: cert-manager)
+cloudnative-pg
+
+    apps/hello-world (depends: cert-manager, cloudflare-operator, traefik)
+    apps/authentik   (depends: cert-manager, cloudflare-operator, cloudnative-pg)
+    apps/netbird     (depends: authentik, traefik, cloudflare-operator)
+```
+
+No app installs until all its infra dependencies report healthy to Flux's controller.
 
 ## Verification commands
 
@@ -121,28 +135,28 @@ Run these after `nix run` completes to verify the cluster is healthy:
 
 ```bash
 # --- Cluster & Node State ---
-k3d cluster list                            # confirm cluster exists
-kubectl cluster-info                        # control plane health
-kubectl get nodes -o wide                   # node readiness
+docker ps | grep k0s-guenivir-testing            # confirm container is running
+kubectl cluster-info                             # control plane health
+kubectl get nodes -o wide                        # node readiness
 
 # --- Flux Health ---
-flux check                                  # Flux component health
-flux get kustomizations -A                  # all Kustomization statuses
-flux get helmreleases -A                    # all HelmRelease statuses
-flux tree kustomization authentik-testing   # visual dependency tree for authentik
+flux check                                       # Flux component health
+flux get kustomizations -A                       # all Kustomization statuses
+flux get helmreleases -A                         # all HelmRelease statuses
+flux tree kustomization authentik-testing        # visual dependency tree for authentik
 
 # --- Namespace & Pod Health ---
-kubectl get pods -A                         # all pods across all namespaces
-k9s                                         # interactive TUI (in devShell)
+kubectl get pods -A                              # all pods across all namespaces
+k9s                                              # interactive TUI (in devShell)
 
 # --- SOPS / Secrets ---
-kubectl get secrets -n authentik            # encrypted secrets should be decrypted and present
+kubectl get secrets -n authentik                 # encrypted secrets should be decrypted and present
 
 # --- Gateway & Tunnel ---
-kubectl get gateways -A                     # envoy gateways
-kubectl get httproutes -A                   # HTTP routes
-kubectl get tunnelbindings -A               # cloudflare tunnel bindings
-kubectl get tunnels -A                      # cluster tunnels
+kubectl get gateways -A                          # envoy gateways
+kubectl get httproutes -A                        # HTTP routes
+kubectl get tunnelbindings -A                    # cloudflare tunnel bindings
+kubectl get tunnels -A                           # cluster tunnels
 ```
 
 ## Troubleshooting
@@ -150,14 +164,14 @@ kubectl get tunnels -A                      # cluster tunnels
 ### Deployment fails on step 2 (cluster create)
 
 ```text
-failed to create cluster: ... cgroups: memory cgroup v2 ...
+docker: Error response from daemon: ... cgroups: memory cgroup v2 ...
 ```
 
-**Cause:** k3d/k3s requires cgroup v2 memory controller delegation. This is **not available** in Cloud Agent VMs (Docker-in-Docker inside Firecracker) or other nested container environments.
+**Cause:** k0s (like any Kubernetes) requires cgroup v2 memory controller delegation. This is **not available** in Cloud Agent VMs (Docker-in-Docker inside Firecracker) or other nested container environments.
 
 **Fix:** Run on bare metal, a VM, or WSL2 — not inside a Cloud Agent / CI container that itself runs inside a VM.
 
-### Deployment fails on step 4 or 5 (SOPS / flux bootstrap)
+### Deployment fails on step 5 or 6 (SOPS / flux bootstrap)
 
 ```text
 Error: age: no matching identity file
@@ -177,15 +191,26 @@ nix develop
 # if the secret is cached from a previous successful decrypt
 ```
 
+### k0s container exits immediately
+
+```text
+docker logs k0s-guenivir-testing
+... failed to find memory cgroup (v2)
+```
+
+**Cause:** Same cgroup v2 issue as above.
+
+**Fix:** Run on a system with proper cgroup v2 delegation.
+
 ### Flux bootstraps but Kustomizations fail
 
 ```text
-Kustomization/authentik-testing  False  Progressing  error: ... health check failed ...
+Kustomization/authentik  False  Progressing  error: ... health check failed ...
 ```
 
 **Common causes:**
 
-1. **Cluster hasn't finished provisioning** — controllers (CNPG, cert-manager, envoy) take time to come up. Flux retries automatically.
+1. **Cluster hasn't finished provisioning** — controllers (CNPG, cert-manager, traefik) take time to come up. Flux retries automatically.
 1. **Wrong branch** — Flux bootstraps from the current branch. If your changes are on a different branch, Flux syncs whatever is on the remote HEAD.
 1. **SOPS key mismatch** — the `sops-age` secret in `flux-system` must match the age key used to encrypt `.sops.yaml` files. Run `kubectl get secret sops-age -n flux-system -o yaml` to verify.
 
@@ -197,22 +222,23 @@ kubectl describe kustomization <name> -n flux-system # detailed error
 flux logs                                            # Flux controller logs
 ```
 
-### Envoy Gateway pods not starting
+### Traefik or cert-manager pods not starting
 
 ```text
-CrashLoopBackOff: failed to find envoy binary
+CrashLoopBackOff: ...
 ```
 
-This can happen if the envoy gateway controller hasn't finished pulling images. Wait a few minutes and re-check:
+This can happen if the controller hasn't finished pulling images. Wait a few minutes and re-check:
 
 ```bash
-kubectl get pods -n envoy-gateway-system -w
+kubectl get pods -n traefik-system -w
+kubectl get pods -n cert-manager -w
 ```
 
-If pods remain in `CrashLoopBackOff` after 5 minutes, check the envoy-gateway HelmRelease health:
+If pods remain in `CrashLoopBackOff` after 5 minutes, check the HelmRelease health:
 
 ```bash
-flux get helmrelease envoy-gateway -n flux-system
+flux get helmrelease <name> -n flux-system
 ```
 
 ### TunnelBinding stuck in progress
@@ -224,17 +250,17 @@ kubectl describe tunnelbinding -n authentik
 kubectl get secrets -n cloudflare-operator-system
 ```
 
-If the API token is missing or expired, you'll need to update the SOPS-encrypted secret at `k3s/infrastructure/controllers/dns/cloudflare-operator/cloudflare-api-token.sops.yaml`.
+If the API token is missing or expired, you'll need to update the SOPS-encrypted secret at `k8s/apps/manifests/authentik/cloudflare-secret.sops.yaml`.
 
 ## Cloud Agent VM limitation
 
-Per `AGENTS.md`: **k3d / k3s clusters cannot run in Cloud Agent VMs.** The nested container environment (Docker-in-Docker inside Firecracker) lacks cgroup v2 memory controller delegation. k3s exits with `failed to find memory cgroup (v2)`. This means `nix run` (deploy) will not work in these environments.
+Per `AGENTS.md`: **k0s clusters cannot run in Cloud Agent VMs.** The nested container environment (Docker-in-Docker inside Firecracker) lacks cgroup v2 memory controller delegation. k0s exits with `failed to find memory cgroup (v2)`. This means `nix run` (deploy) will not work in these environments.
 
 However, all other dev tasks work normally in Cloud Agent VMs:
 
 - `nix fmt` (formatting, linting)
 - `nix develop` (dev shell with tools)
-- Editing manifests in `k3s/`
+- Editing manifests in `k8s/`
 - Pre-commit hooks
 - Running `kubectl` / `flux` commands against a remote cluster
 
@@ -242,9 +268,9 @@ However, all other dev tasks work normally in Cloud Agent VMs:
 
 | Resource | Path |
 |---|---|
-| Flake definition (deploy app) | `flake.nix` (lines 74-121) |
+| Flake definition (deploy app) | `flake.nix` |
 | DevShell definition | `shell.nix` |
 | AGENTS.md (project instructions) | `AGENTS.md` |
 | Flux & cluster docs | `docs/flux-and-clusters.md` |
-| Cluster bootstrap entrypoint | `k3s/clusters/testing/` |
+| Cluster bootstrap entrypoint | `k8s/clusters/testing/` |
 | Cloudflare operator docs | `docs/cloudflare-operator.md` |

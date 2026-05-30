@@ -1,7 +1,7 @@
 _: {
   settings = {
     excludes = [
-      "k3s/clusters/*/flux-system/*.yaml"
+      "k8s/clusters/*/flux-system/*.yaml"
       "**/*.sops.yaml"
     ];
   };
