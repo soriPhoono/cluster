@@ -1,0 +1,26 @@
+# Service pointing to Traefik in the traefik namespace so the tunnel
+# can route through Traefik, which splits traffic between:
+#   netbird-server (API, gRPC, WebSocket, relay, OAuth2)
+#   netbird-dashboard (UI)
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-proxy
+  namespace: netbird
+spec:
+  type: ExternalName
+  externalName: traefik.traefik.svc.cluster.local
+---
+apiVersion: networking.cfargotunnel.com/v1alpha1
+kind: TunnelBinding
+metadata:
+  name: guenivir-netbird-binding
+  namespace: netbird
+subjects:
+  - name: traefik-proxy
+    spec:
+      fqdn: "vpn.cryptic-coders.net"
+      target: http://traefik.traefik.svc.cluster.local:80
+tunnelRef:
+  kind: Tunnel
+  name: guenivir-netbird-tunnel

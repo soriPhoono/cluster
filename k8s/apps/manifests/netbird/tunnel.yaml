@@ -1,16 +1,4 @@
-# Cloudflare Tunnel for NetBird
-# Points to Traefik which routes via the IngressRoutes above.
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: netbird-traefik-proxy
-  namespace: netbird
-spec:
-  type: ExternalName
-  externalName: traefik.traefik.svc.cluster.local
----
-apiVersion: networking.cfargotunnel.com/v1alpha1
+apiVersion: networking.cfargotunnel.com/v1alpha2
 kind: Tunnel
 metadata:
   name: guenivir-netbird-tunnel
@@ -24,17 +12,3 @@ spec:
     secret: cloudflare-secrets
     accountId: b6e9a277e1c46db22032d0e2c04fb6ae
     accountName: homelab
----
-apiVersion: networking.cfargotunnel.com/v1alpha1
-kind: TunnelBinding
-metadata:
-  name: guenivir-netbird-binding
-  namespace: netbird
-subjects:
-  - name: netbird-traefik-proxy
-    spec:
-      fqdn: "vpn.cryptic-coders.net"
-      target: http://traefik.traefik.svc.cluster.local:80
-tunnelRef:
-  kind: Tunnel
-  name: guenivir-netbird-tunnel
