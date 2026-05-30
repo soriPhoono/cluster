@@ -11,7 +11,7 @@ spec:
     branch: feature/gke-implementation
   secretRef:
     name: flux-system
-  url: https://github.com/soriphoono/guenivir.git
+  url: ssh://git@github.com/soriPhoono/guenivir.git
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
