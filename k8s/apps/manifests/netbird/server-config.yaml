@@ -26,6 +26,8 @@ data:
           - "http://localhost:53000/"
         owner:
           email: "admin@cryptic-coders.net"
-          password: "changeme123"
+          # bcrypt hash (cost=10) — NetBird 0.71.4 embedded Dex requires
+          # pre-hashed passwords, plaintext causes bcrypt parse errors.
+          password: "$2b$10$2miXQ.WhFZdX4zHQNz2Ba.jgDPVWvHMhSEu81RjRGOCHnoYaCTtL6"
       store:
         engine: "sqlite"
