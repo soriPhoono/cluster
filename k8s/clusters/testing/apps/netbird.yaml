@@ -17,6 +17,10 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   path: ./k8s/apps/manifests/netbird
   prune: true
   wait: true
