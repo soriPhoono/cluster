@@ -172,16 +172,16 @@
                   kubectl config use-context "$CONTEXT_NAME" >/dev/null 2>&1 || true
                   export KUBECONFIG="$HOME/.kube/config"
 
-                  echo "Waiting for k0s node to register..."
-                  for i in $(seq 1 60); do
+                  echo "Waiting for k0s node to register (up to 5 minutes)..."
+                  for i in $(seq 1 150); do
                     if kubectl get nodes -o name 2>/dev/null | grep -q node; then
                       echo "Node registered after $i"s
                       break
                     fi
-                    if [ "$i" -eq 60 ]; then
+                    if [ "$i" -eq 150 ]; then
                       echo "Node did not register in time"
                       kubectl get nodes 2>/dev/null || true
-                      docker logs "$CLUSTER_NAME" --tail=10 2>/dev/null || true
+                      docker logs "$CLUSTER_NAME" --tail=20 2>/dev/null || true
                       exit 1
                     fi
                     sleep 2
