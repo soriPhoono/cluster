@@ -131,6 +131,10 @@ resource "kubernetes_config_map" "setup_script" {
 
       # Use the default Authentik self-signed certificate for RS256 signing
       DEFAULT_SIGNING_KEY="9afd2d18-2819-4f9b-ae39-202af1e46234"
+      # Default scope mappings for OpenID email and profile claims
+      # These provide the "name", "email", and "preferred_username" claims Dex requires
+      EMAIL_SCOPE_MAPPING="f82b9323-e01b-4466-accd-70dd3bdd1f7b"
+      PROFILE_SCOPE_MAPPING="24d4f936-1c62-411b-92a0-09b599107f0a"
 
       build_provider_json() {
         jq -n \
@@ -139,6 +143,8 @@ resource "kubernetes_config_map" "setup_script" {
           --arg auth_flow "$AUTH_FLOW" \
           --arg invalid_flow "$INVALID_FLOW" \
           --arg signing_key "$DEFAULT_SIGNING_KEY" \
+          --arg email_map "$EMAIL_SCOPE_MAPPING" \
+          --arg profile_map "$PROFILE_SCOPE_MAPPING" \
           --arg uri1 "$REDIRECT_URI_1" \
           --arg uri2 "$REDIRECT_URI_2" \
           --arg uri3 "$REDIRECT_URI_3" \
@@ -149,6 +155,7 @@ resource "kubernetes_config_map" "setup_script" {
             invalidation_flow: $invalid_flow,
             redirect_uris: [{url: $uri1, matching_mode: "strict"}, {url: $uri2, matching_mode: "strict"}, {url: $uri3, matching_mode: "strict"}],
             signing_key: $signing_key,
+            property_mappings: [$email_map, $profile_map],
             token_validity: 14400,
             sub_mode: "hashed_user_id"
           }'
