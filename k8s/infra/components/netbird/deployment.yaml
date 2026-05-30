@@ -38,10 +38,10 @@ spec:
           - --single-account-mode-domain=vpn.cryptic-coders.net
           - --dns-domain=vpn.cryptic-coders.net
 
-      # OIDC credentials are injected from a Secret created by Terraform
+      # OIDC credentials from Terraform-managed Secret (same namespace)
       envFromSecret:
-        NETBIRD_AUTH_CLIENT_ID: netbird/netbird-oauth-credentials/client_id
-        NETBIRD_AUTH_CLIENT_SECRET: netbird/netbird-oauth-credentials/client_secret
+        NETBIRD_AUTH_CLIENT_ID: netbird-oauth-credentials/client_id
+        NETBIRD_AUTH_CLIENT_SECRET: netbird-oauth-credentials/client_secret
 
       env:
         NETBIRD_DOMAIN: "vpn.cryptic-coders.net"
@@ -70,15 +70,13 @@ spec:
         enabled: false
 
     dashboard:
+      envFromSecret:
+        AUTH_CLIENT_ID: netbird-oauth-credentials/client_id
+        AUTH_CLIENT_SECRET: netbird-oauth-credentials/client_secret
+
       env:
         NETBIRD_MGMT_API_ENDPOINT: "https://vpn.cryptic-coders.net"
         NETBIRD_MGMT_GRPC_API_ENDPOINT: "https://vpn.cryptic-coders.net"
-
-      envFromSecret:
-        AUTH_CLIENT_ID: netbird/netbird-oauth-credentials/client_id
-        AUTH_CLIENT_SECRET: netbird/netbird-oauth-credentials/client_secret
-
-      env:
         AUTH_AUTHORITY: "https://auth.cryptic-coders.net/application/o/netbird/"
         AUTH_AUDIENCE: "netbird-dashboard"
         USE_AUTH0: "false"
