@@ -129,8 +129,8 @@ resource "kubernetes_config_map" "setup_script" {
       echo "Authorization flow: $AUTH_FLOW"
       echo "Invalidation flow: $INVALID_FLOW"
 
-      # Note: jwt_alg is set to RS256 below. Authentik will use its default
-      # certificate-key pair for RS256 signing. No explicit signing_key needed.
+      # Use the default Authentik self-signed certificate for RS256 signing
+      DEFAULT_SIGNING_KEY="9afd2d18-2819-4f9b-ae39-202af1e46234"
 
       build_provider_json() {
         jq -n \
@@ -138,6 +138,7 @@ resource "kubernetes_config_map" "setup_script" {
           --arg client_type "confidential" \
           --arg auth_flow "$AUTH_FLOW" \
           --arg invalid_flow "$INVALID_FLOW" \
+          --arg signing_key "$DEFAULT_SIGNING_KEY" \
           --arg uri1 "$REDIRECT_URI_1" \
           --arg uri2 "$REDIRECT_URI_2" \
           --arg uri3 "$REDIRECT_URI_3" \
@@ -147,7 +148,7 @@ resource "kubernetes_config_map" "setup_script" {
             authorization_flow: $auth_flow,
             invalidation_flow: $invalid_flow,
             redirect_uris: [{url: $uri1, matching_mode: "strict"}, {url: $uri2, matching_mode: "strict"}, {url: $uri3, matching_mode: "strict"}],
-            jwt_alg: "RS256",
+            signing_key: $signing_key,
             token_validity: 14400,
             sub_mode: "hashed_user_id"
           }'
