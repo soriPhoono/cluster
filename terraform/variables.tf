@@ -28,6 +28,6 @@ variable "redirect_uris" {
   default = [
     "https://vpn.cryptic-coders.net/nb-auth",
     "https://vpn.cryptic-coders.net/nb-silent-auth",
-    "https://vpn.cryptic-coders.net/api/identity-providers/callback",
+    "https://vpn.cryptic-coders.net/oauth2/callback",
   ]
 }
