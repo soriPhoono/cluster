@@ -1,0 +1,92 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: netbird
+  namespace: flux-system
+spec:
+  interval: 1h
+  timeout: 15m
+  releaseName: netbird
+  targetNamespace: netbird
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  chart:
+    spec:
+      chart: netbird
+      version: 1.9.0
+      sourceRef:
+        kind: HelmRepository
+        name: netbird
+        namespace: flux-system
+      interval: 12h
+  values:
+    global:
+      namespace: netbird
+
+    management:
+      podCommand:
+        args:
+          - --port=80
+          - --log-file=console
+          - --log-level=info
+          - --disable-anonymous-metrics=true
+          - --single-account-mode-domain=vpn.cryptic-coders.net
+          - --dns-domain=vpn.cryptic-coders.net
+
+      # OIDC credentials are injected from a Secret created by Terraform
+      envFromSecret:
+        NETBIRD_AUTH_CLIENT_ID: netbird/netbird-oauth-credentials/client_id
+        NETBIRD_AUTH_CLIENT_SECRET: netbird/netbird-oauth-credentials/client_secret
+
+      env:
+        NETBIRD_DOMAIN: "vpn.cryptic-coders.net"
+        NETBIRD_AUTH_OIDC_CONFIGURATION_ENDPOINT: "https://auth.cryptic-coders.net/application/o/netbird/.well-known/openid-configuration"
+        NETBIRD_AUTH_SUPPORTED_SCOPES: "openid profile email groups"
+        NETBIRD_AUTH_AUDIENCE: "netbird-dashboard"
+        NETBIRD_EMBEDDED_IDP_ENABLED: "false"
+
+      persistentVolume:
+        enabled: true
+        size: 10Mi
+        storageClass: local-path
+
+      ingress:
+        enabled: false
+      ingressGrpc:
+        enabled: false
+
+    signal:
+      ingress:
+        enabled: false
+
+    relay:
+      enabled: true
+      ingress:
+        enabled: false
+
+    dashboard:
+      env:
+        NETBIRD_MGMT_API_ENDPOINT: "https://vpn.cryptic-coders.net"
+        NETBIRD_MGMT_GRPC_API_ENDPOINT: "https://vpn.cryptic-coders.net"
+
+      envFromSecret:
+        AUTH_CLIENT_ID: netbird/netbird-oauth-credentials/client_id
+        AUTH_CLIENT_SECRET: netbird/netbird-oauth-credentials/client_secret
+
+      env:
+        AUTH_AUTHORITY: "https://auth.cryptic-coders.net/application/o/netbird/"
+        AUTH_AUDIENCE: "netbird-dashboard"
+        USE_AUTH0: "false"
+        AUTH_SUPPORTED_SCOPES: "openid profile email groups"
+        AUTH_REDIRECT_URI: "/nb-auth"
+        AUTH_SILENT_REDIRECT_URI: "/nb-silent-auth"
+        NGINX_SSL_PORT: "443"
+        LETSENCRYPT_DOMAIN: "none"
+
+      ingress:
+        enabled: false

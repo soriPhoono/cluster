@@ -1,0 +1,92 @@
+# NetBird routing: Traefik IngressRoutes + Cloudflare Tunnel
+# These are separate from the Helm chart since the chart doesn't manage them.
+#
+# Traffic flow:
+#   Cloudflare (vpn.cryptic-coders.net)
+#     → Tunnel (guenivir-netbird-tunnel)
+#       → Traefik service
+#         → IngressRoute (per path prefix)
+#           → netbird-management (API, OAuth2)
+#           → netbird-dashboard (UI)
+#           → netbird-signal (gRPC)
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: netbird-h2c
+  namespace: netbird
+spec:
+  serverName: netbird-management
+  insecureSkipVerify: true
+---
+# Management API + OAuth2 routes
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-management
+  namespace: netbird
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`vpn.cryptic-coders.net`) && (PathPrefix(`/api`) || PathPrefix(`/oauth2`))
+      services:
+        - name: netbird-management
+          namespace: netbird
+          port: 80
+---
+# gRPC routes for signal/management
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-grpc
+  namespace: netbird
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`vpn.cryptic-coders.net`) && (PathPrefix(`/signalexchange.SignalExchange/`) || PathPrefix(`/management.ManagementService/`))
+      services:
+        - name: netbird-management
+          namespace: netbird
+          port: 80
+          scheme: h2c
+          serversTransport: netbird-h2c
+---
+# Relay WebSocket route
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-relay
+  namespace: netbird
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`vpn.cryptic-coders.net`) && PathPrefix(`/relay`)
+      services:
+        - name: netbird-relay
+          namespace: netbird
+          port: 33080
+---
+# Dashboard catch-all
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbird-dashboard
+  namespace: netbird
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`vpn.cryptic-coders.net`)
+      priority: 1
+      services:
+        - name: netbird-dashboard
+          namespace: netbird
+          port: 80

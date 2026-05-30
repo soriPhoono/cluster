@@ -6,3 +6,4 @@ resources:
   - cloudnative-pg.yaml
   - traefik.yaml
   - cloudflare-operator.yaml
+  - netbird.yaml
