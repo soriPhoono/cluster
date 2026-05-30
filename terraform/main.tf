@@ -120,7 +120,7 @@ resource "kubernetes_config_map" "setup_script" {
         -o jsonpath='{.data.AUTHENTIK_BOOTSTRAP_TOKEN}' | base64 -d)
       AUTHENTIK_URL="http://authentik-server.$AUTHENTIK_NS.svc.cluster.local:80"
 
-      # Fetch default authorization flow (implicit consent) and invalidation flow
+      # Fetch default authorization and invalidation flows
       echo "Fetching default flows..."
       FLOWS=$(curl -s -H "Authorization: Bearer $BOOTSTRAP_TOKEN" \
         "$AUTHENTIK_URL/api/v3/flows/instances/")
@@ -128,6 +128,9 @@ resource "kubernetes_config_map" "setup_script" {
       INVALID_FLOW=$(echo "$FLOWS" | jq -r '.results[] | select(.designation == "invalidation") | .pk' 2>/dev/null | head -1)
       echo "Authorization flow: $AUTH_FLOW"
       echo "Invalidation flow: $INVALID_FLOW"
+
+      # Note: jwt_alg is set to RS256 below. Authentik will use its default
+      # certificate-key pair for RS256 signing. No explicit signing_key needed.
 
       build_provider_json() {
         jq -n \
@@ -144,6 +147,7 @@ resource "kubernetes_config_map" "setup_script" {
             authorization_flow: $auth_flow,
             invalidation_flow: $invalid_flow,
             redirect_uris: [{url: $uri1, matching_mode: "strict"}, {url: $uri2, matching_mode: "strict"}, {url: $uri3, matching_mode: "strict"}],
+            jwt_alg: "RS256",
             token_validity: 14400,
             sub_mode: "hashed_user_id"
           }'
