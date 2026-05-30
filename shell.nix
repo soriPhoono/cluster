@@ -28,6 +28,8 @@ with pkgs;
       kubernetes-helm
       fluxcd
       k9s
+      opentofu
+      jq
 
       google-cloud-sdk
     ];

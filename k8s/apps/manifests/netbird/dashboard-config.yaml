@@ -8,9 +8,9 @@ data:
     NETBIRD_MGMT_API_ENDPOINT=https://vpn.cryptic-coders.net
     NETBIRD_MGMT_GRPC_API_ENDPOINT=https://vpn.cryptic-coders.net
     AUTH_AUDIENCE=netbird-dashboard
-    AUTH_CLIENT_ID=netbird-dashboard
-    AUTH_CLIENT_SECRET=
-    AUTH_AUTHORITY=https://vpn.cryptic-coders.net/oauth2
+    AUTH_CLIENT_ID=wrUKSzSg1Da6d4zyfUuDuYEA3FyzGs9nEJmGyBQ5
+    AUTH_CLIENT_SECRET=07lQfkWbxiUmmOutIHxbuWPT8fsr3WXZO6jc3JWdiE76Qu6QKvfgy4qT6M33ejw7qxWOELCJ0dAoov20w4tkNJdt6RvRZKABPkBC4mi7r81yXiXgWgKncMvh9w7iVgRH
+    AUTH_AUTHORITY=https://auth.cryptic-coders.net/application/o/netbird/
     USE_AUTH0=false
     AUTH_SUPPORTED_SCOPES=openid profile email groups
     AUTH_REDIRECT_URI=/nb-auth

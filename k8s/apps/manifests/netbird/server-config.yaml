@@ -14,18 +14,13 @@ data:
       logLevel: "info"
       dataDir: "/var/lib/netbird"
       auth:
-        issuer: "https://vpn.cryptic-coders.net/oauth2"
-        localAuthDisabled: false
-        signKeyRefreshEnabled: true
+        # External OIDC via Authentik (configured by terraform/)
+        localAuthDisabled: true
+        issuer: "https://auth.cryptic-coders.net/application/o/netbird/"
+        clientID: "wrUKSzSg1Da6d4zyfUuDuYEA3FyzGs9nEJmGyBQ5"
+        clientSecret: "07lQfkWbxiUmmOutIHxbuWPT8fsr3WXZO6jc3JWdiE76Qu6QKvfgy4qT6M33ejw7qxWOELCJ0dAoov20w4tkNJdt6RvRZKABPkBC4mi7r81yXiXgWgKncMvh9w7iVgRH"
         dashboardRedirectURIs:
           - "https://vpn.cryptic-coders.net/nb-auth"
           - "https://vpn.cryptic-coders.net/nb-silent-auth"
-          - "/nb-auth"
-          - "/nb-silent-auth"
         cliRedirectURIs:
           - "http://localhost:53000/"
-        owner:
-          email: "admin@cryptic-coders.net"
-          password: "changeme123"
-      store:
-        engine: "sqlite"
