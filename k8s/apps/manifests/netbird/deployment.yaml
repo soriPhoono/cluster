@@ -43,7 +43,7 @@ spec:
             "Address": ":33080"
           },
           "HttpConfig": {
-            "OIDCConfigEndpoint": "http://authentik-server.authentik.svc.cluster.local:80/application/o/netbird/.well-known/openid-configuration"
+            "OIDCConfigEndpoint": "http://netbird-oidc-config:80/oidc-config.json"
           },
           "DataDir": "/var/lib/netbird",
           "SingleAccountMode": true,
@@ -65,11 +65,15 @@ spec:
         NETBIRD_AUTH_CLIENT_ID: netbird-oauth-credentials/client_id
         NETBIRD_AUTH_CLIENT_SECRET: netbird-oauth-credentials/client_secret
 
+      # OIDC parameters are configured directly rather than fetched from
+      # a discovery endpoint, because the Cloudflare tunnel returns a
+      # JavaScript challenge to Go HTTP clients.
       env:
         NETBIRD_DOMAIN: "vpn.cryptic-coders.net"
-        NETBIRD_AUTH_OIDC_CONFIGURATION_ENDPOINT: "http://authentik-server.authentik.svc.cluster.local:80/application/o/netbird/.well-known/openid-configuration"
-        NETBIRD_AUTH_SUPPORTED_SCOPES: "openid profile email groups"
+        NETBIRD_AUTH_OIDC_CONFIGURATION_ENDPOINT: ""
+        NETBIRD_AUTH_ISSUER: "https://auth.cryptic-coders.net/application/o/netbird/"
         NETBIRD_AUTH_AUDIENCE: "netbird-dashboard"
+        NETBIRD_AUTH_SUPPORTED_SCOPES: "openid profile email groups"
 
       persistentVolume:
         enabled: true

@@ -12,9 +12,11 @@ spec:
       namespace: flux-system
     - name: cloudflare-operator
       namespace: flux-system
+    - name: traefik
+      namespace: flux-system
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./k8s/infra/components/netbird
+  path: ./k8s/apps/manifests/netbird
   prune: true
   wait: true
