@@ -49,7 +49,6 @@
           "$HOME/.ssh/id_ed25519"
         ];
         secrets = {
-          GITHUB_TOKEN.file = ./secrets/github_token.age;
           TESTING_AGE_KEY.file = ./secrets/testing_age_key.age;
         };
       };
@@ -125,7 +124,9 @@
                   sleep 2
 
                   # ---- Phase 2: Start k0s in Docker ----
-                  operation "Starting k0s cluster in Docker..." "Failed to start k0s" "docker run -d --name '$CLUSTER_NAME' --hostname '$CLUSTER_NAME' --privileged -v /var/lib/k0s -v /var/log/pods --tmpfs /run -p 6443:6443 '$K0S_IMAGE'"
+                  # --enable-worker runs the kubelet on the same node (single-node cluster)
+                  # --no-taints prevents the control-plane:NoSchedule taint so pods can schedule
+                  operation "Starting k0s cluster in Docker..." "Failed to start k0s" "docker run -d --name '$CLUSTER_NAME' --hostname '$CLUSTER_NAME' --privileged -v /var/lib/k0s -v /var/log/pods --tmpfs /run -p 6443:6443 '$K0S_IMAGE' controller --enable-worker --no-taints"
 
                   echo "Waiting for k0s API server to be ready..."
                   # Wait until the kubeconfig is available inside the container
@@ -197,11 +198,6 @@
                     fi
                     sleep 4
                   done
-
-                  # k0s applies control-plane:NoSchedule taint even with --enable-worker
-                  # Remove it so pods can schedule on the single node
-                  kubectl taint node --all node-role.kubernetes.io/control-plane:NoSchedule- 2>/dev/null || true
-                  echo "Removed control-plane taint to allow workload scheduling"
 
                   # ---- Phase 4: Prepare Flux bootstrap ----
                   operation "Preparing namespace and SOPS key (before Flux sync applies SOPS kustomizations)..." "Failed to prepare namespace and SOPS key" "kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -"
