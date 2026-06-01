@@ -21,6 +21,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ./k8s/apps/manifests/netbird
+  path: ./k8s/apps/admin/netbird
   prune: true
   wait: true

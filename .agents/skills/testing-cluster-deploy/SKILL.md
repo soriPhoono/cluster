@@ -19,7 +19,7 @@ nix run
   └─ k0s kubeconfig admin                         # extract admin kubeconfig
   └─ kubectl create namespace flux-system         # prep bootstrap namespace
   └─ kubectl create secret sops-age               # inject SOPS age key for encrypted secrets
-  └─ flux bootstrap github ...                    # bootstrap Flux pointing at current branch
+  └─ flux bootstrap git ...                       # bootstrap Flux via SSH pointing at current branch
        └─ Flux reconciles k8s/clusters/testing/   # syncs all manifests from the repo
 ```
 
@@ -31,8 +31,8 @@ This creates a **full-stack local test environment** that mirrors production —
 |---|---|
 | **Docker** | k0s runs in a Docker container. Must be installed and the daemon running. |
 | **Nix** | The Nix daemon must be running (`sudo systemctl start nix-daemon` or equivalent). |
-| **Age keys** | `GITHUB_TOKEN` and `TESTING_AGE_KEY` are decrypted via `agenix-shell` on entering the devShell. Requires your SSH identity key (`~/.ssh/id_ed25519`) to be present. |
-| **GitHub auth** | `flux bootstrap github` uses `--token-auth` — ensure your `GITHUB_TOKEN` is valid and has repo scope. |
+| **Age keys** | `TESTING_AGE_KEY` is decrypted via `agenix-shell` on entering the devShell. Requires your SSH identity key (`~/.ssh/id_ed25519`) to be present. |
+| **GitHub auth** | `flux bootstrap git` uses SSH key authentication — ensure your `~/.ssh/id_ed25519` key is loaded and has access to the repository. |
 | **Current branch** | Flux bootstraps from the **currently checked-out branch**. Push your changes first, or the cluster will reconcile the remote branch state, not your local uncommitted changes. |
 
 ## Workflow
@@ -87,7 +87,7 @@ nix run
 | 3 | `kubectl wait --for=condition=Ready node --all --timeout=180s` | Wait for k0s node to report Ready (using kubeconfig extracted from container, with server address rewritten to `localhost:6443`) |
 | 4 | `kubectl create namespace flux-system` | Ensure the Flux bootstrap namespace exists before SOPS secret injection |
 | 5 | `kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$HOME/.config/sops/age/keys.txt` | Inject the cluster's SOPS age key so Flux can decrypt `.sops.yaml` secrets during reconciliation |
-| 6 | `flux bootstrap github --owner=soriphoono --repository=guenivir --branch=$(git rev-parse --abbrev-ref HEAD) --path=k8s/clusters/testing --personal --token-auth` | Bootstrap FluxCD from the current branch, using `k8s/clusters/testing` as the sync root. Flux installs itself, creates the `GitRepository` and `Kustomization` resources, and begins reconciling |
+| 6 | `flux bootstrap git --url=ssh://git@github.com/soriPhoono/guenivir.git --branch=$(git rev-parse --abbrev-ref HEAD) --path=k8s/clusters/testing --private-key-file=$HOME/.ssh/id_ed25519` | Bootstrap FluxCD from the current branch via SSH, using `k8s/clusters/testing` as the sync root. Flux installs itself, creates the `GitRepository` and `Kustomization` resources, and begins reconciling |
 
 ## Cluster topology after bootstrap
 

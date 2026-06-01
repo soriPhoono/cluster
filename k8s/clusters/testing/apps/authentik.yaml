@@ -21,6 +21,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ./k8s/apps/manifests/authentik
+  path: ./k8s/apps/auth/authentik
   prune: true
   wait: true
