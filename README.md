@@ -90,10 +90,10 @@ nix run         # create k0s cluster in Docker, bootstrap Flux
 ### What `nix run` does
 
 1. Starts a k0s container in Docker (controller + worker, single-node)
-2. Extracts kubeconfig for local `kubectl` access
-3. Creates `flux-system` namespace and injects the SOPS age key
-4. Bootstraps Flux against `k8s/clusters/testing/`
-5. Flux reconciles all manifests — infra components first, then apps
+1. Extracts kubeconfig for local `kubectl` access
+1. Creates `flux-system` namespace and injects the SOPS age key
+1. Bootstraps Flux against `k8s/clusters/testing/`
+1. Flux reconciles all manifests — infra components first, then apps
 
 ### Tear down
 

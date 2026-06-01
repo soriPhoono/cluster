@@ -126,7 +126,7 @@
                   # ---- Phase 2: Start k0s in Docker ----
                   # --enable-worker runs the kubelet on the same node (single-node cluster)
                   # --no-taints prevents the control-plane:NoSchedule taint so pods can schedule
-                  operation "Starting k0s cluster in Docker..." "Failed to start k0s" "docker run -d --name '$CLUSTER_NAME' --hostname '$CLUSTER_NAME' --privileged -v /var/lib/k0s -v /var/log/pods --tmpfs /run -p 6443:6443 '$K0S_IMAGE' controller --enable-worker --no-taints"
+                  operation "Starting k0s cluster in Docker..." "Failed to start k0s" "docker run -d --name '$CLUSTER_NAME' --hostname '$CLUSTER_NAME' --privileged -v /var/lib/k0s -v /var/log/pods --tmpfs /run -p 6443:6443 '$K0S_IMAGE' k0s controller --enable-worker --no-taints"
 
                   echo "Waiting for k0s API server to be ready..."
                   # Wait until the kubeconfig is available inside the container

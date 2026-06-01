@@ -60,9 +60,9 @@ For rapid testing of local changes **before** pushing:
 1. After bootstrapping, manually apply your uncommitted changes:
 
 ```bash
-kubectl apply -k k8s/apps/manifests/authentik/
+kubectl apply -k k8s/apps/auth/authentik/
 # or for specific resources:
-kubectl apply -f k8s/apps/manifests/authentik/ingress.yaml
+kubectl apply -f k8s/apps/auth/authentik/ingress.yaml
 ```
 
 Note: `flux bootstrap` syncs from the **remote** branch. If you haven't pushed, Flux will reconcile whatever is currently on the remote. For local-only changes, apply them with `kubectl` after bootstrap completes.
@@ -103,7 +103,6 @@ k0s-guenivir-testing (k0s v1.35.3)
       │   ├── traefik (ingress controller)
       │   └── cloudflare-operator (Cloudflare DNS/tunnel management)
       └── Kustomization: apps
-          ├── hello-world (testing — you can disregard this)
           ├── authentik
           │   ├── PostgreSQL Cluster (CloudNativePG)
           │   ├── Authentik HelmRelease
@@ -122,9 +121,8 @@ cert-manager ─┬── traefik (depends: cert-manager)
               ├── cloudflare-operator (depends: cert-manager)
 cloudnative-pg
 
-    apps/hello-world (depends: cert-manager, cloudflare-operator, traefik)
     apps/authentik   (depends: cert-manager, cloudflare-operator, cloudnative-pg)
-    apps/netbird     (depends: authentik, traefik, cloudflare-operator)
+    apps/netbird     (depends: cert-manager, cloudflare-operator, traefik)
 ```
 
 No app installs until all its infra dependencies report healthy to Flux's controller.
@@ -250,7 +248,7 @@ kubectl describe tunnelbinding -n authentik
 kubectl get secrets -n cloudflare-operator-system
 ```
 
-If the API token is missing or expired, you'll need to update the SOPS-encrypted secret at `k8s/apps/manifests/authentik/cloudflare-secret.sops.yaml`.
+If the API token is missing or expired, you'll need to update the SOPS-encrypted secret at `k8s/apps/auth/authentik/cloudflare-secret.sops.yaml`.
 
 ## Cloud Agent VM limitation
 
