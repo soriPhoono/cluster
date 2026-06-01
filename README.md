@@ -50,10 +50,9 @@ Details: [docs/](docs/README.md).
 ```
 k8s/                              # Multi-cluster Kubernetes config
 ├── apps/                         # Shared application manifests
-│   └── manifests/
-│       ├── hello-world/
-│       ├── authentik/
-│       └── netbird/
+│   ├── auth/authentik/
+│   ├── admin/netbird/
+│   └── test/hello-world/
 ├── infra/                        # Shared infrastructure components
 │   └── components/
 │       ├── databases/cloudnative-pg/
@@ -113,8 +112,8 @@ Quick cluster secret example:
 ```bash
 kubectl create secret generic my-secret \
   --from-literal=key=value \
-  --dry-run=client -o yaml > k8s/apps/manifests/my-app/my-secret.sops.yaml
-sops -e -i k8s/apps/manifests/my-app/my-secret.sops.yaml
+  --dry-run=client -o yaml > k8s/apps/auth/my-app/my-secret.sops.yaml
+sops -e -i k8s/apps/auth/my-app/my-secret.sops.yaml
 ```
 
 (Adjust path to match the Flux `Kustomization` that should include the file.)
