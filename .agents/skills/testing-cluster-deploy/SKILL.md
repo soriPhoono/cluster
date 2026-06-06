@@ -14,13 +14,18 @@ The `nix run` command in this flake executes a full local testing pipeline:
 
 ```
 nix run
-  └─ docker rm -f k0s-guenivir-testing           # teardown old
-  └─ docker run k0sproject/k0s                    # spin up fresh k0s-in-Docker
-  └─ k0s kubeconfig admin                         # extract admin kubeconfig
-  └─ kubectl create namespace flux-system         # prep bootstrap namespace
-  └─ kubectl create secret sops-age               # inject SOPS age key for encrypted secrets
-  └─ flux bootstrap git ...                       # bootstrap Flux via SSH pointing at current branch
-       └─ Flux reconciles k8s/clusters/testing/   # syncs all manifests from the repo
+  └─ docker rm -f k0s-guenivir-testing                # teardown old
+  └─ docker run k0sproject/k0s k0s controller ...     # spin up fresh k0s-in-Docker (--enable-worker --no-taints)
+  └─ wait for kubeconfig to appear inside container   # k0s API readiness check
+  └─ k0s kubeconfig admin                             # extract admin kubeconfig
+  └─ sed rewrite → localhost:6443                     # fix server address for local access
+  └─ merge into ~/.kube/config                        # persist the config, set context
+  └─ wait for node to register (up to 5 min)          # node registration loop
+  └─ wait --for=condition=Ready node --all            # node readiness check
+  └─ kubectl create namespace flux-system             # prep bootstrap namespace (idempotent)
+  └─ kubectl create secret sops-age                   # inject SOPS age key for encrypted secrets
+  └─ flux bootstrap git --silent ...                  # bootstrap Flux via SSH pointing at current branch
+       └─ Flux reconciles k8s/clusters/testing/       # syncs all manifests from the repo
 ```
 
 This creates a **full-stack local test environment** that mirrors production — every CRD, controller, application, and tunnel binding from the repo gets deployed and reconciled by Flux.
@@ -83,11 +88,14 @@ nix run
 | Step | Command | Purpose |
 |---|---|---|
 | 1 | `docker rm -f k0s-guenivir-testing` | Remove any existing test container for a clean slate |
-| 2 | `docker run -d --name k0s-guenivir-testing --hostname k0s-guenivir-testing --privileged -v /var/lib/k0s -v /var/log/pods --tmpfs /run -p 6443:6443 docker.io/k0sproject/k0s:v1.35.3-k0s.0` | Start single-node k0s cluster in Docker (controller + worker in one container). Runs the default `CMD ["k0s", "controller", "--enable-worker"]`. |
-| 3 | `kubectl wait --for=condition=Ready node --all --timeout=180s` | Wait for k0s node to report Ready (using kubeconfig extracted from container, with server address rewritten to `localhost:6443`) |
-| 4 | `kubectl create namespace flux-system` | Ensure the Flux bootstrap namespace exists before SOPS secret injection |
-| 5 | `kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$HOME/.config/sops/age/keys.txt` | Inject the cluster's SOPS age key so Flux can decrypt `.sops.yaml` secrets during reconciliation |
-| 6 | `flux bootstrap git --url=ssh://git@github.com/soriPhoono/guenivir.git --branch=$(git rev-parse --abbrev-ref HEAD) --path=k8s/clusters/testing --private-key-file=$HOME/.ssh/id_ed25519` | Bootstrap FluxCD from the current branch via SSH, using `k8s/clusters/testing` as the sync root. Flux installs itself, creates the `GitRepository` and `Kustomization` resources, and begins reconciling |
+| 2 | `docker run -d --name k0s-guenivir-testing --hostname k0s-guenivir-testing --privileged -v /var/lib/k0s -v /var/log/pods --tmpfs /run -p 6443:6443 docker.io/k0sproject/k0s:v1.35.3-k0s.0 k0s controller --enable-worker --no-taints` | Start single-node k0s cluster in Docker (controller + worker in one container). `--no-taints` prevents the control-plane taint so application pods can schedule on the single node. |
+| 3 | Wait for kubeconfig inside container (loop up to 60s): `docker exec k0s-guenivir-testing k0s kubeconfig admin > /dev/null` | Wait for the k0s API server to become ready by polling until `k0s kubeconfig admin` succeeds |
+| 4 | Extract and persist kubeconfig: `docker exec ... k0s kubeconfig admin | sed 's|https://.*:6443|https://localhost:6443|' > ~/.kube/k0s-guenivir-testing.config` | Extract kubeconfig from container, rewrite server address to localhost, then merge into `~/.kube/config` and activate the `k0s-guenivir-testing` context |
+| 5 | Wait for node registration (loop up to 5 min): `kubectl get nodes -o name | grep node` | Wait for the k0s node to appear in kubectl's node list (it must self-register as a controller+worker) |
+| 6 | `kubectl wait --for=condition=Ready node --all --timeout=180s` (with fallback loop) | Wait for k0s node to report Ready |
+| 7 | Prepare namespace: `kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply -f -` | Ensure the Flux bootstrap namespace exists before SOPS secret injection (idempotent create-or-update) |
+| 8 | Inject SOPS key: `kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=$HOME/.config/sops/age/keys.txt --dry-run=client -o yaml | kubectl apply -f -` | Inject the cluster's SOPS age key so Flux can decrypt `.sops.yaml` secrets during reconciliation (idempotent) |
+| 9 | `flux bootstrap git --url=ssh://git@github.com/soriPhoono/guenivir.git --branch=$(git rev-parse --abbrev-ref HEAD) --path=k8s/clusters/testing --private-key-file=$HOME/.ssh/id_ed25519 --silent` | Bootstrap FluxCD from the current branch via SSH, using `k8s/clusters/testing` as the sync root. `--silent` skips the deploy key prompt. Flux installs itself, creates `GitRepository` and `Kustomization` resources, and begins reconciling |
 
 ## Cluster topology after bootstrap
 
@@ -98,6 +106,7 @@ k0s-guenivir-testing (k0s v1.35.3)
   └── FluxCD (deployed by bootstrap)
       ├── GitRepository (guenivir, current branch)
       ├── Kustomization: infra (infrastructure batch operation)
+      │   ├── local-path-provisioner (dynamic PV provisioning)
       │   ├── cert-manager (TLS certificates)
       │   ├── cloudnative-pg (PostgreSQL management)
       │   ├── traefik (ingress controller)
@@ -117,9 +126,11 @@ k0s-guenivir-testing (k0s v1.35.3)
 ### Dependency ordering enforced by Flux
 
 ```
-cert-manager ─┬── traefik (depends: cert-manager)
-              ├── cloudflare-operator (depends: cert-manager)
-cloudnative-pg
+local-path-provisioner (no infra deps — provides PVs for CNPG)
+cert-manager (no infra deps)
+cloudnative-pg (no infra deps, uses local-path-provisioner for PVCs)
+traefik (depends: cert-manager)
+cloudflare-operator (depends: cert-manager)
 
     apps/authentik   (depends: cert-manager, cloudflare-operator, cloudnative-pg)
     apps/netbird     (depends: cert-manager, cloudflare-operator, traefik)
@@ -141,7 +152,7 @@ kubectl get nodes -o wide                        # node readiness
 flux check                                       # Flux component health
 flux get kustomizations -A                       # all Kustomization statuses
 flux get helmreleases -A                         # all HelmRelease statuses
-flux tree kustomization authentik-testing        # visual dependency tree for authentik
+flux tree kustomization authentik               # visual dependency tree for authentik
 
 # --- Namespace & Pod Health ---
 kubectl get pods -A                              # all pods across all namespaces
@@ -169,7 +180,7 @@ docker: Error response from daemon: ... cgroups: memory cgroup v2 ...
 
 **Fix:** Run on bare metal, a VM, or WSL2 — not inside a Cloud Agent / CI container that itself runs inside a VM.
 
-### Deployment fails on step 5 or 6 (SOPS / flux bootstrap)
+### Deployment fails on step 7-9 (namespace, SOPS key, or flux bootstrap)
 
 ```text
 Error: age: no matching identity file
@@ -269,6 +280,4 @@ However, all other dev tasks work normally in Cloud Agent VMs:
 | Flake definition (deploy app) | `flake.nix` |
 | DevShell definition | `shell.nix` |
 | AGENTS.md (project instructions) | `AGENTS.md` |
-| Flux & cluster docs | `docs/flux-and-clusters.md` |
 | Cluster bootstrap entrypoint | `k8s/clusters/testing/` |
-| Cloudflare operator docs | `docs/cloudflare-operator.md` |
