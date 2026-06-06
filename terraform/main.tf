@@ -325,3 +325,224 @@ data "kubernetes_secret" "netbird_oauth" {
 
   depends_on = [kubernetes_job_v1.setup_netbird_oauth]
 }
+
+# ---------------------------------------------------------------------------
+# Google OAuth Source setup for Authentik
+# ---------------------------------------------------------------------------
+# This job runs a script that:
+#   1. Authenticates to Authentik API using the bootstrap token
+#   2. Reads Google OAuth client credentials from the authentik-google-oauth Secret
+#   3. Creates (or updates) a Google OAuth source in Authentik
+#   4. Users can then sign in with their Google account
+# ---------------------------------------------------------------------------
+
+locals {
+  google_job_name = "setup-google-oauth-source"
+}
+
+resource "kubernetes_service_account" "setup_google_oauth" {
+  metadata {
+    name      = local.google_job_name
+    namespace = var.authentik_namespace
+  }
+}
+
+# Role to read both the authentik-env and authentik-google-oauth secrets
+resource "kubernetes_role" "read_google_oauth_secrets" {
+  metadata {
+    name      = "read-google-oauth-secrets"
+    namespace = var.authentik_namespace
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    resource_names = [
+      "authentik-env",
+      "authentik-google-oauth",
+    ]
+    verbs = ["get"]
+  }
+}
+
+resource "kubernetes_role_binding" "read_google_oauth_secrets" {
+  metadata {
+    name      = "read-google-oauth-secrets"
+    namespace = var.authentik_namespace
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.setup_google_oauth.metadata[0].name
+    namespace = var.authentik_namespace
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.read_google_oauth_secrets.metadata[0].name
+  }
+}
+
+resource "kubernetes_config_map" "setup_google_oauth_script" {
+  metadata {
+    name      = "${local.google_job_name}-script"
+    namespace = var.authentik_namespace
+  }
+
+  data = {
+    "setup.sh" = <<-SCRIPT
+      #!/bin/sh
+      set -euo pipefail
+
+      AUTHENTIK_NS="${var.authentik_namespace}"
+      AUTHENTIK_FQDN="${var.authentik_fqdn}"
+      SOURCE_SLUG="google"
+
+      echo "=== Authentik Google OAuth Source Setup ==="
+
+      # 1. Get Authentik bootstrap token
+      echo "Reading Authentik bootstrap token..."
+      BOOTSTRAP_TOKEN=$(kubectl get secret authentik-env -n "$AUTHENTIK_NS" \
+        -o jsonpath='{.data.AUTHENTIK_BOOTSTRAP_TOKEN}' | base64 -d)
+      AUTHENTIK_URL="http://authentik-server.$AUTHENTIK_NS.svc.cluster.local:80"
+
+      # 2. Read Google OAuth credentials from the SOPS-encrypted Secret
+      echo "Reading Google OAuth credentials..."
+      GOOGLE_CLIENT_ID=$(kubectl get secret authentik-google-oauth -n "$AUTHENTIK_NS" \
+        -o jsonpath='{.data.google-oauth-client-id}' | base64 -d)
+      GOOGLE_CLIENT_SECRET=$(kubectl get secret authentik-google-oauth -n "$AUTHENTIK_NS" \
+        -o jsonpath='{.data.google-oauth-client-secret}' | base64 -d)
+
+      if [ -z "$GOOGLE_CLIENT_ID" ] || [ "$GOOGLE_CLIENT_ID" = "placeholder-replace-with-real-client-id" ]; then
+        echo "ERROR: Google OAuth credentials are not configured!"
+        echo "Update k8s/apps/auth/authentik/google-oauth.sops.yaml with real credentials."
+        exit 1
+      fi
+
+      echo "Google Client ID: $GOOGLE_CLIENT_ID"
+
+      # 3. Fetch default authentication and enrollment flows
+      echo "Fetching default flows..."
+      FLOWS=$(curl -s -H "Authorization: Bearer $BOOTSTRAP_TOKEN" \
+        "$AUTHENTIK_URL/api/v3/flows/instances/")
+
+      AUTH_FLOW=$(echo "$FLOWS" | jq -r '.results[] | select(.slug == "default-source-authentication") | .pk' 2>/dev/null | head -1)
+      ENROLL_FLOW=$(echo "$FLOWS" | jq -r '.results[] | select(.slug == "default-source-enrollment") | .pk' 2>/dev/null | head -1)
+
+      echo "Authentication flow: $AUTH_FLOW"
+      echo "Enrollment flow: $ENROLL_FLOW"
+
+      if [ -z "$AUTH_FLOW" ] || [ -z "$ENROLL_FLOW" ]; then
+        echo "WARNING: Could not find default source flows. Falling back to any authorization/enrollment flows..."
+        AUTH_FLOW=$(echo "$FLOWS" | jq -r '.results[] | select(.designation == "authentication") | .pk' 2>/dev/null | head -1)
+        ENROLL_FLOW=$(echo "$FLOWS" | jq -r '.results[] | select(.designation == "enrollment") | .pk' 2>/dev/null | head -1)
+        echo "Fallback auth flow: $AUTH_FLOW"
+        echo "Fallback enroll flow: $ENROLL_FLOW"
+      fi
+
+      build_source_json() {
+        jq -n \
+          --arg name "Google" \
+          --arg slug "$SOURCE_SLUG" \
+          --arg auth_flow "$AUTH_FLOW" \
+          --arg enroll_flow "$ENROLL_FLOW" \
+          --arg provider_type "google" \
+          --arg client_id "$GOOGLE_CLIENT_ID" \
+          --arg client_secret "$GOOGLE_CLIENT_SECRET" \
+          --arg pkce "S256" \
+          --arg user_matching "email_link" \
+          '{
+            name: $name,
+            slug: $slug,
+            enabled: true,
+            authentication_flow: $auth_flow,
+            enrollment_flow: $enroll_flow,
+            provider_type: $provider_type,
+            consumer_key: $client_id,
+            consumer_secret: $client_secret,
+            pkce: $pkce,
+            user_matching_mode: $user_matching
+          }'
+      }
+
+      # 4. Check if source already exists (idempotent)
+      echo "Checking for existing Google OAuth source..."
+      SOURCE_LIST=$(curl -s -H "Authorization: Bearer $BOOTSTRAP_TOKEN" \
+        "$AUTHENTIK_URL/api/v3/sources/oauth/")
+      EXISTING_SOURCE=$(echo "$SOURCE_LIST" | jq -r --arg slug "$SOURCE_SLUG" \
+        '.results[] | select(.slug == $slug) | .pk' 2>/dev/null || echo "")
+
+      if [ -n "$EXISTING_SOURCE" ]; then
+        echo "Source already exists (pk=$EXISTING_SOURCE), updating..."
+        SOURCE_PK=$EXISTING_SOURCE
+        PAYLOAD=$(build_source_json)
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
+          -H "Authorization: Bearer $BOOTSTRAP_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "$PAYLOAD" \
+          "$AUTHENTIK_URL/api/v3/sources/oauth/$SOURCE_PK/")
+        echo "Update source HTTP status: $HTTP_CODE"
+      else
+        echo "Creating new Google OAuth source..."
+        PAYLOAD=$(build_source_json)
+        SOURCE_RESP=$(curl -s -X POST \
+          -H "Authorization: Bearer $BOOTSTRAP_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "$PAYLOAD" \
+          "$AUTHENTIK_URL/api/v3/sources/oauth/")
+        SOURCE_PK=$(echo "$SOURCE_RESP" | jq -r '.pk' 2>/dev/null || echo "")
+        echo "Create response pk: $SOURCE_PK"
+      fi
+
+      echo ""
+      echo "=== Done ==="
+      echo "Google OAuth source: https://$AUTHENTIK_FQDN/source/oauth/callback/$SOURCE_SLUG/"
+      echo "Users can now sign in with Google at the Authentik login page."
+    SCRIPT
+  }
+}
+
+# Create the setup Job
+resource "kubernetes_job_v1" "setup_google_oauth" {
+  metadata {
+    name      = local.google_job_name
+    namespace = var.authentik_namespace
+  }
+
+  spec {
+    template {
+      metadata {}
+      spec {
+        container {
+          name    = "setup"
+          image   = "bitnami/kubectl:latest"
+          command = ["/bin/bash", "/scripts/setup.sh"]
+
+          volume_mount {
+            name       = "script"
+            mount_path = "/scripts"
+          }
+        }
+
+        restart_policy       = "Never"
+        service_account_name = kubernetes_service_account.setup_google_oauth.metadata[0].name
+
+        volume {
+          name = "script"
+          config_map {
+            name = kubernetes_config_map.setup_google_oauth_script.metadata[0].name
+            default_mode = "0755"
+          }
+        }
+      }
+    }
+
+    backoff_limit = 3
+  }
+
+  depends_on = [
+    kubernetes_config_map.setup_google_oauth_script,
+    kubernetes_role_binding.read_google_oauth_secrets,
+  ]
+}
