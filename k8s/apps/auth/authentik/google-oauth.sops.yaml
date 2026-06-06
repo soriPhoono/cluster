@@ -5,8 +5,8 @@ metadata:
     namespace: authentik
 type: Opaque
 stringData:
-    google-oauth-client-id: ENC[AES256_GCM,data:yMYcn/NGZ/8CKtapMYsJV26yN/NhruLB4QHnbR1RPOd8oHAAXngM,iv:vmvASTNE/8NJGFKBxKsdAyi90ugMSr+qsqHjpm6YOvQ=,tag:48NJE4hDl9Utw+RI0CgM7w==,type:str]
-    google-oauth-client-secret: ENC[AES256_GCM,data:yOZcsKdQiyB/z5p7a/ohiBGZemfIDniFNOqwUiRX3mVEOjmE2BxFgjpksQ==,iv:OJEttAldLZPMLWETt5+psHsxJxlO/YNJ0Gf6M3V157M=,tag:DpiUZLfu3Mz0L6/Fvl717Q==,type:str]
+    google-oauth-client-id: ENC[AES256_GCM,data:mT+k0YO2DQxNuUa/HNYbBPccgio392JnZ51lnDneHCS2ObZhzV+7hmC2piYY97opdVthB33QKOHxehnkLOIky2g/EoM9XMSG,iv:fsonnfMmbq3rJAMBU5z/AWUTlbpum+TShK7xjcOF8A4=,tag:896DHWnwlZAijw2M/BUJsQ==,type:str]
+    google-oauth-client-secret: ENC[AES256_GCM,data:GtT3tdgA7s2MLMXNJfT6t3fpdxpJKQp4ftqUiGNkRLNs0+o=,iv:DaZdD3jLqNlFDVO+HdQGX6wJv4xlQAoUfn+Q+n6spcE=,tag:jcRk3tSxTz7QCAoy/0Y7qQ==,type:str]
 sops:
     age:
         - enc: |
@@ -28,6 +28,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age1y4x8gzzcdhxvqaf9matt0eze3z3yxwx607avq4cexfkgwal4psesj39lvn
     encrypted_regex: ^(stringData|data)$
-    lastmodified: "2026-06-06T16:22:47Z"
-    mac: ENC[AES256_GCM,data:erepWAn93VHn5OmF0y4/fo3O/3a2ESDDWsNAMNy0AUGEnmVpJKyzLLQ74Fki8cYSZHE0uRBINPSqEIBfkvngQUwYIzKfc7N+KsWFgmMSlGPgc+uKU6yCgOGCOmxM+saNHRWQHlDVu871leZpldHZSuMGYddLHkhaDEvSZ2qsu8U=,iv:0rHOBdbW6IFKlw56o9WOGCmy9Q8mhBdMtS7hh0uFnRs=,tag:9W5Ec4+xTA2HAm+iXrUIRg==,type:str]
+    lastmodified: "2026-06-06T16:33:25Z"
+    mac: ENC[AES256_GCM,data:Gm0XjTs3NncoeGBTd9N41495fDxEwatMwnW2qpY/lnTiXW02FaRh+2l8ZcuvGDQZKcwANm/d4OftiU552LsmiISSCj6Nh6c36NUPjoJzt7csdgUXYCrRAtkuLiKWs1QwPEU/5A9V5RuaS/VHnk+SLfV07zajn+5FKhb2KqMk67s=,iv:kf0xfGGicrvDn20zz5oHHTr6QdHjr6mR3YMVUueLkiU=,tag:FU34MdwEXlMVK931+W5Gww==,type:str]
     version: 3.13.1
