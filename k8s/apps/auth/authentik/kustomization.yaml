@@ -6,6 +6,7 @@ resources:
   - database-credentials.sops.yaml
   - authentik-env.sops.yaml
   - cloudflare-secret.sops.yaml
+  - google-oauth.sops.yaml
   - release.yaml
   - tunnel.yaml
   - publication.yaml
