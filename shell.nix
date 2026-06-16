@@ -5,10 +5,6 @@
 }:
 with pkgs;
   mkShell {
-    inputsFrom = [
-      config.mcp-servers.devShell
-    ];
-
     packages = [
       gh
 
@@ -23,15 +19,11 @@ with pkgs;
       jq
       yq
 
-      k0sctl
       kubectl
-      kubernetes-helm
-      fluxcd
+      kind
       k9s
-      opentofu
-      jq
 
-      google-cloud-sdk
+      opentofu
     ];
 
     shellHook = ''

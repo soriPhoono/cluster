@@ -16,5 +16,7 @@ _: {
     yamlfmt.enable = true;
 
     mdformat.enable = true;
+
+    terraform.enable = true;
   };
 }

@@ -1,5 +1,4 @@
 .serena/
-opencode.json
 
 .direnv/
 
@@ -7,4 +6,5 @@ result
 result-*
 
 .pre-commit-config.yaml
+
 .terraform/
