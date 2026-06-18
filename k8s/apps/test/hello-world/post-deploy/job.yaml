@@ -10,7 +10,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: copy-secret
-          image: registry.k8s.io/kubectl:v1.29.0
+          image: alpine/k8s:1.29.2
           command: ["/bin/sh", "/scripts/exec.sh"]
           volumeMounts:
             - name: scripts-volume
