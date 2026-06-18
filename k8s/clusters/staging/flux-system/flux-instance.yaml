@@ -30,7 +30,7 @@ spec:
     kind: GitRepository
     url: https://github.com/soriPhoono/guenivir.git
     ref: refs/heads/main
-    path: clusters/staging/kustomization.yaml
+    path: k8s/clusters/staging/kustomization.yaml
   kustomize:
     patches:
       - target:
