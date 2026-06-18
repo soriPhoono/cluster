@@ -25,6 +25,11 @@ with pkgs;
       kind
       k9s
 
+      fluxcd
+      flux9s
+      fluxcd-operator
+      fluxcd-operator-mcp
+
       terraform
     ];
 

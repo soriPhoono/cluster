@@ -8,3 +8,4 @@ result-*
 .pre-commit-config.yaml
 
 .terraform/
+terraform.tfstate*
