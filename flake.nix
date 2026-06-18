@@ -6,6 +6,10 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     agenix-shell = {
       url = "github:aciceri/agenix-shell";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -45,6 +49,7 @@
         ];
         secrets = {
           TESTING_AGE_KEY.file = ./secrets/testing_age_key.age;
+          TF_VAR_ghcr_pat.file = ./secrets/ghcr_pat.age;
         };
       };
 
@@ -60,7 +65,7 @@
         };
 
         devShells.default = import ./shell.nix {
-          inherit lib pkgs;
+          inherit inputs lib pkgs;
           config = {
             inherit (config) pre-commit agenix-shell;
           };

@@ -1,4 +1,5 @@
 {
+  inputs,
   pkgs,
   config,
   ...
@@ -13,6 +14,7 @@ with pkgs;
       alejandra
 
       age
+      inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
       sops
       ssh-to-age
 
@@ -23,7 +25,7 @@ with pkgs;
       kind
       k9s
 
-      opentofu
+      terraform
     ];
 
     shellHook = ''

@@ -12,17 +12,17 @@ terraform {
 }
 
 provider "kubernetes" {
-  host                   = module.create-cluster.cluster-host
-  client_certificate     = module.create-cluster.cluster-client-certificate
-  client_key             = module.create-cluster.cluster-client-key
+  host                   = module.create-cluster.endpoint
+  client_certificate     = module.create-cluster.client-certificate
+  client_key             = module.create-cluster.client-key
   cluster_ca_certificate = module.create-cluster.cluster-ca-certificate
 }
 
 provider "helm" {
   kubernetes = {
-    host                   = module.create-cluster.cluster-host
-    client_certificate     = module.create-cluster.cluster-client-certificate
-    client_key             = module.create-cluster.cluster-client-key
+    host                   = module.create-cluster.endpoint
+    client_certificate     = module.create-cluster.client-certificate
+    client_key             = module.create-cluster.client-key
     cluster_ca_certificate = module.create-cluster.cluster-ca-certificate
   }
 }

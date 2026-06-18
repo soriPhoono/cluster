@@ -1,8 +1,8 @@
 terraform {
   required_providers {
-    k3d = {
-      source  = "pvotal-tech/k3d"
-      version = ">= 0.0.7"
+    kind = {
+      source  = "tehcyx/kind"
+      version = "0.11.0"
     }
   }
 }

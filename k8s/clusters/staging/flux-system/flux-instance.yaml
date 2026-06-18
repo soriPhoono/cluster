@@ -1,0 +1,47 @@
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  name: flux
+  namespace: flux-system
+spec:
+  distribution:
+    version: "2.8.x"
+    registry: "ghcr.io/fluxcd"
+    variant: "upstream-alpine"
+    artifact: "oci://ghcr.io/controlplaneio-fluxcd/flux-operator-manifests"
+  components:
+    - source-controller
+    - kustomize-controller
+    - helm-controller
+    - notification-controller
+    - image-reflector-controller
+    - image-automation-controller
+    - source-watcher
+  cluster:
+    type: kubernetes
+    size: medium
+    multitenant: true
+    objectLevelWorkloadIdentity: true
+    multitenantWorkloadIdentity: true
+    tenantDefaultServiceAccount: "flux"
+    tenantDefaultDecryptionServiceAccount: "flux"
+    tenantDefaultKubeConfigServiceAccount: "flux"
+  sync:
+    kind: GitRepository
+    url: https://github.com/soriPhoono/guenivir.git
+    ref: refs/heads/main
+    path: clusters/staging
+  kustomize:
+    patches:
+      - target:
+          kind: Deployment
+        patch: |
+          - op: replace
+            path: /spec/template/spec/nodeSelector
+            value:
+              kubernetes.io/os: linux
+          - op: add
+            path: /spec/template/spec/tolerations
+            value:
+              - key: "CriticalAddonsOnly"
+                operator: "Exists"

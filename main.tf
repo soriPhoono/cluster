@@ -3,24 +3,24 @@ locals {
     auths = {
       "ghcr.io" = {
         username = "flux"
-        password = var.ghcr-pat
-        auth     = base64encode("flux:${var.ghcr-pat}")
+        password = var.ghcr_pat
+        auth     = base64encode("flux:${var.ghcr_pat}")
       }
     }
   })
 }
 
 module "create-cluster" {
-  source = "./terraform/create-dev-cluster"
+  source = var.debug_mode ? "./terraform/create-dev-cluster" : "./terraform/create-prod-cluster"
 }
 
 module "flux-operator-bootstrap" {
   source = "controlplaneio-fluxcd/flux-operator-bootstrap/kubernetes"
 
-  revision = var.bootstrap_revision
+  revision = 1
 
   gitops_resources = {
-    instance_yaml = file("${path.root}/k8s/clusters/${var.cluster-name}/flux-system/flux-instance.yaml")
+    instance_yaml = file("${path.root}/k8s/clusters/${var.debug_mode ? "staging" : var.cluster_name}/flux-system/flux-instance.yaml")
   }
 
   managed_resources = {
@@ -28,7 +28,7 @@ module "flux-operator-bootstrap" {
     apiVersion: v1
     kind: Secret
     metadata:
-      name: dockerconfig
+      name: flux-dockerconfig
       namespace: flux-system
     type: kubernetes.io/dockerconfigjson
     data:

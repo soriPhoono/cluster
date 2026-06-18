@@ -1,3 +1,11 @@
+variable "debug_mode" {
+  description = "Enable debug mode"
+  type        = bool
+  const       = true
+  default     = true
+  nullable    = false
+}
+
 variable "bootstrap_revision" {
   description = "Bump to trigger a new bootstrap run."
   type        = number
@@ -5,14 +13,14 @@ variable "bootstrap_revision" {
   nullable    = false
 }
 
-variable "cluster-name" {
+variable "cluster_name" {
   description = "The name of the cluster configuration to load from disk"
   type        = string
   default     = "guenivir"
   nullable    = false
 }
 
-variable "ghcr-pat" {
+variable "ghcr_pat" {
   description = "The personal access token for GitHub Container Registry"
   type        = string
   sensitive   = true

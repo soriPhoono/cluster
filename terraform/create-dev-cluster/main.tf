@@ -1,19 +1,22 @@
-resource "k3d_cluster" "this" {
-  name = "k3d-guenivir"
+resource "kind_cluster" "this" {
+  name           = "kind-guenivir"
+  wait_for_ready = true
 
-  servers = 1
-  agents  = 2
+  node_image = "kindest/node:v1.32.0"
 
-  image = "rancher/k3s:v1.20.4-k3s1"
+  kind_config {
+    kind        = "Cluster"
+    api_version = "kind.x-k8s.io/v1alpha4"
 
-  kubeconfig {
-    switch_current_context    = true
-    update_default_kubeconfig = true
-  }
-
-  k3s {
-    extra_args = [{
-      arg = "--disable=traefik"
-    }]
+    dynamic "node" {
+      for_each = concat(
+        [for i in range(var.servers_count) : { role = "control-plane" }],
+        [for i in range(var.workers_count) : { role = "worker" }]
+      )
+      content {
+        role = node.value.role
+      }
+    }
   }
 }
+
