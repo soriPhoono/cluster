@@ -50,6 +50,7 @@
         secrets = {
           TESTING_AGE_KEY.file = ./secrets/testing_age_key.age;
           TF_VAR_ghcr_pat.file = ./secrets/ghcr_pat.age;
+          TF_VAR_cloudflare_global_api_token.file = ./secrets/cloudflare_global_api_token.age;
         };
       };
 

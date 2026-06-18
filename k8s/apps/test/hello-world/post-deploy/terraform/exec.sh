@@ -22,5 +22,12 @@ if [ "$STATUS_CODE" -eq 200 ]; then
 fi
 
 echo "Secret not found (HTTP status $STATUS_CODE). Running Terraform..."
+
+WORK_DIR="/tmp/tf"
+mkdir -p "$WORK_DIR"
+cp /workspace/*.tf "$WORK_DIR"/
+cd "$WORK_DIR"
+
 terraform init
 terraform apply -auto-approve
+

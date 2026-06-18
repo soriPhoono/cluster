@@ -20,7 +20,8 @@ resource "cloudflare_api_token" "scoped_token" {
   policy {
     effect = "allow"
     permission_groups = [
-      data.cloudflare_api_token_permission_groups.all.zone["DNS Write"]
+      data.cloudflare_api_token_permission_groups.all.zone["DNS Write"],
+      data.cloudflare_api_token_permission_groups.all.zone["Zone Read"]
     ]
     resources = {
       "com.cloudflare.api.account.zone.${data.cloudflare_zone.zone.id}" = "*"
