@@ -10,5 +10,7 @@ generatorOptions:
 configMapGenerator:
   - name: hello-world-post-deploy-tf
     files:
-      - terraform/main.tf
       - terraform/exec.sh
+      - terraform/main.tf
+      - terraform/providers.tf
+      - terraform/variables.tf
