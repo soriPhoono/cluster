@@ -27,13 +27,12 @@ spec:
       kind: Deployment
     additionalArguments:
       - "--global.sendanonymoususage=false"
-      - "--log.level=INFO"
-    logs:
-      general:
-        format: json
-      access:
-        enabled: true
-        format: json
+    log:
+      level: INFO
+      format: json
+    accessLog:
+      enabled: true
+      format: json
     ports:
       web:
         port: 8000
