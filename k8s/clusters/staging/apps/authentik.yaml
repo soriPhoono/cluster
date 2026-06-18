@@ -1,14 +1,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: hello-world
+  name: authentik
   namespace: flux-system
 spec:
   interval: 1h
   retryInterval: 2m
   timeout: 15m
+  dependsOn:
+    - name: longhorn
+    - name: cloudnative-pg
+    - name: ingress-traefik
+    - name: cloudflare-operator
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./k8s/apps/test/hello-world
+  path: ./k8s/apps/auth/authentik
   prune: true
