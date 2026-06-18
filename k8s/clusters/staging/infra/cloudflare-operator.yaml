@@ -10,5 +10,5 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./k8s/infra/network/cloudflare-operator
+  path: ./k8s/infra/dns/cloudflare-operator
   prune: true
