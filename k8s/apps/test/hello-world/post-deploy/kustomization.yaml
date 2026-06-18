@@ -3,14 +3,9 @@ kind: Kustomization
 namespace: flux-system
 resources:
   - job.yaml
-
 generatorOptions:
   disableNameSuffixHash: true
-
 configMapGenerator:
-  - name: hello-world-post-deploy-tf
+  - name: hello-world-post-deploy-sh
     files:
-      - terraform/exec.sh
-      - terraform/main.tf
-      - terraform/providers.tf
-      - terraform/variables.tf
+      - exec.sh

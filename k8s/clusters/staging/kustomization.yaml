@@ -4,4 +4,3 @@ resources:
   - flux-system/reconciler.yaml
   - infra
   - apps
-

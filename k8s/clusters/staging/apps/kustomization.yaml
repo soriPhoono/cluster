@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
   - hello-world.yaml
   - hello-world-post-deploy.yaml
-

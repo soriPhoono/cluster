@@ -9,20 +9,14 @@ spec:
       serviceAccountName: flux
       restartPolicy: OnFailure
       containers:
-        - name: terraform
-          image: hashicorp/terraform:1.8.0
-          command: ["/bin/sh", "/workspace/exec.sh"]
-          env:
-            - name: TF_VAR_cloudflare_global_api_token
-              valueFrom:
-                secretKeyRef:
-                  name: cloudflare-global-secret
-                  key: CLOUDFLARE_GLOBAL_API_TOKEN
+        - name: copy-secret
+          image: bitnami/kubectl:1.29
+          command: ["/bin/sh", "/scripts/exec.sh"]
           volumeMounts:
-            - name: tf-code
-              mountPath: /workspace
+            - name: scripts-volume
+              mountPath: /scripts
       volumes:
-        - name: tf-code
+        - name: scripts-volume
           configMap:
-            name: hello-world-post-deploy-tf
+            name: hello-world-post-deploy-sh
             defaultMode: 0755
