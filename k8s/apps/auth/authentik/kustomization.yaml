@@ -1,11 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - namespace.yaml
-  - database.yaml
-  - database-credentials.sops.yaml
-  - authentik-env.sops.yaml
-  - cloudflare-secret.sops.yaml
-  - release.yaml
-  - tunnel.yaml
-  - publication.yaml
+  - config/namespace.yaml
+  - config/database-credentials.sops.yaml
+  - config/authentik-env.sops.yaml
+  - deployment/database.yaml
+  - deployment/release.yaml
+  - publication/ingress.yaml
+  - publication/tunnel.yaml
+  - publication/publication.yaml
