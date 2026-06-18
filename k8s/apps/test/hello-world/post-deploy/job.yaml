@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello-world-post-deploy
+  namespace: flux-system
+spec:
+  template:
+    spec:
+      serviceAccountName: flux
+      restartPolicy: OnFailure
+      containers:
+        - name: terraform
+          image: hashicorp/terraform:1.8.0
+          command: ["/bin/sh", "/workspace/exec.sh"]
+          env:
+            - name: TF_VAR_cloudflare_global_api_token
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-global-secret
+                  key: CLOUDFLARE_GLOBAL_API_TOKEN
+          volumeMounts:
+            - name: tf-code
+              mountPath: /workspace
+      volumes:
+        - name: tf-code
+          configMap:
+            name: hello-world-post-deploy-tf
+            defaultMode: 0755

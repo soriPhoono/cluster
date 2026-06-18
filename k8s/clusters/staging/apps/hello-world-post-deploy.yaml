@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: hello-world-post-deploy
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 2m
+  timeout: 15m
+  dependsOn:
+    - name: hello-world
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./k8s/apps/test/hello-world/post-deploy
+  prune: true

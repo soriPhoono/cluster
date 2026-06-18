@@ -26,3 +26,11 @@ variable "ghcr_pat" {
   sensitive   = true
   nullable    = false
 }
+
+variable "cloudflare_global_api_token" {
+  description = "The global Cloudflare API token used to generate scoped tokens"
+  type        = string
+  sensitive   = true
+  nullable    = false
+}
+

@@ -13,3 +13,17 @@ module "flux-operator-bootstrap" {
 
   depends_on = [module.create-cluster]
 }
+
+resource "kubernetes_secret_v1" "cloudflare_global_secret" {
+  metadata {
+    name      = "cloudflare-global-secret"
+    namespace = "flux-system"
+  }
+
+  data = {
+    CLOUDFLARE_GLOBAL_API_TOKEN = var.cloudflare_global_api_token
+  }
+
+  depends_on = [module.flux-operator-bootstrap]
+}
+
