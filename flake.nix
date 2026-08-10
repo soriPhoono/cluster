@@ -35,9 +35,9 @@
       inherit systems;
 
       perSystem = {
+        system,
         pkgs,
         config,
-        system,
         ...
       }: {
         _module.args.pkgs = import nixpkgs {

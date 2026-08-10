@@ -6,8 +6,20 @@ _: {
     deadnix.enable = true;
     statix.enable = true;
 
-    yamlfmt.enable = true;
+    yamlfmt = {
+      enable = true;
+      excludes = [
+        ".sops.yaml"
+        "**/*.sops.yaml"
+        "**/flux-system/*.yaml"
+      ];
+    };
 
-    mdformat.enable = true;
+    mdformat = {
+      enable = true;
+      excludes = [
+        ".agents/**/*.md"
+      ];
+    };
   };
 }
