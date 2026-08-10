@@ -1,11 +1,4 @@
 _: {
-  settings = {
-    excludes = [
-      "k8s/clusters/*/flux-system/*.yaml"
-      "**/*.sops.yaml"
-    ];
-  };
-
   projectRootFile = "flake.nix";
 
   programs = {
@@ -16,7 +9,5 @@ _: {
     yamlfmt.enable = true;
 
     mdformat.enable = true;
-
-    terraform.enable = true;
   };
 }

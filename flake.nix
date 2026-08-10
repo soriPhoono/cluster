@@ -1,19 +1,11 @@
 {
-  description = "Guenivir — multi-cluster Kubernetes GitOps";
+  description = "Empty flake template";
 
   inputs = {
     systems.url = "github:nix-systems/default";
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    agenix = {
-      url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    agenix-shell = {
-      url = "github:aciceri/agenix-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -36,23 +28,11 @@
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = with inputs; [
-        agenix-shell.flakeModules.default
         treefmt-nix.flakeModule
         git-hooks-nix.flakeModule
       ];
 
       inherit systems;
-
-      agenix-shell = {
-        identityPaths = [
-          "$HOME/.ssh/id_ed25519"
-        ];
-        secrets = {
-          TESTING_AGE_KEY.file = ./secrets/testing_age_key.age;
-          TF_VAR_ghcr_pat.file = ./secrets/ghcr_pat.age;
-          TF_VAR_cloudflare_global_api_token.file = ./secrets/cloudflare_global_api_token.age;
-        };
-      };
 
       perSystem = {
         pkgs,
@@ -65,16 +45,17 @@
           config.allowUnfree = true;
         };
 
-        devShells.default = import ./shell.nix {
-          inherit inputs lib pkgs;
-          config = {
-            inherit (config) pre-commit agenix-shell;
-          };
-        };
-
         # --- Configuration Builders --- #
         treefmt = import ./treefmt.nix {inherit lib pkgs;};
         pre-commit = import ./pre-commit.nix {inherit lib pkgs;};
+
+        # --- Devshell Configuration --- #
+        devShells.default = import ./shell.nix {
+          inherit lib pkgs;
+          config = {
+            inherit (config) pre-commit;
+          };
+        };
       };
     };
 }
