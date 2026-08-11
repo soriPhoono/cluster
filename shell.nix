@@ -17,6 +17,10 @@ with pkgs;
       secretspec
 
       # age
+
+      # terraform
+      terraform
+      tfsec
     ];
 
     shellHook = ''
