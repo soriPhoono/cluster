@@ -11,6 +11,9 @@ with pkgs;
       nixd
       nil
       alejandra
+
+      age
+      sops
       secretspec
 
       # age
