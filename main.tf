@@ -30,6 +30,7 @@ resource "proxmox_virtual_environment_vm" "guenivir-controlplane" {
 
   node_name = "pve-dev"
   vm_id     = 100
+  migrate   = true
 
   agent {
     enabled = true
@@ -37,7 +38,8 @@ resource "proxmox_virtual_environment_vm" "guenivir-controlplane" {
 
   stop_on_destroy = true
 
-  bios = "ovmf"
+  machine = "q35"
+  bios    = "ovmf"
 
   startup {
     order      = "3"
@@ -54,8 +56,20 @@ resource "proxmox_virtual_environment_vm" "guenivir-controlplane" {
     dedicated = 8192
   }
 
+  scsi_hardware = virtio-scsi-pci
+
+  cdrom {
+    enabled = true
+    file_id = proxmox_download_file.guenivir-talos-vm-image.id
+  }
+
+  efi_disk {
+    type = "4m"
+  }
+
   disk {
-    datastore_id = "local-lvm"
-    file_id      = proxmox_download_file.guenivir-talos-vm-image.id
+    file_format = "qcow2"
+    discard     = "on"
+    ssd         = true
   }
 }
