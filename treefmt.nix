@@ -6,6 +6,10 @@ _: {
     deadnix.enable = true;
     statix.enable = true;
 
+    # Terraform
+    terraform.enable = true;
+
+    # K8s
     yamlfmt = {
       enable = true;
       excludes = [
@@ -15,6 +19,7 @@ _: {
       ];
     };
 
+    # Docs/Agentics
     mdformat = {
       enable = true;
       excludes = [
