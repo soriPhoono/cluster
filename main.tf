@@ -24,17 +24,23 @@ locals {
   }
 
   controlplane_ips = {
-    for k, v in proxmox_virtual_environment_vm.guenivir_controlplane : k => [
-      for ip in flatten(v.ipv4_addresses) : ip
-      if startswith(ip, "192.168.") || (startswith(ip, "10.") && !startswith(ip, "100.")) || (startswith(ip, "172.") && ip != "127.0.0.1")
-    ][0]
+    for k, v in proxmox_virtual_environment_vm.guenivir_controlplane : k => try(
+      [
+        for ip in flatten(v.ipv4_addresses) : ip
+        if startswith(ip, "192.168.") || (startswith(ip, "10.") && !startswith(ip, "100.")) || (startswith(ip, "172.") && ip != "127.0.0.1")
+      ][0],
+      ""
+    )
   }
 
   worker_ips = {
-    for k, v in proxmox_virtual_environment_vm.guenivir_worker : k => [
-      for ip in flatten(v.ipv4_addresses) : ip
-      if startswith(ip, "192.168.") || (startswith(ip, "10.") && !startswith(ip, "100.")) || (startswith(ip, "172.") && ip != "127.0.0.1")
-    ][0]
+    for k, v in proxmox_virtual_environment_vm.guenivir_worker : k => try(
+      [
+        for ip in flatten(v.ipv4_addresses) : ip
+        if startswith(ip, "192.168.") || (startswith(ip, "10.") && !startswith(ip, "100.")) || (startswith(ip, "172.") && ip != "127.0.0.1")
+      ][0],
+      ""
+    )
   }
 }
 
@@ -246,6 +252,10 @@ data "talos_cluster_health" "guenivir_health" {
   control_plane_nodes  = [for k, v in local.controlplane_ips : v]
   worker_nodes         = [for k, v in local.worker_ips : v]
   endpoints            = [for k, v in local.controlplane_ips : v]
+
+  timeouts = {
+    read = "10m"
+  }
 }
 
 data "talos_client_configuration" "guenivir" {
