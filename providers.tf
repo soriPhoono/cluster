@@ -1,14 +1,6 @@
 terraform {
   required_version = "1.15.8"
 
-  cloud {
-    organization = "soriphoono"
-
-    workspaces {
-      name = "Guenivir"
-    }
-  }
-
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
