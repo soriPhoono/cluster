@@ -190,6 +190,17 @@ data "talos_machine_configuration" "guenivir_controlplane" {
   cluster_endpoint = "https://${local.controlplane_ips["0"]}:6443"
   machine_type     = "controlplane"
   machine_secrets  = talos_machine_secrets.guenivir_secrets.machine_secrets
+  config_patches = [
+    yamlencode({
+      machine = {
+        features = {
+          qemuGuestAgent = {
+            enabled = true
+          }
+        }
+      }
+    })
+  ]
 }
 
 resource "talos_machine_configuration_apply" "guenivir_controlplane" {
@@ -207,6 +218,17 @@ data "talos_machine_configuration" "guenivir_worker" {
   cluster_endpoint = "https://${local.controlplane_ips["0"]}:6443"
   machine_type     = "worker"
   machine_secrets  = talos_machine_secrets.guenivir_secrets.machine_secrets
+  config_patches = [
+    yamlencode({
+      machine = {
+        features = {
+          qemuGuestAgent = {
+            enabled = true
+          }
+        }
+      }
+    })
+  ]
 }
 
 resource "talos_machine_configuration_apply" "guenivir_worker" {
