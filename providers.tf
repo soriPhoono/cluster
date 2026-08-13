@@ -1,4 +1,14 @@
 terraform {
+  required_version = "1.15.8"
+
+  cloud {
+    organization = "soriphoono"
+
+    workspaces {
+      name = "Guenivir"
+    }
+  }
+
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
@@ -9,6 +19,21 @@ terraform {
       source  = "siderolabs/talos"
       version = "0.12.0-alpha.5"
     }
+
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "3.2.1"
+    }
+
+    helm = {
+      source  = "hashicorp/helm"
+      version = "3.2.0"
+    }
+
+    local = {
+      source  = "hashicorp/local"
+      version = "2.5.2"
+    }
   }
 }
 
@@ -18,3 +43,19 @@ provider "proxmox" {
 }
 
 provider "talos" {}
+
+provider "kubernetes" {
+  host                   = talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.host
+  client_certificate     = base64decode(talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.client_certificate)
+  client_key             = base64decode(talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.client_key)
+  cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.ca_certificate)
+}
+
+provider "helm" {
+  kubernetes = {
+    host                   = talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.host
+    client_certificate     = base64decode(talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.client_certificate)
+    client_key             = base64decode(talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.client_key)
+    cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.ca_certificate)
+  }
+}

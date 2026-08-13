@@ -4,6 +4,9 @@
 
     treefmt.enable = true;
 
+    terraform-format.enable = true;
+    tflint.enable = true;
+
     gitleaks = {
       enable = true;
       name = "gitleaks";
