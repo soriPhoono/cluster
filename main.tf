@@ -24,23 +24,19 @@ locals {
   }
 
   controlplane_ips = {
-    for k, v in proxmox_virtual_environment_vm.guenivir_controlplane : k => try(
-      [
-        for ip in flatten(v.ipv4_addresses) : ip
-        if startswith(ip, "192.168.") || (startswith(ip, "10.") && !startswith(ip, "100.")) || (startswith(ip, "172.") && ip != "127.0.0.1")
-      ][0],
-      ""
-    )
+    for k, v in proxmox_virtual_environment_vm.guenivir_controlplane : k => coalescelist(
+      [for ip in flatten(v.ipv4_addresses) : ip if startswith(ip, "100.")],
+      [for ip in flatten(v.ipv4_addresses) : ip if startswith(ip, "192.168.")],
+      [""]
+    )[0]
   }
 
   worker_ips = {
-    for k, v in proxmox_virtual_environment_vm.guenivir_worker : k => try(
-      [
-        for ip in flatten(v.ipv4_addresses) : ip
-        if startswith(ip, "192.168.") || (startswith(ip, "10.") && !startswith(ip, "100.")) || (startswith(ip, "172.") && ip != "127.0.0.1")
-      ][0],
-      ""
-    )
+    for k, v in proxmox_virtual_environment_vm.guenivir_worker : k => coalescelist(
+      [for ip in flatten(v.ipv4_addresses) : ip if startswith(ip, "100.")],
+      [for ip in flatten(v.ipv4_addresses) : ip if startswith(ip, "192.168.")],
+      [""]
+    )[0]
   }
 }
 
@@ -70,9 +66,10 @@ resource "proxmox_virtual_environment_vm" "guenivir_controlplane" {
   description = "Managed by terraform - Guenivir controlplane"
   tags        = ["terraform", "guenivir", "talos", "controlplane"]
 
-  node_name = "pve-dev"
-  vm_id     = 100 + each.key
-  migrate   = true
+  node_name  = "pve-dev"
+  vm_id      = 100 + each.key
+  migrate    = true
+  boot_order = ["scsi0", "ide3"]
 
   agent {
     enabled = true
@@ -131,9 +128,10 @@ resource "proxmox_virtual_environment_vm" "guenivir_worker" {
   description = "Managed by terraform - Guenivir worker"
   tags        = ["terraform", "guenivir", "talos", "worker"]
 
-  node_name = "pve-dev"
-  vm_id     = 200 + each.key
-  migrate   = true
+  node_name  = "pve-dev"
+  vm_id      = 200 + each.key
+  migrate    = true
+  boot_order = ["scsi0", "ide3"]
 
   agent {
     enabled = true
