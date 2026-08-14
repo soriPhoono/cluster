@@ -43,8 +43,8 @@ resource "talos_machine_configuration_apply" "guenivir_controlplane" {
     yamlencode({
       machine = {
         install = {
-          disk  = "/dev/sdd"
-          image = "ghcr.io/siderolabs/installer:v1.12.6"
+          disk  = "/dev/sda"
+          image = module.create_cluster.installer_image
         }
       }
     })
@@ -71,8 +71,8 @@ resource "talos_machine_configuration_apply" "guenivir_worker" {
     yamlencode({
       machine = {
         install = {
-          disk  = "/dev/sdd"
-          image = "ghcr.io/siderolabs/installer:v1.12.6"
+          disk  = "/dev/sda"
+          image = module.create_cluster.installer_image
         }
       }
     })

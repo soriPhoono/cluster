@@ -16,6 +16,11 @@ locals {
   }
 }
 
+output "installer_image" {
+  description = "The Talos installer image URL containing schematic extensions"
+  value       = data.talos_image_factory_urls.guenivir_talos_image_registry.urls.installer
+}
+
 output "endpoint" {
   description = "The kubectl endpoint for the kubernetes api"
   value       = "https://${local.controlplane_ips["0"]}:6443"
