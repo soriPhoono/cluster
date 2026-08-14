@@ -133,8 +133,9 @@ resource "local_sensitive_file" "kubeconfig" {
 # Install flux operator into kubernetes
 
 module "flux_operator_bootstrap" {
-  source  = "controlplaneio-fluxcd/flux-operator-bootstrap/kubernetes"
-  version = "0.8.0"
+  depends_on = [data.talos_cluster_health.guenivir_health]
+  source     = "controlplaneio-fluxcd/flux-operator-bootstrap/kubernetes"
+  version    = "0.8.0"
 
   revision = var.flux_operator_bootstrap_revision
 
