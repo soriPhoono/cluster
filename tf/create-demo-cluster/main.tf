@@ -1,3 +1,19 @@
+locals {
+  controlplanes = {
+    for i in range(var.control_plane_count) : tostring(i) => {
+      cpu    = 4
+      memory = 4096
+    }
+  }
+
+  workers = {
+    for i in range(var.worker_count) : tostring(i) => {
+      cpu    = 8
+      memory = 8192
+    }
+  }
+}
+
 # Get TalOS Linux ISO URL & Upgrade URL
 
 data "talos_image_factory_urls" "guenivir_talos_image_registry" {
@@ -19,13 +35,13 @@ resource "proxmox_download_file" "guenivir_talos_vm_image" {
 
 resource "proxmox_virtual_environment_vm" "guenivir_controlplane" {
   depends_on  = [proxmox_download_file.guenivir_talos_vm_image]
-  for_each    = range(var.control_plane_count)
-  name        = "guenivir-controlplane-${each.key + 1}"
+  for_each    = local.controlplanes
+  name        = "guenivir-controlplane-${tonumber(each.key) + 1}"
   description = "Managed by terraform - Guenivir controlplane"
   tags        = ["terraform", "guenivir", "talos", "controlplane"]
 
   node_name  = "pve-dev"
-  vm_id      = 100 + each.key
+  vm_id      = 100 + tonumber(each.key)
   migrate    = true
   boot_order = ["scsi0", "ide3"]
 
@@ -38,7 +54,6 @@ resource "proxmox_virtual_environment_vm" "guenivir_controlplane" {
 
   machine = "q35"
   bios    = "ovmf"
-  # scsi_hardware = "virtio-scsi-pci"
 
   startup {
     order      = "3"
@@ -48,7 +63,7 @@ resource "proxmox_virtual_environment_vm" "guenivir_controlplane" {
 
   cpu {
     cores = each.value.cpu
-    type  = "x86-64-v2-AES" # recommended for modern CPUs
+    type  = "x86-64-v2-AES"
   }
 
   memory {
@@ -81,13 +96,13 @@ resource "proxmox_virtual_environment_vm" "guenivir_controlplane" {
 
 resource "proxmox_virtual_environment_vm" "guenivir_worker" {
   depends_on  = [proxmox_download_file.guenivir_talos_vm_image]
-  for_each    = range(var.worker_count)
-  name        = "guenivir-worker-${each.key + 1}"
+  for_each    = local.workers
+  name        = "guenivir-worker-${tonumber(each.key) + 1}"
   description = "Managed by terraform - Guenivir worker"
   tags        = ["terraform", "guenivir", "talos", "worker"]
 
   node_name  = "pve-dev"
-  vm_id      = 200 + each.key
+  vm_id      = 200 + tonumber(each.key)
   migrate    = true
   boot_order = ["scsi0", "ide3"]
 
@@ -100,7 +115,6 @@ resource "proxmox_virtual_environment_vm" "guenivir_worker" {
 
   machine = "q35"
   bios    = "ovmf"
-  # scsi_hardware = "virtio-scsi-pci"
 
   startup {
     order      = "3"
@@ -110,7 +124,7 @@ resource "proxmox_virtual_environment_vm" "guenivir_worker" {
 
   cpu {
     cores = each.value.cpu
-    type  = "x86-64-v2-AES" # recommended for modern CPUs
+    type  = "x86-64-v2-AES"
   }
 
   memory {

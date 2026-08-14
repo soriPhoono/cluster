@@ -18,7 +18,7 @@ locals {
 
 output "endpoint" {
   description = "The kubectl endpoint for the kubernetes api"
-  value       = "https://${local.controlplane_ips[0]}:6443"
+  value       = "https://${local.controlplane_ips["0"]}:6443"
 }
 
 output "control_plane_ips" {
