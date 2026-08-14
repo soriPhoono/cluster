@@ -38,6 +38,17 @@ resource "talos_machine_configuration_apply" "guenivir_controlplane" {
   node                        = each.value
   machine_configuration_input = data.talos_machine_configuration.guenivir_controlplane.machine_configuration
   client_configuration        = talos_machine_secrets.guenivir_secrets.client_configuration
+
+  config_patches = [
+    yamlencode({
+      machine = {
+        install = {
+          disk  = "/dev/sdd"
+          image = "ghcr.io/siderolabs/installer:v1.12.6"
+        }
+      }
+    })
+  ]
 }
 
 data "talos_machine_configuration" "guenivir_worker" {
@@ -55,6 +66,17 @@ resource "talos_machine_configuration_apply" "guenivir_worker" {
   node                        = each.value
   machine_configuration_input = data.talos_machine_configuration.guenivir_worker.machine_configuration
   client_configuration        = talos_machine_secrets.guenivir_secrets.client_configuration
+
+  config_patches = [
+    yamlencode({
+      machine = {
+        install = {
+          disk  = "/dev/sdd"
+          image = "ghcr.io/siderolabs/installer:v1.12.6"
+        }
+      }
+    })
+  ]
 }
 
 resource "talos_machine_bootstrap" "guenivir_controlplane" {
