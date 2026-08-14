@@ -1,14 +1,14 @@
 locals {
   controlplanes = {
     for i in range(var.control_plane_count) : tostring(i) => {
-      cpu    = 4
+      cpu    = 8
       memory = 4096
     }
   }
 
   workers = {
     for i in range(var.worker_count) : tostring(i) => {
-      cpu    = 8
+      cpu    = 16
       memory = 8192
     }
   }
