@@ -24,6 +24,7 @@ with pkgs;
 
       # kubernetes
       kubectl
+      kubernetes-helm
 
       # talos linux
       talosctl
