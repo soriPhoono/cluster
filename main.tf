@@ -131,3 +131,14 @@ resource "local_sensitive_file" "kubeconfig" {
 }
 
 # Install flux operator into kubernetes
+
+module "flux_operator_bootstrap" {
+  source  = "controlplaneio-fluxcd/flux-operator-bootstrap/kubernetes"
+  version = "0.8.0"
+
+  revision = var.flux_operator_bootstrap_revision
+
+  gitops_resources = {
+    instance_yaml = file("${path.root}/k8s/clusters/staging/flux-instance.yaml")
+  }
+}

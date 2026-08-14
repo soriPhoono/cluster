@@ -16,8 +16,8 @@ variable "talos_version" {
   default     = "v1.13.8"
 }
 
-# variable "flux_operator_bootstrap_revision" {
-#   type        = number
-#   description = "The revision of flux operator's installed state, bump this to reinstall flux operator into the cluster"
-#   default     = 1
-# }
+variable "flux_operator_bootstrap_revision" {
+  type        = number
+  description = "The revision of flux operator's installed state, bump this to reinstall flux operator into the cluster"
+  default     = 1
+}
