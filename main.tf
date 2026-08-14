@@ -10,7 +10,7 @@
 # Create cluster
 
 module "create_cluster" {
-  source = "tf/create-demo-cluster"
+  source = "./tf/create-demo-cluster"
 
   proxmox_api_url   = var.proxmox_api_url
   proxmox_api_token = var.proxmox_api_token
