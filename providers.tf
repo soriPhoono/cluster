@@ -2,6 +2,11 @@ terraform {
   required_version = "1.15.8"
 
   required_providers {
+    local = {
+      source  = "hashicorp/local"
+      version = "2.5.2"
+    }
+
     proxmox = {
       source  = "bpg/proxmox"
       version = "0.111.1"
@@ -20,11 +25,6 @@ terraform {
     helm = {
       source  = "hashicorp/helm"
       version = "3.2.0"
-    }
-
-    local = {
-      source  = "hashicorp/local"
-      version = "2.5.2"
     }
   }
 }
