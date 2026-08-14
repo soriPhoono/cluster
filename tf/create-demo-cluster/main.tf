@@ -52,8 +52,9 @@ resource "proxmox_virtual_environment_vm" "guenivir_controlplane" {
 
   stop_on_destroy = true
 
-  machine = "q35"
-  bios    = "ovmf"
+  machine       = "q35"
+  bios          = "ovmf"
+  scsi_hardware = "virtio-scsi-pci"
 
   startup {
     order      = "3"
@@ -113,8 +114,9 @@ resource "proxmox_virtual_environment_vm" "guenivir_worker" {
 
   stop_on_destroy = true
 
-  machine = "q35"
-  bios    = "ovmf"
+  machine       = "q35"
+  bios          = "ovmf"
+  scsi_hardware = "virtio-scsi-pci"
 
   startup {
     order      = "3"
