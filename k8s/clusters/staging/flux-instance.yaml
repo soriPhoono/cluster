@@ -21,11 +21,8 @@ spec:
   cluster:
     type: kubernetes
     size: small
-    multitennant: true
-    tenantDefaultServiceAccount: guenivir-core-flux
+    multitenant: false
     networkPolicy: true
-    objectLevelWorkloadIdentity: true
-    multitenantWorkloadIdentity: true
     domain: cluster.local
   sync:
     kind: GitRepository
