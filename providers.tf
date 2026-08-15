@@ -34,8 +34,6 @@ provider "proxmox" {
   api_token = var.proxmox_api_token
 }
 
-provider "talos" {}
-
 provider "kubernetes" {
   host                   = talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.host
   client_certificate     = base64decode(talos_cluster_kubeconfig.guenivir-kubeconfig.kubernetes_client_configuration.client_certificate)
