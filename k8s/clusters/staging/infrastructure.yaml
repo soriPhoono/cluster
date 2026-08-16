@@ -8,6 +8,6 @@ spec:
   path: ./k8s/infrastructure
   prune: true
   sourceRef:
-    kind: FluxInstance
-    name: flux
+    kind: GitRepository
+    name: flux-system
   timeout: 5m0s
