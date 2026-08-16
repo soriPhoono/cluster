@@ -61,6 +61,12 @@ spec:
         - path:
             type: PathPrefix
             value: /demo
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
       backendRefs:
         - name: web-demo
           port: 80
