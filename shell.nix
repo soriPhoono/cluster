@@ -24,7 +24,10 @@ with pkgs;
 
       # kubernetes
       kubectl
+      k9s
       kubernetes-helm
+      fluxcd
+      flux9s
 
       # talos linux
       talosctl
