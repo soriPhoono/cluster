@@ -15,6 +15,15 @@ spec:
       labels:
         app.kubernetes.io/name: podinfo
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: podinfo
       containers:
         - name: podinfo
           image: ghcr.io/stefanprodan/podinfo:6.7.0

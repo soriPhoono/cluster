@@ -22,6 +22,11 @@ with pkgs;
       terraform
       tfsec
 
+      # YAML and Kubernetes validation
+      yamllint
+      kubernetes-validate
+      kube-linter
+
       # kubernetes
       kubectl
       k9s

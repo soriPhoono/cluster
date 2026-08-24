@@ -1,0 +1,6 @@
+checks:
+  exclude:
+    # The current demo images do not yet support this hardening without an
+    # image/runtime-user migration and writable-path review.
+    - no-read-only-root-fs
+    - run-as-non-root

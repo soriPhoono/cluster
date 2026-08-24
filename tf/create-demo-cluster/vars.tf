@@ -23,5 +23,5 @@ variable "control_plane_count" {
 variable "worker_count" {
   type        = number
   description = "The number of worker nodes to create in the cluster"
-  default     = 1
+  default     = 2
 }

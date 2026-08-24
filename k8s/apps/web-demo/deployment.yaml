@@ -15,6 +15,15 @@ spec:
       labels:
         app.kubernetes.io/name: web-demo
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: web-demo
       containers:
         - name: web-demo
           image: nginxdemos/hello:plain-text
